@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>花里胡哨的网站详情页</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96c93d);
+            background-size: 400%;
+            animation: gradientShift 15s ease infinite;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            text-align: center;
+            width: 90%;
+            max-width: 800px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.3);
+            animation: float 4s ease-in-out infinite, fadeIn 1.5s ease-out;
+            margin: 20px;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        h1 {
+            font-size: clamp(24px, 6vw, 36px);
+            margin-bottom: 16px;
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        p {
+            font-size: clamp(16px, 4vw, 20px);
+            margin: 16px 0;
+            animation: slideIn 1s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(-100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .highlight {
+            display: inline-block;
+            position: relative;
+            color: #ffeb3b;
+            text-shadow: 0 0 15px #ffeb3b;
+            animation: neon 1.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes neon {
+            from { text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #ffeb3b; }
+            to { text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #ffeb3b; }
+        }
+
+        .bubble {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            animation: bubbleRise 5s infinite ease-in;
+            pointer-events: none;
+        }
+
+        @keyframes bubbleRise {
+            0% { transform: translateY(100vh) scale(0.5); opacity: 0.5; }
+            100% { transform: translateY(-100vh) scale(1.5); opacity: 0; }
+        }
+
+        .spin-text {
+            display: inline-block;
+            animation: spin 10s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .bounce {
+            display: inline-block;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-20px); }
+            60% { transform: translateY(-10px); }
+        }
+
+        .typewriter {
+            overflow: hidden;
+            border-right: 0.15em solid #fff;
+            white-space: nowrap;
+            margin: 0 auto;
+            animation: typing 3.5s steps(40, end), blink-caret 0.75s step-end infinite;
+        }
+
+        @keyframes typing {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+
+        @keyframes blink-caret {
+            from, to { border-color: transparent; }
+            50% { border-color: #fff; }
+        }
+
+        .cloudflare-info {
+            margin-top: 24px;
+            font-size: clamp(14px, 3.5vw, 18px);
+            font-weight: bold;
+            color: #ff0707;
+            text-shadow: 0 0 10px #8c00ff;
+            animation: shake 0.5s infinite;
+        }
+
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+
+        /* Random bubbles */
+        .bubble:nth-child(1) { width: 15px; height: 15px; left: 10%; animation-duration: 4s; }
+        .bubble:nth-child(2) { width: 20px; height: 20px; left: 30%; animation-duration: 6s; animation-delay: 1s; }
+        .bubble:nth-child(3) { width: 10px; height: 10px; left: 50%; animation-duration: 5s; animation-delay: 2s; }
+        .bubble:nth-child(4) { width: 18px; height: 18px; left: 70%; animation-duration: 7s; }
+        .bubble:nth-child(5) { width: 12px; height: 12px; left: 90%; animation-duration: 3s; animation-delay: 0.5s; }
+
+        /* Mobile optimizations */
+        @media (max-width: 600px) {
+            .container {
+                padding: 16px;
+                margin: 10px;
+            }
+            h1 {
+                font-size: clamp(20px, 5vw, 28px);
+            }
+            p {
+                font-size: clamp(14px, 3.5vw, 16px);
+            }
+            .cloudflare-info {
+                font-size: clamp(12px, 3vw, 14px);
+            }
+            .bubble {
+                display: none; /* Reduce bubbles on mobile for performance */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="bounce">这个网站是干啥的？</h1>
+        <p class="typewriter">I‘m K-Black</p>
+        <p class="slideIn">这是一个个人介绍网站</p>
+        <p class="cloudflare-info spin-text">本站使用 <span class="highlight">Cloudflare Workers</span> 部署至全球网络！</p>
+    </div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+</body>
+</html>

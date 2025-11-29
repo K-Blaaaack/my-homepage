@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>弹窗示例</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f0f0f0;
+    }
+
+    /* 弹窗遮罩 */
+    .popup-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(6px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    /* 弹窗主体 */
+    .popup {
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 20px 30px;
+      width: 400px;
+      max-width: 90%;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+      transform: scale(0.9);
+      opacity: 0;
+      transition: all 0.3s ease;
+    }
+
+    /* 弹窗显示状态 */
+    .popup.show {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    /* 弹窗隐藏动画 */
+    .popup.hide {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+
+    .popup h2 {
+      margin-top: 0;
+      font-size: 20px;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 6px;
+      color: #222; /* 深色标题 */
+    }
+
+    .popup ul {
+      list-style: none;
+      padding: 0;
+      margin: 10px 0 20px 0;
+    }
+
+    .popup ul li {
+      margin: 6px 0;
+    }
+
+    .popup ul li a {
+      text-decoration: none;
+      color: #007BFF;
+      font-size: 15px;
+      transition: 0.2s;
+    }
+
+    .popup ul li a:hover {
+      text-decoration: underline;
+    }
+
+    /* 关闭按钮 */
+    .close-btn {
+      display: block;
+      text-align: right;
+      margin-top: -10px;
+      margin-bottom: 10px;
+    }
+    .close-btn button {
+      background: transparent;
+      border: none;
+      font-size: 22px;
+      cursor: pointer;
+      color: #666;
+      transition: 0.2s;
+      padding: 4px 8px;
+    }
+    .close-btn button:hover {
+      color: #000;
+    }
+
+    /* 移动端优化 */
+    @media (max-width: 480px) {
+      .popup {
+        width: 90%;
+        padding: 16px 20px;
+      }
+      .popup h2 {
+        font-size: 18px;
+      }
+      .popup ul li a {
+        font-size: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 触发按钮 -->
+  <button id="openPopupBtn">Open</button>
+
+  <!-- 弹窗结构 -->
+  <div class="popup-overlay" id="popupOverlay">
+    <div class="popup" id="popupBox">
+      <div class="close-btn">
+        <button id="closePopupBtn">&times;</button>
+      </div>
+      <h2>常用工具</h2>
+      <ul>
+        <li><a href="https://001.com" target="_blank">工具1</a></li>
+        <li><a href="https://002.com" target="_blank">工具2</a></li>
+      </ul>
+
+      <h2>我的其他站点</h2>
+      <ul>
+        <li><a href="https://003.com" target="_blank">站点1</a></li>
+        <li><a href="https://004.com" target="_blank">站点2</a></li>
+      </ul>
+
+      <h2>其他网站</h2>
+      <ul>
+        <li><a href="https://005.com" target="_blank">网站1</a></li>
+        <li><a href="https://006.com" target="_blank">网站2</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    const openBtn = document.getElementById("openPopupBtn");
+    const closeBtn = document.getElementById("closePopupBtn");
+    const overlay = document.getElementById("popupOverlay");
+    const popupBox = document.getElementById("popupBox");
+
+    // 打开弹窗
+    openBtn.addEventListener("click", () => {
+      overlay.style.display = "flex";
+      setTimeout(() => {
+        popupBox.classList.add("show");
+        popupBox.classList.remove("hide");
+      }, 10);
+    });
+
+    // 关闭弹窗
+    function closePopup() {
+      popupBox.classList.remove("show");
+      popupBox.classList.add("hide");
+      setTimeout(() => {
+        overlay.style.display = "none";
+      }, 300); // 等待动画结束
+    }
+
+    closeBtn.addEventListener("click", closePopup);
+
+    // 点击遮罩关闭
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) {
+        closePopup();
+      }
+    });
+  </script>
+
+</body>
+</html>

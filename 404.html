@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - 页面跑丢了 | Page Got Lost</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Arial', 'PingFang SC', sans-serif;
+            background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            max-width: 500px;
+            width: 90%;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        h1 {
+            font-size: 6em;
+            margin: 0;
+            color: #333;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            font-size: 1.8em;
+            color: #555;
+            margin: 20px 0;
+        }
+
+        p {
+            font-size: 1.1em;
+            color: #777;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            font-size: 1em;
+            color: white;
+            background-color: #ff6b6b;
+            text-decoration: none;
+            border-radius: 25px;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .btn:hover {
+            background-color: #4ecdc4;
+            transform: translateY(-2px);
+        }
+
+        /* 动画效果 */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 4em;
+            }
+
+            h2 {
+                font-size: 1.5em;
+            }
+
+            p {
+                font-size: 1em;
+            }
+
+            .container {
+                padding: 20px;
+                width: 85%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>404</h1>
+        <h2>哎呀，页面跑丢了！ | Oops, Page Got Lost!</h2>
+        <p>这页面可能去星际旅行了，或者被外星人绑架了... 要不回首页看看？<br>Looks like this page took a cosmic detour or got abducted by aliens... Wanna head back home?</p>
+        <a href="/" class="btn">返回首页 | Back to Home</a>
+    </div>
+</body>
+</html>

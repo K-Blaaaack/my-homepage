@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hello World</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f0f0f0;
+      flex-direction: column;
+    }
+    h1 {
+      color: #333;
+    }
+    /* Footer样式 */
+    .footer {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      background-color: #333;
+      color: white;
+      text-align: center;
+      padding: 10px;
+    }
+    .footer-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .footer-text {
+      margin: 0;
+      font-size: 14px;
+    }
+    .author-name {
+      font-weight: bold;
+    }
+    .footer-links {
+      margin-top: 10px;
+    }
+    .footer-links a {
+      color: white;
+      margin: 0 10px;
+      text-decoration: none;
+    }
+    .footer-links a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <h1>Hello, World!</h1>
+
+  <!-- 网页底部作者信息栏 -->
+  <footer class="footer">
+    <div class="footer-container">
+      <p class="footer-text">
+        © 2025 By
+        <span class="author-name">K-Black</span>
+      </p>
+      <p class="footer-deploy">本站由 <strong>Cloudflare Workers</strong> 部署到全球网络</p>
+      <div id="runtime" style="font-weight: bold; color: rgb(92, 91, 91); font-size: 13px; line-height: 1.5;"></div>
+      <div id="lastUpdate" style="font-weight: bold; color: rgb(92, 91, 91); font-size: 12px; line-height: 1.5;"></div>
+      <div class="footer-links">
+        <a href="./wip.html" target="_blank">关于我</a>
+        <a href="mailto:k-black@k-black.top">联系我</a>
+        <a href="./info.html" target="_blank">这个网站是干啥的？</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // 监听 footer 出现在视口
+    const author = document.querySelector(".author-name");
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          author.classList.add("animate");
+          observer.unobserve(author); // 只触发一次
+        }
+      });
+    }, { threshold: 0.5 });
+
+    observer.observe(author);
+
+    // 设置网站上线时间（第一次运行）
+    const startTime = new Date("2025/08/25 13:11:45");
+
+    // 设置上一次部署/修改的时间
+    const lastDeployTime = new Date("2025/09/09 21:12:00");
+
+    function formatDiff(diff) {
+      const days = Math.floor(diff / 86400);
+      diff %= 86400;
+      const hours = Math.floor(diff / 3600);
+      diff %= 3600;
+      const minutes = Math.floor(diff / 60);
+      const seconds = diff % 60;
+      return `${days}天 ${hours}小时 ${minutes}分钟 ${seconds}秒`;
+    }
+
+    function updateInfo() {
+      const now = new Date();
+
+      // 运行时间
+      let diffRun = Math.floor((now - startTime) / 1000);
+      document.getElementById("runtime").textContent =
+        `本站已运行 ${formatDiff(diffRun)}`;
+
+      // 上一次部署/修改
+      let diffDeploy = Math.floor((now - lastDeployTime) / 1000);
+      document.getElementById("lastUpdate").textContent =
+        `距上一次更新 ${formatDiff(diffDeploy)}`;
+    }
+
+    // 每秒更新
+    setInterval(updateInfo, 1000);
+    updateInfo();
+  </script>
+</body>
+</html>
