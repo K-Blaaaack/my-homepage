@@ -1,3 +1,31 @@
+// 背景图片数组
+const backgroundImages = [
+  'url("images/background1.png")',
+  'url("images/background2.jpg")',
+  'url("images/background3.jpg")',
+  'url("images/background4.png")',
+  'url("images/background5.png")',
+  'url("images/background6.png")',
+  'url("images/background7.png")',
+  'url("images/background8.png")',
+  'url("images/background9.jpg")',
+  'url("images/background10.jpg")',
+  'url("images/background11.jpg")',
+  'url("images/background12.jpg")',
+  'url("images/background13.jpg")',
+  'url("images/background14.jpg")',
+  'url("images/background15.jpg")',
+  'url("images/background16.jpg")',
+  'url("images/background17.jpg")'
+];
+
+// 随机选择一张背景图片
+const randomImage = backgroundImages[Math.floor(Math.random() * backgroundImages.length)];
+
+// 设置为body的背景
+document.body.style.background = `${randomImage} no-repeat center center fixed`;
+document.body.style.backgroundSize = 'cover'; // 使背景图片覆盖整个页面
+
 // 弹窗操作
 const openBtn = document.getElementById("openPopupBtn");
 const closeBtn = document.getElementById("closePopupBtn");
