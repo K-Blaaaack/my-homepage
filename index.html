@@ -1,79 +1,56 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>K-Black的主页</title>
-  <link rel="stylesheet" href="css/styles/styles.css"> <!-- 引入外部样式 -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <title>K-Black 的主页（M3 Pixel 风格）</title>
+  <link rel="stylesheet" href="css/styles/styles-m3.css">
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col items-center">
-  
-  <!-- 顶部导航栏 -->
-  <header class="w-full sticky top-0 z-50 bg-white/80 backdrop-blur border-b">
-    <div class="max-w-4xl mx-auto px-4 py-2 flex items-center justify-between">
-      <!-- 标识区域 -->
-      <div class="flex items-center gap-2">
-        <svg aria-hidden="true" viewBox="0 0 16 16" width="20" height="20" class="text-gray-800 fill-current">
-        <path fill-rule="evenodd"
-          d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38
-             0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01
-             1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95
-             0-.87.31-1.59.82-2.15-.08-.2-.36-1.01.08-2.1 0 0 .67-.21 2.2.82a7.62 7.62 0 0 1 2-.27c.68 0 1.36.09 2 .27
-             1.53-1.04 2.2-.82 2.2-.82.44 1.09.16 1.9.08 2.1.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48
-             0 1.07-.01 1.93-.01 2.19 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z" />
-      </svg>
-        <span class="font-semibold text-gray-800">
-          <a href="https://github.com/K-Blaaaack/">K-Black</a>
-        </span>
+<body>
+  <!-- 顶部 App Bar -->
+  <header class="app-bar">
+    <div class="app-bar-content">
+      <a href="https://github.com/K-Blaaaack/" class="app-title">K-Black</a>
+      <div class="top-controls">
+        <!-- 弹窗按钮 -->
+        <button id="openPopupBtn" class="m3-button-filled">各种链接</button>
+        <a href="./info.html" target="_blank" class="m3-button-tonal">关于</a>
+        <a href="https://github.com/K-Blaaaack/my-homepage" target="_blank" class="m3-button-filled">本站源码</a>
+        <!-- 暗色模式开关 -->
+        <label class="m3-switch">
+          <input type="checkbox" id="darkToggle">
+          <span class="slider"></span>
+        </label>
       </div>
-
-      <!-- 导航链接 -->
-      <nav class="flex items-center gap-3 text-sm">
-        <a id="openPopupBtn" class="px-3 py-1 rounded-full border border-gray-300 text-gray-700 hover:bg-gray-50 transition">
-          各种链接
-        </a>
-        <a href="./info.html" target="_blank" class="px-3 py-1 rounded-full border border-gray-300 text-gray-700 hover:bg-gray-50 transition">
-          关于
-        </a>
-        <a href="https://github.com/K-Blaaaack/my-homepage" target="_blank" class="px-3 py-1 rounded-full bg-gray-900 text-white hover:bg-gray-800 transition">
-          本站源码
-        </a>
-      </nav>
     </div>
   </header>
 
-<!-- 提示框 -->
-<section class="bg-blue-50/50 backdrop-blur-md border border-blue-200 text-blue-700 rounded-xl p-4 mb-6 w-full max-w-2xl">
-  <h2 class="font-semibold mb-2">这是一个提示</h2>
-  <p class="text-sm leading-relaxed">
-    本站还没开发完，<a href="/error" target="_blank" class="underline text-blue-600 hover:text-blue-800">点击跳转404</a>，准备高考了，也不知道完全开发完要到什么时候...
-  </p>
-</section>
-
+  <!-- 提示框 -->
+  <section class="alert-box">
+    <h2>这是一个提示</h2>
+    <p>本站还没开发完，<a href="/error" target="_blank">点击跳转404</a>，准备高考了，也不知道完全开发完要到什么时候...</p>
+  </section>
 
   <!-- 弹窗 -->
-  <div class="popup-overlay" id="popupOverlay">
-    <div class="popup" id="popupBox">
+  <div id="popupOverlay" class="popup-overlay">
+    <div id="popupBox" class="popup">
       <div class="close-btn">
         <button id="closePopupBtn">&times;</button>
       </div>
       <h2>常用工具</h2>
-      <ul>
+      <ul class="m3-list">
         <li><a href="https://www.gamekee.com/ba/" target="_blank">蔚蓝档案Wiki(gamekee)</a></li>
         <li><a href="https://bluearchive.jp/contact/2" target="_blank">蔚蓝档案日服账号申诉页面</a></li>
       </ul>
-
       <h2>我的其他站点</h2>
-      <ul>
+      <ul class="m3-list">
         <li><a href="https://github.com/K-Blaaaack/" target="_blank">我的GitHub主页</a></li>
         <li><a href="https://clock.k-black.top/" target="_blank">翻页时钟（基于FlipFlow自改）</a></li>
         <li><a href="https://k-black.top/" target="_blank">？？？</a></li>
         <li><a href="https://github.com/K-Blaaaack/my-homepage" target="_blank">本站源码</a></li>
       </ul>
-
       <h2>蔚蓝档案官方网站</h2>
-      <ul>
+      <ul class="m3-list">
         <li><a href="https://bluearchive-cn.com/" target="_blank">国服</a></li>
         <li><a href="https://bluearchive.jp/" target="_blank">日服</a></li>
         <li><a href="https://bluearchive.nexon.com/" target="_blank">国际服</a></li>
@@ -81,28 +58,18 @@
     </div>
   </div>
 
- <!-- 个人介绍 -->
-<section class="w-full max-w-4xl bg-white/20 backdrop-blur-sm shadow-lg rounded-2xl p-6 mb-6 mx-auto">
-  <h1 class="text-3xl font-bold text-gray-800 mb-4">关于K-Black</h1>
-  <div class="text-lg text-gray-600 mb-4">
-    大家好，我是K-Black，一名热衷于编程和开发的技术爱好者。我在GitHub上有许多个人项目，专注于开源软件开发和技术分享。
-  </div>
-  <div class="text-lg text-gray-600 mb-4">
-    目前，我正在研究Linux Kernel编译，通过修改参数与配置文件来提升系统使用体验。除了开发，我还喜欢搞ESP32那些单片机。
-  </div>
-  <div class="text-lg text-gray-600">
-    如果你对我的工作有兴趣，欢迎通过底部信息栏联系我。
-  </div>
-</section>
+  <!-- 个人介绍 -->
+  <section class="profile-section">
+    <h1>关于K-Black</h1>
+    <p>大家好，我是K-Black，一名热衷于编程和开发的技术爱好者。我在GitHub上有许多个人项目，专注于开源软件开发和技术分享。</p>
+    <p>目前，我正在研究Linux Kernel编译，通过修改参数与配置文件来提升系统使用体验。除了开发，我还喜欢搞ESP32那些单片机。</p>
+    <p>如果你对我的工作有兴趣，欢迎通过底部信息栏联系我。</p>
+  </section>
 
-
-
-  <!-- 网页底部信息栏 -->
+  <!-- 页脚 -->
   <footer class="footer">
     <div class="footer-container">
-      <p class="footer-text">
-        © 2025 By <span class="author-name">K-Black</span>
-      </p>
+      <p class="footer-text">© 2025 By <span class="author-name">K-Black</span></p>
       <p class="footer-deploy">本站由 <strong>Cloudflare Workers</strong> 部署到全球网络</p>
       <div id="runtime"></div>
       <div id="lastUpdate"></div>
@@ -114,6 +81,6 @@
     </div>
   </footer>
 
-  <script src="js/scripts.js"></script> <!-- 引入外部JS -->
+  <script src="js/scripts-m3.js"></script>
 </body>
 </html>
