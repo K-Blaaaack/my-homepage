@@ -49,6 +49,7 @@ button{font-family:inherit}
 .loader-line.dim{color:var(--muted)}
 .loader-line.gold{color:var(--gold)}
 .loader-line.err{color:#c7151e}
+.loader-line.red{color:#c7151e}
 .loader-cursor{
   display:inline-block;width:7px;height:13px;background:var(--accent);
   animation:blink .8s step-end infinite;vertical-align:middle;margin-left:2px;
@@ -235,6 +236,8 @@ button{font-family:inherit}
       <div class="loader-line" id="l13"></div>
       <div class="loader-line" id="l14"></div>
       <div class="loader-line" id="l15"></div>
+      <div class="loader-line" id="l16"></div>
+      <div class="loader-line" id="l17"></div>
     </div>
     <div class="loader-progress">
       <div class="loader-pbar"><div class="loader-pbar-fill" id="pFill"></div></div>
@@ -514,7 +517,7 @@ button{font-family:inherit}
   var ptxt=document.getElementById("pTxt");
   var lines=[
     {id:"l1",text:"> P.R.T.S. NATIVE RHODES ISLAND TERMINAL SERVICE",delay:0},
-    {id:"l2",text:"> 版权所有 hypergryph / 罗德岛终端服务",delay:300},
+    {id:"l2",text:"> 罗德岛终端服务",delay:300},
     {id:"l3",text:"> -------------------------------------------",delay:500},
     {id:"l4",text:"> 正在连接至罗德岛主服务器...",delay:700,cls:"dim"},
     {id:"l5",text:"> [  OK  ] 网络连接已建立",delay:1200},
@@ -525,11 +528,13 @@ button{font-family:inherit}
     {id:"l10",text:"> [  OK  ] 同步站点配置",delay:2700},
     {id:"l11",text:"> [  OK  ] 加载完成",delay:3000,cls:"gold"},
     {id:"l12",text:"> ",delay:3200},
-    {id:"l13",text:"> 欢迎回来，博士。",delay:3400,cls:"gold"},
+    {id:"l13",text:"> 欢迎回来，博士",delay:3400,cls:"gold"},
     {id:"l14",text:"> K-BLACK TERMINAL 已就绪",delay:3600},
-    {id:"l15",text:"> ACCESS GRANTED<span class='loader-cursor'></span>",delay:3800},
+    {id:"l15",text:"> ACCESS GRANTED",delay:3800},
+    {id:"l16",text:"> [????] Dr.预言家，不准忘記我",delay:4200,cls:"red"},
+    {id:"l17",text:"> [PRTS] 我是普瑞賽斯 Priestess",delay:4600,cls:"red"},
   ];
-  var total=4200;
+  var total=5200;
   lines.forEach(function(l){
     setTimeout(function(){
       var el=document.getElementById(l.id);
@@ -545,8 +550,8 @@ button{font-family:inherit}
   setTimeout(function(){
     fill.style.width="100%";
     ptxt.textContent="100%";
-  },3800);
-  setTimeout(function(){loader.classList.add("hide")},4400);
+  },4600);
+  setTimeout(function(){loader.classList.add("hide")},5400);
 })();
 
 /* Nav scroll */
