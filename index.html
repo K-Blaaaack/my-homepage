@@ -20,13 +20,46 @@ body{font-family:var(--font);background:var(--black);color:var(--text);overflow-
 a{color:inherit;text-decoration:none}
 button{font-family:inherit}
 
-/* Loading */
-.loader{position:fixed;inset:0;z-index:9999;background:var(--black);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .6s,visibility .6s}
+/* PRTS Loader */
+.loader{position:fixed;inset:0;z-index:9999;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .8s,visibility .8s}
 .loader.hide{opacity:0;visibility:hidden;pointer-events:none}
-.loader-num{font-size:clamp(32px,8vw,64px);font-weight:200;letter-spacing:8px;color:var(--text);font-variant-numeric:tabular-nums}
-.loader-label{font-size:10px;letter-spacing:6px;color:var(--muted);margin-top:12px}
-.loader-bar{width:120px;height:1px;background:var(--border);margin-top:24px;position:relative;overflow:hidden}
-.loader-bar::after{content:"";position:absolute;top:0;left:0;height:100%;background:var(--accent);width:0;transition:width .3s}
+.loader-terminal{
+  width:min(520px,90vw);background:rgba(255,255,255,.02);
+  border:1px solid rgba(32,150,230,.15);padding:0;
+  font-family:"SF Mono","Fira Code","Cascadia Code",monospace;
+  position:relative;overflow:hidden;
+}
+.loader-terminal::before{
+  content:"";position:absolute;top:0;left:0;width:100%;height:1px;
+  background:linear-gradient(90deg,transparent,var(--accent),transparent);
+}
+.loader-term-bar{
+  display:flex;align-items:center;gap:6px;padding:8px 12px;
+  background:rgba(32,150,230,.06);border-bottom:1px solid rgba(32,150,230,.1);
+}
+.loader-term-dot{width:6px;height:6px;border-radius:50%;background:rgba(32,150,230,.3)}
+.loader-term-title{font-size:9px;letter-spacing:2px;color:var(--accent);margin-left:8px;opacity:.6}
+.loader-term-body{padding:20px;min-height:200px;display:flex;flex-direction:column;gap:2px}
+.loader-line{
+  font-size:11px;line-height:1.8;color:var(--accent);opacity:0;
+  transform:translateY(4px);transition:opacity .3s,transform .3s;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.loader-line.show{opacity:1;transform:translateY(0)}
+.loader-line.dim{color:var(--muted)}
+.loader-line.gold{color:var(--gold)}
+.loader-line.err{color:#c7151e}
+.loader-cursor{
+  display:inline-block;width:7px;height:13px;background:var(--accent);
+  animation:blink .8s step-end infinite;vertical-align:middle;margin-left:2px;
+}
+@keyframes blink{50%{opacity:0}}
+.loader-progress{
+  margin-top:16px;display:flex;align-items:center;gap:10px;
+}
+.loader-pbar{flex:1;height:1px;background:rgba(32,150,230,.15);position:relative;overflow:hidden}
+.loader-pbar-fill{height:100%;background:var(--accent);width:0;transition:width .15s linear}
+.loader-ptxt{font-size:9px;color:var(--muted);letter-spacing:1px;font-variant-numeric:tabular-nums;min-width:32px;text-align:right}
 
 /* Nav */
 .nav{position:fixed;top:0;left:0;width:100%;z-index:100;background:rgba(0,0,0,.9);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
@@ -177,11 +210,37 @@ button{font-family:inherit}
 </head>
 <body>
 
-<!-- Loading -->
+<!-- PRTS Loader -->
 <div class="loader" id="loader">
-  <div class="loader-num" id="loaderNum">00 // 00 / 00</div>
-  <div class="loader-label">LOADING</div>
-  <div class="loader-bar" id="loaderBar"></div>
+  <div class="loader-terminal">
+    <div class="loader-term-bar">
+      <div class="loader-term-dot"></div>
+      <div class="loader-term-dot"></div>
+      <div class="loader-term-dot"></div>
+      <div class="loader-term-title">P.R.T.S. TERMINAL v4.12.06</div>
+    </div>
+    <div class="loader-term-body" id="termBody">
+      <div class="loader-line" id="l1"></div>
+      <div class="loader-line" id="l2"></div>
+      <div class="loader-line" id="l3"></div>
+      <div class="loader-line" id="l4"></div>
+      <div class="loader-line" id="l5"></div>
+      <div class="loader-line" id="l6"></div>
+      <div class="loader-line" id="l7"></div>
+      <div class="loader-line" id="l8"></div>
+      <div class="loader-line" id="l9"></div>
+      <div class="loader-line" id="l10"></div>
+      <div class="loader-line" id="l11"></div>
+      <div class="loader-line" id="l12"></div>
+      <div class="loader-line" id="l13"></div>
+      <div class="loader-line" id="l14"></div>
+      <div class="loader-line" id="l15"></div>
+    </div>
+    <div class="loader-progress">
+      <div class="loader-pbar"><div class="loader-pbar-fill" id="pFill"></div></div>
+      <div class="loader-ptxt" id="pTxt">0%</div>
+    </div>
+  </div>
 </div>
 
 <!-- SVG defs -->
@@ -448,15 +507,46 @@ button{font-family:inherit}
 </footer>
 
 <script>
-/* Loading */
+/* PRTS Boot Sequence */
 (function(){
-  var n=document.getElementById("loaderNum"),b=document.getElementById("loaderBar"),l=document.getElementById("loader");
-  var p=0;var t=setInterval(function(){
-    p+=Math.random()*5+5;if(p>100)p=100;
-    var s=Math.floor(p);n.textContent=("0"+s).slice(-2)+" // 00 / "+("0"+new Date().getDate()).slice(-2);
-    b.style.width=p+"%";
-    if(p>=100){clearInterval(t);setTimeout(function(){l.classList.add("hide")},300)}
-  },80);
+  var loader=document.getElementById("loader");
+  var fill=document.getElementById("pFill");
+  var ptxt=document.getElementById("pTxt");
+  var lines=[
+    {id:"l1",text:"> P.R.T.S. NATIVE RHODES ISLAND TERMINAL SERVICE",delay:0},
+    {id:"l2",text:"> 版权所有 hypergryph / 罗德岛终端服务",delay:200},
+    {id:"l3",text:"> -------------------------------------------",delay:350},
+    {id:"l4",text:"> 正在连接至罗德岛主服务器...",delay:500,cls:"dim"},
+    {id:"l5",text:"> [  OK  ] 网络连接已建立",delay:900},
+    {id:"l6",text:"> [  OK  ] 加载用户身份认证模块",delay:1100},
+    {id:"l7",text:"> [  OK  ] 加密通道已开启 (TLS 1.3)",delay:1300},
+    {id:"l8",text:"> [  OK  ] 加载终端界面资源",delay:1500},
+    {id:"l9",text:"> [  OK  ] 检索个人档案数据库",delay:1700},
+    {id:"l10",text:"> [  OK  ] 同步站点配置",delay:1900},
+    {id:"l11",text:"> [  OK  ] 加载完成",delay:2100,cls:"gold"},
+    {id:"l12",text:"> ",delay:2400},
+    {id:"l13",text:"> 欢迎回来，博士。",delay:2600,cls:"gold"},
+    {id:"l14",text:"> K-BLACK TERMINAL 已就绪",delay:2800},
+    {id:"l15",text:"> ACCESS GRANTED<span class='loader-cursor'></span>",delay:3000},
+  ];
+  var total=3400;
+  lines.forEach(function(l){
+    setTimeout(function(){
+      var el=document.getElementById(l.id);
+      if(!el)return;
+      el.textContent=l.text;
+      if(l.cls)el.classList.add(l.cls);
+      el.classList.add("show");
+      var pct=Math.min(Math.floor((l.delay/total)*100),100);
+      fill.style.width=pct+"%";
+      ptxt.textContent=pct+"%";
+    },l.delay);
+  });
+  setTimeout(function(){
+    fill.style.width="100%";
+    ptxt.textContent="100%";
+  },3200);
+  setTimeout(function(){loader.classList.add("hide")},3800);
 })();
 
 /* Nav scroll */
