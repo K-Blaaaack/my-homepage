@@ -504,7 +504,7 @@ button{font-family:inherit}
 
 /* Runtime */
 (function(){
-  var s=new Date("2025/11/29 10:11:45"),dp=new Date("2025/11/29 22:07:00");
+  var s=new Date("2025/11/29 10:11:45"),dp=new Date("2026/07/20 00:00:00");
   function f(n){var day=Math.floor(n/86400);n%=86400;var h=Math.floor(n/3600);n%=3600;var m=Math.floor(n/60);var sec=n%60;return day+"天 "+h+"时 "+m+"分 "+sec+"秒"}
   function u(){var now=new Date();var r=document.getElementById("runtime");var up=document.getElementById("lastUpdate");if(r)r.textContent="已运行 "+f(Math.floor((now-s)/1000));if(up)up.textContent="上次更新 "+f(Math.floor((now-dp)/1000))}
   u();setInterval(u,1000);
