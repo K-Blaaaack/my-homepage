@@ -452,7 +452,7 @@ button{font-family:inherit}
 (function(){
   var n=document.getElementById("loaderNum"),b=document.getElementById("loaderBar"),l=document.getElementById("loader");
   var p=0;var t=setInterval(function(){
-    p+=Math.random()*15+5;if(p>100)p=100;
+    p+=Math.random()*5+5;if(p>100)p=100;
     var s=Math.floor(p);n.textContent=("0"+s).slice(-2)+" // 00 / "+("0"+new Date().getDate()).slice(-2);
     b.style.width=p+"%";
     if(p>=100){clearInterval(t);setTimeout(function(){l.classList.add("hide")},300)}
