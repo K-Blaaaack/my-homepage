@@ -1,106 +1,57 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>404 - 页面跑丢了 | Page Got Lost</title>
-    <style>
-        body {
-            margin: 0;
-            font-family: 'Arial', 'PingFang SC', sans-serif;
-            background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-        }
-
-        .container {
-            text-align: center;
-            background: rgba(255, 255, 255, 0.95);
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            max-width: 500px;
-            width: 90%;
-            animation: fadeIn 1s ease-in-out;
-        }
-
-        h1 {
-            font-size: 6em;
-            margin: 0;
-            color: #333;
-            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
-        }
-
-        h2 {
-            font-size: 1.8em;
-            color: #555;
-            margin: 20px 0;
-        }
-
-        p {
-            font-size: 1.1em;
-            color: #777;
-            margin-bottom: 30px;
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 12px 30px;
-            font-size: 1em;
-            color: white;
-            background-color: #ff6b6b;
-            text-decoration: none;
-            border-radius: 25px;
-            transition: background-color 0.3s, transform 0.2s;
-        }
-
-        .btn:hover {
-            background-color: #4ecdc4;
-            transform: translateY(-2px);
-        }
-
-        /* 动画效果 */
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* 响应式设计 */
-        @media (max-width: 600px) {
-            h1 {
-                font-size: 4em;
-            }
-
-            h2 {
-                font-size: 1.5em;
-            }
-
-            p {
-                font-size: 1em;
-            }
-
-            .container {
-                padding: 20px;
-                width: 85%;
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#000000">
+  <meta name="color-scheme" content="dark">
+  <title>404 - K-BLACK</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "SF Pro Display", -apple-system, "Helvetica Neue", Arial, sans-serif;
+      background: #0a0a0a; color: #e6e6e6;
+      display: flex; justify-content: center; align-items: center;
+      min-height: 100vh; -webkit-font-smoothing: antialiased;
+    }
+    .card {
+      text-align: center; padding: 48px 40px;
+      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 4px; max-width: 480px; width: 90%;
+      animation: fadeIn 0.8s ease-out;
+    }
+    .code {
+      font-size: 72px; font-weight: 200; letter-spacing: 8px;
+      color: rgba(255,255,255,0.1); margin-bottom: 16px;
+    }
+    h1 {
+      font-size: 20px; font-weight: 400; margin-bottom: 12px;
+    }
+    p {
+      font-size: 14px; color: #888; line-height: 1.8; margin-bottom: 24px;
+    }
+    .btn {
+      display: inline-block; padding: 12px 28px;
+      font-size: 12px; letter-spacing: 2px; color: #c8c8ff;
+      background: rgba(200,200,255,0.1); border: 1px solid rgba(200,200,255,0.2);
+      border-radius: 4px; text-decoration: none;
+      transition: all 0.3s;
+    }
+    .btn:hover {
+      background: rgba(200,200,255,0.15); border-color: rgba(200,200,255,0.4);
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>404</h1>
-        <h2>哎呀，页面跑丢了！ | Oops, Page Got Lost!</h2>
-        <p>这页面可能去星际旅行了，或者被外星人绑架了... 要不回首页看看？<br>Looks like this page took a cosmic detour or got abducted by aliens... Wanna head back home?</p>
-        <a href="/" class="btn">返回首页 | Back to Home</a>
-    </div>
+  <div class="card">
+    <div class="code">404</div>
+    <h1>页面不存在</h1>
+    <p>该页面可能已被移除或地址有误。</p>
+    <a href="/" class="btn">返回首页</a>
+  </div>
 </body>
 </html>
