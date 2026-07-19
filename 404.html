@@ -1,38 +1,32 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>404 - K-BLACK</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: -apple-system, "Helvetica Neue", Arial, sans-serif;
-      background: #0a0a0a; color: #e6e6e6;
-      display: flex; justify-content: center; align-items: center; min-height: 100vh;
-    }
-    .box {
-      text-align: center; padding: 48px 40px;
-      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 4px; max-width: 440px; width: 90%;
-    }
-    .num { font-size: 64px; font-weight: 200; letter-spacing: 8px; color: rgba(255,255,255,0.1); margin-bottom: 12px; }
-    h1 { font-size: 18px; font-weight: 400; margin-bottom: 10px; }
-    p { font-size: 13px; color: #888; margin-bottom: 24px; }
-    .btn {
-      display: inline-block; padding: 10px 24px; font-size: 11px; letter-spacing: 2px;
-      color: #c8c8ff; background: rgba(200,200,255,0.1); border: 1px solid rgba(200,200,255,0.2);
-      border-radius: 3px; text-decoration: none; transition: 0.3s;
-    }
-    .btn:hover { background: rgba(200,200,255,0.15); border-color: rgba(200,200,255,0.4); }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#000000">
+<meta name="color-scheme" content="dark">
+<title>404 - K-BLACK</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,"Helvetica Neue","PingFang SC",Arial,sans-serif;background:#000;color:#e6e6e6;display:flex;justify-content:center;align-items:center;min-height:100vh;-webkit-font-smoothing:antialiased}
+.box{text-align:center;padding:48px 40px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);max-width:440px;width:90%;position:relative;overflow:hidden}
+.box::before{content:"";position:absolute;top:0;left:0;width:100%;height:1px;background:linear-gradient(90deg,transparent,#2096e6,transparent)}
+.tag{font-size:9px;letter-spacing:3px;color:#555;margin-bottom:16px}
+.code{font-size:56px;font-weight:200;letter-spacing:8px;color:rgba(255,255,255,.08);margin-bottom:12px}
+h1{font-size:18px;font-weight:400;margin-bottom:10px}
+p{font-size:13px;color:#888;margin-bottom:24px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;font-size:10px;letter-spacing:2px;color:#888;background:none;border:1px solid rgba(255,255,255,.08);transition:.3s}
+.btn:hover{border-color:#2096e6;color:#2096e6}
+.btn svg{width:7px;height:14px;fill:none;stroke:currentColor;stroke-width:1.2}
+</style>
 </head>
 <body>
-  <div class="box">
-    <div class="num">404</div>
-    <h1>页面不存在</h1>
-    <p>该页面可能已被移除或地址有误。</p>
-    <a href="/" class="btn">返回首页</a>
-  </div>
+<div class="box">
+  <div class="tag">ERROR</div>
+  <div class="code">404</div>
+  <h1>页面不存在</h1>
+  <p>该页面可能已被移除或地址有误。</p>
+  <a href="/" class="btn">返回首页 <svg viewBox="0 0 7 15"><polyline points="1,1 6,7.5 1,14"/></svg></a>
+</div>
 </body>
 </html>
