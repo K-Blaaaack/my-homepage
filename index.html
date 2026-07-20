@@ -199,6 +199,37 @@ button{font-family:inherit}
 .rv.vis{opacity:1;transform:translateY(0)}
 .rv-d1{transition-delay:.1s}.rv-d2{transition-delay:.2s}.rv-d3{transition-delay:.3s}.rv-d4{transition-delay:.4s}
 
+/* Main content fade-in */
+.main-wrap{opacity:0;transition:opacity 1.2s ease}
+.main-wrap.show{opacity:1}
+
+/* Floating particles */
+.hero-particles{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+.particle{position:absolute;width:2px;height:2px;background:var(--accent);border-radius:50%;opacity:0;animation:floatUp linear infinite}
+@keyframes floatUp{
+  0%{opacity:0;transform:translateY(100vh) scale(0)}
+  10%{opacity:.6}
+  90%{opacity:.6}
+  100%{opacity:0;transform:translateY(-10vh) scale(1)}
+}
+
+/* Drifting gradient orbs */
+.hero-orbs{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+.orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:0;animation:drift linear infinite}
+.orb-1{width:400px;height:400px;background:rgba(32,150,230,.08);top:20%;left:10%;animation-duration:25s}
+.orb-2{width:300px;height:300px;background:rgba(238,183,99,.06);top:60%;right:15%;animation-duration:30s;animation-delay:-10s}
+.orb-3{width:250px;height:250px;background:rgba(32,150,230,.05);bottom:10%;left:40%;animation-duration:20s;animation-delay:-5s}
+@keyframes drift{
+  0%{transform:translate(0,0) scale(1);opacity:.5}
+  25%{transform:translate(30px,-40px) scale(1.1);opacity:.7}
+  50%{transform:translate(-20px,20px) scale(.9);opacity:.5}
+  75%{transform:translate(40px,30px) scale(1.05);opacity:.6}
+  100%{transform:translate(0,0) scale(1);opacity:.5}
+}
+
+/* Scan line overlay */
+.hero-scanlines{position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.03) 2px,rgba(0,0,0,.03) 4px);pointer-events:none;z-index:0;opacity:.4}
+
 /* Responsive */
 @media(max-width:768px){
   .nav-links{display:none}.burger{display:block}
@@ -252,6 +283,8 @@ button{font-family:inherit}
   <symbol id="i-link" viewBox="0 0 14 14"><path d="M6 1h7v7M13 1L5.5 8.5M11 8v4.5a1 1 0 01-1 1H2a1 1 0 01-1-1V4a1 1 0 011-1H7" fill="none" stroke="currentColor" stroke-width="1.2"/></symbol>
 </svg>
 
+<div class="main-wrap" id="mainWrap">
+
 <!-- Nav -->
 <div class="nav">
   <div class="nav-in">
@@ -278,6 +311,13 @@ button{font-family:inherit}
 <!-- Hero -->
 <section class="hero" id="news">
   <div class="hero-bg"></div>
+  <div class="hero-particles" id="particles"></div>
+  <div class="hero-orbs">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+  <div class="hero-scanlines"></div>
   <div class="hero-content">
     <div class="hero-prefix">PERSONAL PAGE ://</div>
     <h1 class="hero-title">K-BLACK</h1>
@@ -509,6 +549,8 @@ button{font-family:inherit}
   </div>
 </footer>
 
+</div><!-- /main-wrap -->
+
 <script>
 /* PRTS Boot Sequence */
 (function(){
@@ -551,7 +593,10 @@ button{font-family:inherit}
     fill.style.width="100%";
     ptxt.textContent="100%";
   },5200);
-  setTimeout(function(){loader.classList.add("hide")},6000);
+  setTimeout(function(){
+    loader.classList.add("hide");
+    document.getElementById("mainWrap").classList.add("show");
+  },6000);
 })();
 
 /* Nav scroll */
@@ -603,6 +648,21 @@ button{font-family:inherit}
   function f(n){var day=Math.floor(n/86400);n%=86400;var h=Math.floor(n/3600);n%=3600;var m=Math.floor(n/60);var sec=n%60;return day+"天 "+h+"时 "+m+"分 "+sec+"秒"}
   function u(){var now=new Date();var r=document.getElementById("runtime");var up=document.getElementById("lastUpdate");if(r)r.textContent="已运行 "+f(Math.floor((now-s)/1000));if(up)up.textContent="上次更新 "+f(Math.floor((now-dp)/1000))}
   u();setInterval(u,1000);
+})();
+
+/* Particles */
+(function(){
+  var c=document.getElementById("particles");
+  if(!c)return;
+  for(var i=0;i<20;i++){
+    var p=document.createElement("div");
+    p.className="particle";
+    p.style.left=Math.random()*100+"%";
+    p.style.animationDuration=(8+Math.random()*12)+"s";
+    p.style.animationDelay=(-Math.random()*20)+"s";
+    p.style.width=p.style.height=(1+Math.random()*2)+"px";
+    c.appendChild(p);
+  }
 })();
 </script>
 </body>
