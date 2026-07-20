@@ -1,0 +1,11 @@
+{{ define "main" }}
+{{ partial "nav.html" . }}
+<div class="sec" style="min-height:calc(100vh - 56px);display:flex;align-items:center;justify-content:center">
+  <div class="page-box">
+    <div class="tag">{{ .Params.tag | default "PAGE" }}</div>
+    <h1>{{ .Title }}</h1>
+    <div class="page-content">{{ .Content }}</div>
+    <a href="/" class="btn">返回首页 <svg viewBox="0 0 7 15"><polyline points="1,1 6,7.5 1,14" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></a>
+  </div>
+</div>
+{{ end }}

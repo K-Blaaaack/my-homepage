@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="{{ .Site.Language.Locale }}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<meta name="color-scheme" content="dark">
+<title>{{ if .IsHome }}{{ .Site.Title }}{{ else }}{{ .Title }} - {{ .Site.Title }}{{ end }}</title>
+<meta name="description" content="{{ with .Description }}{{ . }}{{ else }}{{ .Site.Params.description }}{{ end }}">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+{{ partial "head/css.html" . }}
+</head>
+<body>
+{{ if .IsHome }}{{ partial "loader.html" . }}{{ end }}
+{{ partial "svg-defs.html" . }}
+<div class="main-wrap{{ if .IsHome }}" id="mainWrap"{{ else }}" style="opacity:1"{{ end }}>
+{{ block "main" . }}{{ end }}
+{{ partial "footer.html" . }}
+</div>
+{{ partial "head/js.html" . }}
+</body>
+</html>

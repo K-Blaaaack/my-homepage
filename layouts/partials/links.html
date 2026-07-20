@@ -1,0 +1,12 @@
+<div class="sec" id="links">
+  <div class="sec-hd rv"><div class="sec-tag">LINKS 链接</div><div class="sec-line"></div></div>
+  <div class="links-grid">
+    {{ range hugo.Data.links.items }}
+    <a href="{{ .url }}" class="lnk rv"{{ if .external }} target="_blank"{{ end }}>
+      <div class="lnk-ico">{{ .icon }}</div>
+      <div class="lnk-body"><div class="lnk-name">{{ .name }}</div><div class="lnk-desc">{{ .desc }}</div></div>
+      <div class="lnk-arrow"><svg viewBox="0 0 7 15" width="7" height="15"><use href="#i-arrow"/></svg></div>
+    </a>
+    {{ end }}
+  </div>
+</div>

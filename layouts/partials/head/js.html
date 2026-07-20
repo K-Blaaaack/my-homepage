@@ -1,0 +1,14 @@
+<script>
+(function(){
+  var s=new Date("{{ .Site.Params.startTime }}"),dp=new Date("{{ .Site.Params.lastDeploy }}");
+  function f(n){var day=Math.floor(n/86400);n%=86400;var h=Math.floor(n/3600);n%=3600;var m=Math.floor(n/60);var sec=n%60;return day+"天 "+h+"时 "+m+"分 "+sec+"秒"}
+  function u(){var now=new Date();var r=document.getElementById("runtime");var up=document.getElementById("lastUpdate");if(r)r.textContent="已运行 "+f(Math.floor((now-s)/1000));if(up)up.textContent="上次更新 "+f(Math.floor((now-dp)/1000))}
+  u();setInterval(u,1000);
+})();
+</script>
+{{ $js := resources.Get "js/main.js" }}
+{{ if $js }}
+<script src="{{ $js.RelPermalink }}"></script>
+{{ else }}
+<script src="/js/main.js"></script>
+{{ end }}

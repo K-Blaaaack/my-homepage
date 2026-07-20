@@ -1,0 +1,49 @@
+<div class="sec">
+  <div class="news-hd">
+    <div class="news-hd-left">
+      <div class="news-badge">BREAKING NEWS</div>
+    </div>
+  </div>
+  {{ with hugo.Data.news.featured }}
+  <div class="news-featured rv">
+    <div class="news-feat-tag">{{ .tag }}</div>
+    <div class="news-feat-title">{{ .title }}</div>
+    <div class="news-feat-date">{{ .date }}</div>
+    {{ with .link }}
+    <a href="{{ .url }}" class="news-feat-link"{{ if .external }} target="_blank"{{ end }}>
+      {{ .text | default "更多情报 READ MORE" }} <svg viewBox="0 0 7 15"><use href="#i-arrow"/></svg>
+    </a>
+    {{ end }}
+  </div>
+  {{ end }}
+
+  <div class="tabs">
+    <button class="tab on" data-t="all">最新</button>
+    <button class="tab" data-t="post">文章</button>
+    <button class="tab" data-t="site">站点</button>
+    <button class="tab" data-t="ba">蔚蓝档案</button>
+  </div>
+
+  <div class="news-list" id="newsList">
+    {{ range first 5 (where .Site.RegularPages "Section" "posts") }}
+    <a href="{{ .RelPermalink }}" class="news-item rv" data-c="post">
+      <div class="news-tag">文章</div>
+      <div class="news-body">
+        <div class="news-date">{{ .Date.Format "2006/01/02" }}</div>
+        <div class="news-title">{{ .Title }}</div>
+      </div>
+      <div class="news-arrow"><svg viewBox="0 0 7 15" width="7" height="15"><use href="#i-arrow"/></svg></div>
+    </a>
+    {{ end }}
+    {{ range hugo.Data.news.items }}
+    <a href="{{ .url }}" class="news-item rv" data-c="{{ .category }}"{{ if .external }} target="_blank"{{ end }}>
+      <div class="news-tag">{{ .tag }}</div>
+      <div class="news-body">
+        <div class="news-date">{{ .label }}</div>
+        <div class="news-title">{{ .title }}</div>
+      </div>
+      <div class="news-arrow"><svg viewBox="0 0 7 15" width="7" height="15"><use href="#i-arrow"/></svg></div>
+    </a>
+    {{ end }}
+  </div>
+</div>

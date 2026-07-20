@@ -1,0 +1,62 @@
+[[items]]
+  icon = "GH"
+  name = "GitHub 主页"
+  desc = "开源项目与代码仓库"
+  url = "https://github.com/K-Blaaaack/"
+  external = true
+
+[[items]]
+  icon = "SRC"
+  name = "本站源码"
+  desc = "GitHub 仓库"
+  url = "https://github.com/K-Blaaaack/my-homepage"
+  external = true
+
+[[items]]
+  icon = "CLK"
+  name = "翻页时钟"
+  desc = "基于 FlipFlow 自改"
+  url = "https://clock.k-black.top/"
+  external = true
+
+[[items]]
+  icon = "?"
+  name = "神秘站点"
+  desc = "敬请期待"
+  url = "https://k-black.top/"
+  external = true
+
+[[items]]
+  icon = "BA"
+  name = "Wiki (GameKee)"
+  desc = "蔚蓝档案数据库"
+  url = "https://www.gamekee.com/ba/"
+  external = true
+
+[[items]]
+  icon = "CN"
+  name = "国服官网"
+  desc = "蔚蓝档案国服"
+  url = "https://bluearchive-cn.com/"
+  external = true
+
+[[items]]
+  icon = "JP"
+  name = "日服官网"
+  desc = "蔚蓝档案日服"
+  url = "https://bluearchive.jp/"
+  external = true
+
+[[items]]
+  icon = "GL"
+  name = "国际服官网"
+  desc = "蔚蓝档案国际服"
+  url = "https://bluearchive.nexon.com/"
+  external = true
+
+[[items]]
+  icon = "JP"
+  name = "日服账号申诉"
+  desc = "账号问题反馈"
+  url = "https://bluearchive.jp/contact/2"
+  external = true

@@ -1,0 +1,80 @@
+[featured]
+  tag = "NOTICE"
+  title = "本站已迁移至 Hugo 静态站点生成器"
+  date = "2025 // 11 / 29"
+  [featured.link]
+    url = "#about"
+    text = "更多情报 READ MORE"
+    external = false
+
+[[items]]
+  url = "https://github.com/K-Blaaaack/"
+  category = "site"
+  tag = "站点"
+  label = "GITHUB"
+  title = "GitHub 主页 - 开源项目与代码仓库"
+  external = true
+
+[[items]]
+  url = "https://github.com/K-Blaaaack/my-homepage"
+  category = "site"
+  tag = "站点"
+  label = "SOURCE"
+  title = "本站源码 - GitHub 仓库"
+  external = true
+
+[[items]]
+  url = "https://clock.k-black.top/"
+  category = "site"
+  tag = "站点"
+  label = "CLOCK"
+  title = "翻页时钟 - 基于 FlipFlow 自改"
+  external = true
+
+[[items]]
+  url = "https://k-black.top/"
+  category = "site"
+  tag = "站点"
+  label = "???"
+  title = "神秘站点 - 敬请期待"
+  external = true
+
+[[items]]
+  url = "https://www.gamekee.com/ba/"
+  category = "ba"
+  tag = "蔚蓝档案"
+  label = "WIKI"
+  title = "Wiki (GameKee) - 蔚蓝档案数据库"
+  external = true
+
+[[items]]
+  url = "https://bluearchive-cn.com/"
+  category = "ba"
+  tag = "蔚蓝档案"
+  label = "CN"
+  title = "国服官网"
+  external = true
+
+[[items]]
+  url = "https://bluearchive.jp/"
+  category = "ba"
+  tag = "蔚蓝档案"
+  label = "JP"
+  title = "日服官网"
+  external = true
+
+[[items]]
+  url = "https://bluearchive.nexon.com/"
+  category = "ba"
+  tag = "蔚蓝档案"
+  label = "GL"
+  title = "国际服官网"
+  external = true
+
+[[items]]
+  url = "https://bluearchive.jp/contact/2"
+  category = "ba"
+  tag = "蔚蓝档案"
+  label = "JP"
+  title = "日服账号申诉"
+  external = true

@@ -1,0 +1,18 @@
+{{ define "main" }}
+{{ partial "nav.html" . }}
+<div class="sec" style="min-height:calc(100vh - 56px);padding-top:80px">
+  <div class="sec-hd"><div class="sec-tag">POSTS 文章</div><div class="sec-line"></div></div>
+  <div class="posts-list">
+    {{ range .Pages }}
+    <a href="{{ .RelPermalink }}" class="news-item">
+      <div class="news-tag">{{ .Date.Format "2006/01" }}</div>
+      <div class="news-body">
+        <div class="news-date">{{ range .Params.categories }}{{ . }}{{ end }}</div>
+        <div class="news-title">{{ .Title }}</div>
+      </div>
+      <div class="news-arrow"><svg viewBox="0 0 7 15" width="7" height="15"><use href="#i-arrow"/></svg></div>
+    </a>
+    {{ end }}
+  </div>
+</div>
+{{ end }}

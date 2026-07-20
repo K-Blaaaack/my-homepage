@@ -1,0 +1,20 @@
+<div class="sec" id="about">
+  <div class="sec-hd rv"><div class="sec-tag">ABOUT 关于</div><div class="sec-line"></div></div>
+  <div class="about-grid">
+    <div class="about-card rv">
+      <div class="about-label">DEPLOY 部署</div>
+      <h3>部署方式</h3>
+      <p>本站由 <strong>Hugo</strong> 构建，部署至 <strong>Cloudflare Workers</strong> 全球网络</p>
+    </div>
+    <div class="about-card rv rv-d1">
+      <div class="about-label">CONTACT 联系</div>
+      <h3>联系方式</h3>
+      <p><a href="mailto:{{ .Site.Params.email }}">{{ .Site.Params.email }}</a></p>
+    </div>
+    <div class="about-card rv rv-d2">
+      <div class="about-label">SOURCE 源码</div>
+      <h3>本站源码</h3>
+      <p><a href="{{ .Site.Params.social.githubSource }}" target="_blank">GitHub 仓库</a></p>
+    </div>
+  </div>
+</div>

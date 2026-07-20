@@ -1,0 +1,36 @@
+baseURL = "https://k-black.top/"
+title = "K-BLACK"
+defaultContentLanguage = "zh-cn"
+
+[languages]
+  [languages.zh-cn]
+    label = "中文"
+    title = "K-BLACK"
+    weight = 1
+
+[params]
+  author = "K-Black"
+  description = "K-Black 个人主页"
+  startTime = "2025/11/29 10:11:45"
+  lastDeploy = "2026/07/20 00:00:00"
+  email = "k-black@k-black.top"
+
+[params.social]
+  github = "https://github.com/K-Blaaaack/"
+  githubHomepage = "https://github.com/K-Blaaaack/"
+  githubSource = "https://github.com/K-Blaaaack/my-homepage"
+
+[markup]
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true
+
+[outputs]
+  home = ["HTML"]
+
+[taxonomies]
+  tag = "tags"
+
+[security.http]
+  methods = ["(?i)GET|POST"]
+  urls = [".*"]

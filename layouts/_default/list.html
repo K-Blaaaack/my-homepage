@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="{{ .Site.Language.Locale }}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<meta name="color-scheme" content="dark">
+<title>{{ .Title }} - {{ .Site.Title }}</title>
+<link rel="stylesheet" href="/css/error.css">
+</head>
+<body>
+<div class="box">
+  <div class="tag">TAXONOMY</div>
+  <h1>{{ .Title }}</h1>
+  {{ .Content }}
+  <a href="/" class="btn">返回首页 <svg viewBox="0 0 7 15"><polyline points="1,1 6,7.5 1,14" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></a>
+</div>
+</body>
+</html>
