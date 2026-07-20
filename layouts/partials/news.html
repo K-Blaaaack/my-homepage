@@ -4,7 +4,7 @@
       <div class="news-badge">BREAKING NEWS</div>
     </div>
   </div>
-  {{ with hugo.Data.news.featured }}
+  {{ with .Site.Data.news.featured }}
   <div class="news-featured rv">
     <div class="news-feat-tag">{{ .tag }}</div>
     <div class="news-feat-title">{{ .title }}</div>
@@ -35,7 +35,7 @@
       <div class="news-arrow"><svg viewBox="0 0 7 15" width="7" height="15"><use href="#i-arrow"/></svg></div>
     </a>
     {{ end }}
-    {{ range hugo.Data.news.items }}
+    {{ range .Site.Data.news.items }}
     <a href="{{ .url }}" class="news-item rv" data-c="{{ .category }}"{{ if .external }} target="_blank"{{ end }}>
       <div class="news-tag">{{ .tag }}</div>
       <div class="news-body">
