@@ -1,21 +1,17 @@
 ---
-title: "Arch Linux 软件管理与 .deb/.rpm 解决方案"
+title: "Arch Linux 软件生态与拓展解决方案"
 date: 2026-07-20T15:00:00+08:00
 draft: false
 tags: ["Linux", "Arch", "软件管理"]
 categories: ["技术笔记"]
-summary: "Arch Linux 下通过 AUR、Chaotic-AUR、Flatpak、debtap 和 distrobox 实现完整软件生态的方法。"
+summary: "Arch Linux 下通过 AUR、Chaotic-AUR、Flatpak、debtap 和 distrobox 实现拓展软件生态的方法。"
 ---
 
 ## 概述
 
 Arch 官方仓库只提供最核心、最纯净的软件，默认看起来"软件少"。
 
-真正的力量来自：
-
-```
-AUR + Chaotic-AUR + Flatpak + 容器
-```
+但结合AUR + Chaotic-AUR + Flatpak + 容器将极大的拓展软件生态
 
 ## AUR
 
