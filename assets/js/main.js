@@ -80,6 +80,33 @@
   els.forEach(function(e){obs.observe(e)});
 })();
 
+/* Code block copy button */
+(function(){
+  var pres=document.querySelectorAll(".post-content pre");
+  pres.forEach(function(pre){
+    var wrap=document.createElement("div");
+    wrap.className="code-wrap";
+    pre.parentNode.insertBefore(wrap,pre);
+    wrap.appendChild(pre);
+    var btn=document.createElement("button");
+    btn.className="copy-btn";
+    btn.innerHTML='<svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> 复制';
+    btn.onclick=function(){
+      var code=pre.querySelector("code");
+      var text=code?code.textContent:pre.textContent;
+      navigator.clipboard.writeText(text).then(function(){
+        btn.innerHTML='<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> 已复制';
+        btn.classList.add("copied");
+        setTimeout(function(){
+          btn.innerHTML='<svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> 复制';
+          btn.classList.remove("copied");
+        },2000);
+      });
+    };
+    wrap.appendChild(btn);
+  });
+})();
+
 /* Hero date */
 (function(){
   var el=document.getElementById("heroDate");
