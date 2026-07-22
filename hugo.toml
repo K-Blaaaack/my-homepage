@@ -24,6 +24,9 @@ defaultContentLanguage = "zh-cn"
   [markup.goldmark]
     [markup.goldmark.renderer]
       unsafe = true
+  [markup.highlight]
+    noClasses = false
+    style = "dracula"
 
 [outputs]
   home = ["HTML"]
