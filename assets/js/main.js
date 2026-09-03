@@ -1,6 +1,22 @@
-/* PRTS Boot Sequence */
+/* PRTS Boot Sequence (homepage only, once per 5 min) */
+function getCookie(n){var m=document.cookie.match("(?:^|; )"+n+"=([^;]*)");
+  return m?decodeURIComponent(m[1]):null;}
+function setCookie(n,v,h){
+  var d=new Date();d.setTime(d.getTime()+h*3600000);
+  document.cookie=n+"="+encodeURIComponent(v)+"; expires="+d.toUTCString()+"; path=/";
+}
 (function(){
   var loader=document.getElementById("loader");
+  if(!loader)return;
+  var mainWrap=document.getElementById("mainWrap");
+  var COOLDOWN=5*60*1000;
+  var last=getCookie("prts_played");
+  var skip=!!last&&(Date.now()-parseInt(last,10))<COOLDOWN;
+  if(skip){
+    loader.classList.add("hide");
+    if(mainWrap)mainWrap.classList.add("show");
+    return;
+  }
   var fill=document.getElementById("pFill");
   var ptxt=document.getElementById("pTxt");
   var lines=[
@@ -40,20 +56,55 @@
     ptxt.textContent="100%";
   },5200);
   setTimeout(function(){
+    setCookie("prts_played",String(Date.now()),24*365);
     loader.classList.add("hide");
-    document.getElementById("mainWrap").classList.add("show");
+    if(mainWrap)mainWrap.classList.add("show");
   },6000);
 })();
 
 /* Nav scroll (homepage only) */
 (function(){
   if(location.pathname!=="/"&&location.pathname!=="")return;
-  var links=document.querySelectorAll(".nav-links a"),ids=["news","profile","links","about"];
+  var links=document.querySelectorAll(".nav-links a");
+  var mobLinks=document.querySelectorAll(".mob a");
+  var ids=["news","profile","links","about"];
   var map={news:"/",profile:"/#profile",links:"/#links",about:"/#about"};
-  window.onscroll=function(){
-    var c="";ids.forEach(function(id){var el=document.getElementById(id);if(el&&el.getBoundingClientRect().top<=200)c=id});
+  var spy=function(){
+    var c="";
+    for(var i=0;i<ids.length;i++){
+      var el=document.getElementById(ids[i]);
+      if(!el)continue;
+      var r=el.getBoundingClientRect();
+      if(r.top<=150&&r.bottom>0)c=ids[i];
+    }
+    if(c==="about"){
+      var ab=document.getElementById("about");
+      if(ab&&ab.getBoundingClientRect().bottom<window.innerHeight*0.6)c="";
+    }
+    if(c==="profile"&&window.scrollY<100)c="news";
     links.forEach(function(l){l.classList.toggle("on",l.getAttribute("href")===map[c])});
+    mobLinks.forEach(function(l){l.classList.toggle("on",l.getAttribute("href")===map[c])});
   };
+  window.addEventListener("scroll",spy,{passive:true});
+  window.addEventListener("resize",spy);
+  spy();
+})();
+
+/* In-page nav (homepage only): scroll instead of full reload */
+(function(){
+  if(location.pathname!=="/"&&location.pathname!=="")return;
+  var all=document.querySelectorAll(".nav-links a,.mob a");
+  all.forEach(function(a){
+    a.addEventListener("click",function(e){
+      var href=a.getAttribute("href")||"";
+      if(href==="/"){e.preventDefault();window.scrollTo({top:0,behavior:"smooth"});return;}
+      if(href.indexOf("/#")===0){
+        e.preventDefault();
+        var t=document.getElementById(href.slice(2));
+        if(t){t.scrollIntoView({behavior:"smooth"});}
+      }
+    });
+  });
 })();
 
 /* Burger */
