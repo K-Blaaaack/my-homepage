@@ -1,0 +1,19 @@
+{{- /* 首页启动动画 · 前置判定（必须在 <head> 中、且在 css 之后执行）
+     命中 5 分钟冷却时，趁 <body> 还没解析就给 <html> 打上 prts-skip，
+     由 main.css 直接隐藏 loader 并显示正文 —— 避免「先渲染黑色遮罩、再淡出 0.8s」的闪烁。
+     cookie key 必须与 assets/js/main.js 一致（prts_played）。 */ -}}
+{{- if .IsHome }}
+<script>
+(function(){
+  try{
+    var m=document.cookie.match(/(?:^|; )prts_played=([^;]*)/);
+    var t=m?parseInt(decodeURIComponent(m[1]),10):NaN;
+    var age=(Date.now()-t)/1000;
+    /* age<0 表示系统时钟回拨，视为失效并重放动画，避免永久跳过 */
+    if(isFinite(t)&&age>=0&&age<300){
+      document.documentElement.classList.add("prts-skip");
+    }
+  }catch(e){}
+})();
+</script>
+{{- end }}

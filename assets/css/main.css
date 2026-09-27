@@ -205,6 +205,9 @@ button{font-family:inherit}
 /* Main content fade-in */
 .main-wrap{opacity:0;transition:opacity 1.2s ease}
 .main-wrap.show{opacity:1}
+/* 命中启动动画冷却（<head> 里判定并给 <html> 打标记）：直接出正文，不要黑色遮罩、不要淡入 */
+html.prts-skip .loader{display:none}
+html.prts-skip .main-wrap{opacity:1;transition:none}
 
 /* Floating particles */
 .hero-particles{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0}

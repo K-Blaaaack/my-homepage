@@ -10,13 +10,22 @@ function setCookie(n,v,h){
   if(!loader)return;
   var mainWrap=document.getElementById("mainWrap");
   var COOLDOWN=5*60*1000;
-  var last=getCookie("prts_played");
-  var skip=!!last&&(Date.now()-parseInt(last,10))<COOLDOWN;
-  if(skip){
+  /* <head> 的 gate 已判定命中冷却，CSS 也已让正文直接可见 —— 收尾即可 */
+  if(document.documentElement.classList.contains("prts-skip")){
     loader.classList.add("hide");
     if(mainWrap)mainWrap.classList.add("show");
     return;
   }
+  var last=getCookie("prts_played");
+  /* age<0 表示系统时钟回拨 —— 与 <head> 的 gate 保持同一判定，否则会永久跳过动画 */
+  var age=last?(Date.now()-parseInt(last,10)):NaN;
+  if(isFinite(age)&&age>=0&&age<COOLDOWN){
+    loader.classList.add("hide");
+    if(mainWrap)mainWrap.classList.add("show");
+    return;
+  }
+  /* 动画一开始就落 cookie：用户中途离开也不会导致下次重播 */
+  setCookie("prts_played",String(Date.now()),24*365);
   var fill=document.getElementById("pFill");
   var ptxt=document.getElementById("pTxt");
   var lines=[
@@ -56,7 +65,6 @@ function setCookie(n,v,h){
     ptxt.textContent="100%";
   },5200);
   setTimeout(function(){
-    setCookie("prts_played",String(Date.now()),24*365);
     loader.classList.add("hide");
     if(mainWrap)mainWrap.classList.add("show");
   },6000);
