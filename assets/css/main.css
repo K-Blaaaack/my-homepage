@@ -152,7 +152,9 @@ svg[viewBox="0 0 7 15"]{stroke-width:1.5;stroke-linecap:round;stroke-linejoin:ro
 .nav{position:fixed;top:0;left:0;width:100%;z-index:100;border-bottom:1px solid var(--rule);
   background:rgba(8,10,11,.86);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
 .nav-in{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:56px}
-.nav-brand{display:flex;align-items:baseline;gap:12px}
+.nav-brand{display:flex;align-items:center;gap:11px}
+/* 顶栏 logo：正方形标识，置于昵称前（56px 导航内留足上下边距） */
+.nav-brand-logo{display:block;height:30px;width:auto;flex-shrink:0}
 .nav-brand-en{font-family:var(--display);font-size:19px;font-weight:700;letter-spacing:var(--ls-title);color:var(--paper);text-transform:uppercase}
 .nav-brand-sub{font-size:9px;letter-spacing:var(--ls-micro);color:var(--muted);text-transform:uppercase}
 .nav-links{display:flex;gap:26px;counter-reset:nav}
@@ -371,12 +373,15 @@ body{counter-reset:sec}
   color:var(--paper);font-variant-numeric:tabular-nums}
 .about-sm{font-family:var(--mono)!important;font-size:12px!important;color:var(--muted)!important;margin-top:5px!important}
 
-/* 页脚 */
-.foot{max-width:1200px;margin:0 auto;padding:40px 24px;border-top:1px solid var(--rule)}
-.foot-brand{font-family:var(--display);font-size:20px;font-weight:700;letter-spacing:var(--ls-title);
-  color:var(--paper-2);margin-bottom:10px;text-transform:uppercase}
-.foot-copy{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--muted)}
-.foot-links{display:flex;gap:22px;margin-top:18px}
+/* 页脚：左侧版权 + 链接上下堆叠，右侧 logo，两者垂直居中对齐 */
+.foot{display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto;
+  align-items:center;column-gap:40px;row-gap:9px;
+  max-width:1200px;margin:0 auto;padding:34px 24px;border-top:1px solid var(--rule)}
+.foot-copy{grid-area:1/1;font-family:var(--mono);font-size:11px;
+  letter-spacing:.08em;color:var(--muted);margin:0}
+.foot-links{grid-area:2/1;display:flex;gap:22px}
+/* logo 跨两行并垂直居中，与左侧文字块同处一个水平带 */
+.foot-logo{grid-area:1/2/3/3;align-self:center;display:block;height:48px;width:auto}
 .foot-links a{font-size:11px;font-weight:700;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;
   transition:color var(--t-fast) var(--ease-out)}
 .foot-links a:hover{color:var(--signal)}
@@ -526,7 +531,11 @@ html.prts-skip .main-wrap{opacity:1;transition:none}
   .burger{display:block}
   .sec{padding:56px 16px}
   .prof-grid,.about-grid,.links-grid{grid-template-columns:1fr}
-  .foot{padding:32px 16px}
+  /* 页脚改为单列：文字在上，logo 在下 */
+  .foot{grid-template-columns:1fr;grid-template-rows:auto auto auto;row-gap:16px;padding:32px 16px}
+  .foot-copy{grid-area:1/1}
+  .foot-links{grid-area:2/1}
+  .foot-logo{grid-area:3/1;justify-self:start}
 }
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;
