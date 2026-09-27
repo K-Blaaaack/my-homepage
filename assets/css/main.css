@@ -484,10 +484,18 @@ body{counter-reset:sec}
 
 
 /* ═══ 12 Motion ═════════════════════════════════════════════════════════ */
-/* 区块显现：横向遮罩滑入（clip-path），非单纯淡入 */
-.rv{clip-path:inset(0 100% 0 0);transform:translateX(-14px);
-  transition:clip-path var(--t-reveal) var(--ease),transform var(--t-reveal) var(--ease)}
-.rv.vis{clip-path:inset(0);transform:none}
+/* 区块显现
+   ⚠️ 不能用 clip-path 做隐藏态：元素被完全裁剪后可见面积为 0，
+      IntersectionObserver 不再报告相交，.vis 永远加不上 —— 内容会永久不可见。
+      这里只用 opacity + transform（不影响相交判定），并加 3s 兜底动画，
+      即使观察器失效也绝不会出现空白页面。 */
+.rv{
+  opacity:0;transform:translateX(-14px);
+  transition:opacity var(--t-reveal) var(--ease),transform var(--t-reveal) var(--ease);
+  animation:rvSafe 0s linear 3s forwards;
+}
+.rv.vis{opacity:1;transform:none}
+@keyframes rvSafe{to{opacity:1;transform:none}}
 .rv-d1{transition-delay:.06s}.rv-d2{transition-delay:.12s}.rv-d3{transition-delay:.18s}.rv-d4{transition-delay:.24s}
 
 .main-wrap{opacity:0;transition:opacity var(--t-slow) var(--ease-out)}
@@ -509,7 +517,7 @@ html.prts-skip .main-wrap{opacity:1;transition:none}
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;
     transition-duration:.01ms!important;scroll-behavior:auto!important}
-  .rv{clip-path:none;transform:none}
+  .rv{opacity:1;transform:none;animation:none}
   .main-wrap{opacity:1}
   .particle,.orb{display:none}
   .hero-scroll i{animation:none;opacity:.6}
