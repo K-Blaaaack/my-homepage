@@ -4,7 +4,7 @@
   <div class="sec-hd"><div class="sec-tag">STACK 技术栈</div><div class="sec-line"></div></div>
   {{ with .Content }}<div class="stack-lead">{{ . }}</div>{{ end }}
   <div class="stack-grid">
-    {{ range hugo.Data.stack.groups }}
+    {{ range .Site.Data.stack.groups }}
     <div class="stack-card">
       <div class="prof-label">{{ .en }}</div>
       <h3>{{ .name }}</h3>
