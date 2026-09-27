@@ -1,11 +1,46 @@
+/* 404 页 · 与 main.css 共用同一套证据基令牌（近黑墨底 + 青色信号 + 0 圆角 + 45° 切角） */
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,"Helvetica Neue","PingFang SC",Arial,sans-serif;background:#000;color:#e6e6e6;display:flex;justify-content:center;align-items:center;min-height:100vh;-webkit-font-smoothing:antialiased}
-.box{text-align:center;padding:48px 40px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);max-width:440px;width:90%;position:relative;overflow:hidden}
-.box::before{content:"";position:absolute;top:0;left:0;width:100%;height:1px;background:linear-gradient(90deg,transparent,#2096e6,transparent)}
-.tag{font-size:9px;letter-spacing:3px;color:#555;margin-bottom:16px}
-.code{font-size:56px;font-weight:200;letter-spacing:8px;color:rgba(255,255,255,.08);margin-bottom:12px}
-h1{font-size:18px;font-weight:400;margin-bottom:10px}
-p{font-size:13px;color:#888;margin-bottom:24px}
-.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;font-size:10px;letter-spacing:2px;color:#888;background:none;border:1px solid rgba(255,255,255,.08);transition:.3s}
-.btn:hover{border-color:#2096e6;color:#2096e6}
-.btn svg{width:7px;height:14px;fill:none;stroke:currentColor;stroke-width:1.2}
+:root{
+  --ink:#080a0b;--ink-2:#0e1112;--ink-3:#141819;
+  --rule:#242a2d;--line:#333b3f;--line-h:#4a5459;
+  --signal:#18d1ff;
+  --paper:#f4f6f6;--paper-2:#c3cbcd;--muted:#8d9396;
+  --cjk:"Noto Sans SC","Source Han Sans SC","HarmonyOS Sans SC","MiSans","PingFang SC","Microsoft YaHei",sans-serif;
+  --display:"Arial Narrow","Roboto Condensed","DIN Condensed","Bebas Neue",var(--cjk);
+  --mono:"IBM Plex Mono","JetBrains Mono","SFMono-Regular",Consolas,monospace;
+  --cut:14px;
+}
+body{
+  font-family:var(--cjk);color:var(--paper-2);
+  display:flex;justify-content:center;align-items:center;min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+  background-color:var(--ink);
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E"),
+    linear-gradient(rgba(244,246,246,.028) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(244,246,246,.028) 1px,transparent 1px);
+  background-size:140px 140px,64px 64px,64px 64px;
+}
+/* 45° 切角（左上 + 右下），切角处 1px 边框线连续 */
+.box{
+  text-align:center;padding:48px 40px;background:var(--ink-2);
+  border:1px solid var(--line);border-top:2px solid var(--line-h);
+  max-width:460px;width:90%;position:relative;
+  clip-path:polygon(var(--cut) 0,100% 0,100% calc(100% - var(--cut)),calc(100% - var(--cut)) 100%,0 100%,0 var(--cut));
+}
+.box::before{content:"";position:absolute;left:0;top:calc(var(--cut) - 1px);width:calc(var(--cut) * 1.4143);height:1px;background:var(--line);transform:rotate(-45deg);transform-origin:0 50%}
+.tag{font-size:9px;font-weight:500;letter-spacing:.2em;color:var(--muted);margin-bottom:16px;font-family:var(--mono);text-transform:uppercase}
+.code{font-family:var(--display);font-size:64px;font-weight:700;letter-spacing:-.04em;line-height:.9;color:var(--ink-3);margin-bottom:14px}
+h1{font-family:var(--display);font-size:26px;font-weight:700;letter-spacing:-.03em;margin-bottom:10px;color:var(--paper);text-transform:uppercase}
+p{font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:26px}
+.btn{
+  display:inline-flex;align-items:center;gap:10px;padding:12px 24px 12px 20px;min-height:44px;
+  font-size:11px;font-weight:700;letter-spacing:.14em;color:var(--paper-2);text-transform:uppercase;
+  background:var(--ink-2);border:1px solid var(--line);border-left:2px solid var(--signal);text-decoration:none;
+  transition:background .18s ease-out,color .18s ease-out,border-color .18s ease-out;
+}
+.btn:hover{background:var(--ink-3);border-color:var(--line-h);border-left-color:var(--signal);color:var(--paper)}
+.btn:active{transform:scale(.98)}
+.btn svg{width:7px;height:14px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+@media(prefers-reduced-motion:reduce){*{transition-duration:.01ms!important}}
