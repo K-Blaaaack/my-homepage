@@ -8,6 +8,7 @@
 </script>
 {{ $js := resources.Get "js/main.js" }}
 {{ if $js }}
+{{ $js = $js | fingerprint }}
 <script src="{{ $js.RelPermalink }}"></script>
 {{ else }}
 <script src="/js/main.js"></script>
