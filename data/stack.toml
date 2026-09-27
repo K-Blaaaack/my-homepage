@@ -1,0 +1,117 @@
+# 完整技术栈清单
+# 首页 PROFILE 卡片的标签是精选（写死在 layouts/partials/profile.html）
+# 这里的是完整版，由 layouts/stack/single.html 渲染到 /stack/
+# 增删改只动本文件即可，无需改模板。
+
+[[groups]]
+  name = "系统与桌面环境"
+  en = "SYSTEM & DESKTOP"
+  items = [
+    "Linux / Arch Linux",
+    "Wayland / niri / KDE Plasma",
+    "Fish / Kitty / Starship",
+    "Vim",
+    "systemd / systemd-resolved",
+    "Windows / UEFI / 双系统",
+    "Fcitx / 输入法 / 词库",
+  ]
+
+[[groups]]
+  name = "编程语言与工具链"
+  en = "LANGUAGES & TOOLCHAIN"
+  items = [
+    "C / C++ / Rust / Python / Shell",
+    "Git / GitHub",
+    "Git 分支管理 / CI/CD",
+    "AUR / Arch 打包",
+    "脚本自动化",
+  ]
+
+[[groups]]
+  name = "内核与移动系统"
+  en = "KERNEL & MOBILE"
+  items = [
+    "Linux Kernel / Kernel 编译",
+    "Android / AOSP / Android Kernel",
+    "ARM64 / x86_64",
+    "Qualcomm Snapdragon / SM8650 / SM8650 DTS",
+    "Fastboot / Magisk / ADB",
+    "Waydroid",
+  ]
+
+[[groups]]
+  name = "容器与虚拟化"
+  en = "CONTAINERS & VIRTUALIZATION"
+  items = [
+    "Docker / Podman",
+    "QEMU / KVM / libvirt",
+    "Proxmox VE / PVE",
+    "服务器虚拟化",
+  ]
+
+[[groups]]
+  name = "网络架构"
+  en = "NETWORKING"
+  items = [
+    "iKuai / OpenWrt",
+    "PPPoE / 多 WAN / 策略路由",
+    "IPv4 / IPv6 / NAT / DHCP / DNS",
+    "VLAN / 10GbE / 40GbE / SFP+ / QSFP+",
+    "光纤网络 / 家庭网络架构",
+    "VPN / Proxy / 网络代理",
+    "UFW / Linux 防火墙",
+  ]
+
+[[groups]]
+  name = "云与 Web"
+  en = "CLOUD & WEB"
+  items = [
+    "Cloudflare / Cloudflare Pages",
+    "AWS / Ubuntu Server / VPS",
+    "前端网页 / Material You",
+  ]
+
+[[groups]]
+  name = "游戏与多媒体"
+  en = "GAMING & MEDIA"
+  items = [
+    "MangoHud / GameMode",
+    "Wine / Proton / umu-run / Lutris",
+    "Steam / Linux 游戏兼容层",
+    "Minecraft / Fabric / Arclight",
+    "Waydroid 游戏自动化",
+    "OBS",
+    "SPlayer-Next / 音乐播放器",
+  ]
+
+[[groups]]
+  name = "AI 与自动化"
+  en = "AI & AUTOMATION"
+  items = [
+    "LLM / AI Agent / AI 工作流",
+    "AI 自动化 / AI 短剧工作流",
+    "AstrBot / OpenCode",
+    "MAA / MaaTouch",
+  ]
+
+[[groups]]
+  name = "硬件与嵌入式"
+  en = "HARDWARE & EMBEDDED"
+  items = [
+    "服务器 / Dell PowerEdge R730",
+    "Intel Xeon / Core i5 / Core i9",
+    "Intel Arc GPU",
+    "RAID / PERC",
+    "Optane / SSD / HDD",
+    "TrueNAS / NAS",
+    "ESP32 / 嵌入式开发",
+  ]
+
+[[groups]]
+  name = "运维与实验室"
+  en = "OPS & HOMELAB"
+  items = [
+    "系统运维 / 故障排查",
+    "网络运维",
+    "家庭实验室（Homelab）",
+  ]

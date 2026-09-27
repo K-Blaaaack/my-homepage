@@ -127,7 +127,7 @@ function setCookie(n,v,h){
 
 /* Reveal */
 (function(){
-  var els=document.querySelectorAll(".sec-hd,.news-featured,.prof-card,.lnk,.about-card,.news-item");
+  var els=document.querySelectorAll(".sec-hd,.news-featured,.prof-card,.lnk,.about-card,.news-item,.stack-card");
   els.forEach(function(e){e.classList.add("rv")});
   var obs=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting)e.target.classList.add("vis")})},{threshold:.1});
   els.forEach(function(e){obs.observe(e)});

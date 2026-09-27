@@ -1,0 +1,21 @@
+{{ define "main" }}
+{{ partial "nav.html" . }}
+<div class="sec" style="min-height:calc(100vh - 56px);padding-top:80px">
+  <div class="sec-hd"><div class="sec-tag">STACK 技术栈</div><div class="sec-line"></div></div>
+  {{ with .Content }}<div class="stack-lead">{{ . }}</div>{{ end }}
+  <div class="stack-grid">
+    {{ range hugo.Data.stack.groups }}
+    <div class="stack-card">
+      <div class="prof-label">{{ .en }}</div>
+      <h3>{{ .name }}</h3>
+      <div class="tags">
+        {{ range .items }}<span class="tag">{{ . }}</span>{{ end }}
+      </div>
+    </div>
+    {{ end }}
+  </div>
+  <div style="margin-top:36px">
+    <a href="/" class="btn">返回首页 <svg viewBox="0 0 7 15"><polyline points="1,1 6,7.5 1,14" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></a>
+  </div>
+</div>
+{{ end }}

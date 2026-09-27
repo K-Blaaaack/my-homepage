@@ -151,6 +151,18 @@ button{font-family:inherit}
 .prof-card p{font-size:13px;color:var(--dim);line-height:1.8;margin-bottom:6px}
 .tags{display:flex;flex-wrap:wrap;gap:6px}
 .tag{font-size:10px;padding:4px 10px;background:rgba(32,150,230,.08);color:var(--accent);letter-spacing:1px}
+.prof-more{display:inline-flex;align-items:center;gap:5px;margin-top:16px;font-size:9px;letter-spacing:2px;color:var(--accent);transition:.3s}
+.prof-more:hover{color:var(--dim)}
+.prof-more svg{width:5px;height:10px;fill:none;stroke:currentColor;stroke-width:1.4}
+
+/* Tech stack page */
+.stack-lead{font-size:13px;color:var(--dim);line-height:1.8;margin:-24px 0 32px}
+.stack-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px;align-items:start}
+.stack-card{background:var(--card);border:1px solid var(--border);padding:24px 26px;transition:.3s;position:relative;overflow:hidden}
+.stack-card::before{content:"";position:absolute;top:0;left:0;width:100%;height:1px;background:linear-gradient(90deg,var(--accent),transparent);opacity:0;transition:.3s}
+.stack-card:hover{border-color:var(--border-h)}
+.stack-card:hover::before{opacity:1}
+.stack-card h3{font-size:14px;font-weight:400;margin-bottom:14px;color:var(--dim)}
 
 /* Links */
 .links-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}

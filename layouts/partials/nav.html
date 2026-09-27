@@ -7,6 +7,7 @@
     <nav class="nav-links">
       <a href="/" class="{{ if .IsHome }}on{{ end }}">INDEX 首页</a>
       <a href="/posts/" class="{{ if eq .CurrentSection.Section "posts" }}on{{ end }}">POSTS 文章</a>
+      <a href="/stack/" class="{{ if eq .Type "stack" }}on{{ end }}">STACK 技术栈</a>
       <a href="/#profile">PROFILE 档案</a>
       <a href="/#about">ABOUT 关于</a>
     </nav>
@@ -16,6 +17,7 @@
 <div class="mob" id="mob">
   <a href="/" class="{{ if .IsHome }}on{{ end }}">INDEX 首页</a>
   <a href="/posts/" class="{{ if eq .CurrentSection.Section "posts" }}on{{ end }}">POSTS 文章</a>
+  <a href="/stack/" class="{{ if eq .Type "stack" }}on{{ end }}">STACK 技术栈</a>
   <a href="/#profile">PROFILE 档案</a>
   <a href="/#about">ABOUT 关于</a>
 </div>
