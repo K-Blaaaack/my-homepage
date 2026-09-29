@@ -4,10 +4,10 @@ date: 2026-09-23T20:00:00+08:00
 draft: false
 tags: ["VPN", "OpenVPN", "Shadowsocks", "组网", "透明代理", "iptables", "脚本"]
 categories: ["技术笔记"]
-summary: "用一台广州云服务器做 OpenVPN 枢纽，把佛山家里的机器、肇庆的主力机和随行的 ThinkPad 组进同一张网，并用一个 bash 脚本实现 local / home / gzhou 三地出口一键切换。"
+summary: "用一台广州云服务器做 OpenVPN 枢纽，把家里的机器、本地主力机和随行的 ThinkPad 组进同一张网，并用一个 bash 脚本实现 local / home / gzhou 三地出口一键切换。"
 ---
 
-我有三台机器散在三个地方：佛山家里的 `potatoserver`（家宽网关）、肇庆的主力机 PotatoPC、还有一台随我移动的 ThinkPad T480。需求很朴素：**让它们像在同一个局域网里一样互访**，并且**能按需选择从哪个地方出公网**——有时候想让流量从佛山家宽走，有时候想走广州机房。
+我有三台机器散在三个地方：家里的 `potatoserver`（家宽网关）、本地的主力机 PotatoPC、还有一台随我移动的 ThinkPad T480。需求很朴素：**让它们像在同一个局域网里一样互访**，并且**能按需选择从哪个地方出公网**——有时候想让流量从家里宽带走，有时候想走广州机房。
 
 方案是一台广州阿里云服务器做 OpenVPN 枢纽，加一个自己写的 bash 脚本 `homevpn` 管出口切换。这篇文章记录它的拓扑、原理、踩过的坑和运维方式。
 
@@ -15,10 +15,10 @@ summary: "用一台广州云服务器做 OpenVPN 枢纽，把佛山家里的机�
 
 `homevpn` 是设备接入**广州阿里云 OpenVPN 枢纽**后，用于**异地组网 + 出口切换**的 bash 脚本：
 
-- **组网**：设备间互访 `10.xxx.xxx.0/24`，并可跨隧道访问佛山家里的 `192.xxx.xxx.0/24`（默认直连 potatoserver）
+- **组网**：设备间互访 `10.xxx.xxx.0/24`，并可跨隧道访问家里内网的 `192.xxx.xxx.0/24`（默认直连 potatoserver）
 - **出口（egress）三选一**：
-  - `local`：走本机所在宽带（肇庆移动 / 校园网等）
-  - `home`：**佛山家宽透明代理**（本机 TCP → 隧道 → 家里 potatoserver 的 ss-server → 家宽出口）
+  - `local`：走本机所在宽带（本地网络）
+  - `home`：**家里宽带透明代理**（本机 TCP → 隧道 → 家里 potatoserver 的 ss-server → 家宽出口）
   - `gzhou`：广州阿里云机房出口（经 `10.xxx.xxx.1` 服务器 NAT）
 - **家网路径（path）**：`direct` = `10.xxx.xxx.2` 直连 potatoserver ／ `relay` = `10.xxx.xxx.1` 广州中继
 
@@ -39,9 +39,9 @@ summary: "用一台广州云服务器做 OpenVPN 枢纽，把佛山家里的机�
 
 | 节点 | 隧道 IP | 所在地 / 角色 |
 |---|---|---|
-| `potatoserver` | `10.xxx.xxx.2` | 佛山家 · 家宽网关（局域网 `192.xxx.xxx.131`），跑 ss-server，是 home 出口的终点 |
-| `PotatoPC` | `10.xxx.xxx.3` | 肇庆，主力机 |
-| `T480` | `10.xxx.xxx.6` | 肇庆（随行），局域网 `192.xxx.xxx.43` |
+| `potatoserver` | `10.xxx.xxx.2` | 家里 · 家宽网关（局域网 `192.xxx.xxx.131`），跑 ss-server，是 home 出口的终点 |
+| `PotatoPC` | `10.xxx.xxx.3` | 本地，主力机 |
+| `T480` | `10.xxx.xxx.6` | 本地（随行），局域网 `192.xxx.xxx.43` |
 
 - 隧道为 **hub-spoke 分流模式**：默认路由走本机宽带，只有 `10.xxx.xxx.0/24` + `192.xxx.xxx.0/24` 进隧道
 - 家网路由双保险：客户端 conf 静态直连（metric 50）+ 服务器 push 中继（metric 100）
@@ -60,7 +60,7 @@ summary: "用一台广州云服务器做 OpenVPN 枢纽，把佛山家里的机�
 | push 家网路由 | `route 192.xxx.xxx.0 255.255.255.0`（不带网关：2.x/3.x 客户端都认，走 10.xxx.xxx.1 中继） |
 | 客户端档案 | `potato_pc_me=10.xxx.xxx.3`、`tpt480_me=10.xxx.xxx.6`、`phone_pkg110_me`、`phone_ace5_me`、`potato_server_home=10.xxx.xxx.2` 等 |
 
-### potatoserver（佛山家，10.xxx.xxx.2 / 192.xxx.xxx.131）
+### potatoserver（家里，10.xxx.xxx.2 / 192.xxx.xxx.131）
 
 | 组件 | 说明 |
 |---|---|
@@ -121,7 +121,7 @@ homevpn menu                    # 强制进入菜单
 
 `pin_transport` 是这套方案的隐形支柱。隧道的**内层**流量走 tun0，但隧道的**外层** UDP 包必须走本机物理网卡出公网。如果切了默认路由之后外层包也跟着进 tun0，就成了自己套自己的死循环。把对端 IP 钉一条 `/32` 主机路由，是最省事也最可靠的解法。
 
-## 佛山透明代理原理（home 出口）★
+## 家里宽带透明代理原理（home 出口）★
 
 这是整个方案里最精妙的一段：
 
@@ -133,7 +133,7 @@ homevpn menu                    # 强制进入菜单
   → ss-redir（127.0.0.1:12345）加密
   → 走 tun0 到 10.xxx.xxx.2:8388（目的在 10/8 豁免段，不会被二次 REDIRECT → 天然防环）
   → potatoserver 的 ss-server 解密
-  → 走家宽出公网（出口 = 佛山电信）
+  → 走家宽出公网（出口 = 家里宽带）
 ```
 
 - **HOMEVPN 链规则**（`iptables -t nat`）：豁免 `0.0.0.0/8, 10.0.0.0/8, 127.0.0.0/8, 169.254.0.0/16, 172.16.0.0/12, 192.168.0.0/16, 224.0.0.0/4, 240.0.0.0/4` → 其余 `-p tcp -j REDIRECT --to-ports 12345`
@@ -154,16 +154,16 @@ homevpn menu                    # 强制进入菜单
 | 家网直连 | `192.xxx.xxx.0/24 via 10.xxx.xxx.2 dev tun0` | 50 | 客户端 conf 静态，永远优先 |
 | 家网中继（push） | `192.xxx.xxx.0/24 via 10.xxx.xxx.1 dev tun0` | 100 | 服务器 push 兜底 |
 
-> **2026-09-23 修复记录**：`gzhou` 原用 metric 200，当主网卡 DHCP 默认路由为 metric 100 时会被压制，出口实际仍是本机宽带（T480 首次实测暴露；本机历史上在校园网 metric 300 环境碰巧成立）。已将两机脚本 `cmd_link gzhou` 与 `cmd_on` 的 tun0 默认路由改为 **metric 50**，压过一切常规 DHCP 默认路由。
+> **2026-09-23 修复记录**：`gzhou` 原用 metric 200，当主网卡 DHCP 默认路由为 metric 100 时会被压制，出口实际仍是本机宽带（T480 首次实测暴露；本机历史上在 metric 300 的网络环境碰巧成立）。已将两机脚本 `cmd_link gzhou` 与 `cmd_on` 的 tun0 默认路由改为 **metric 50**，压过一切常规 DHCP 默认路由。
 
 这个 bug 很典型：**它在我的主力机上"看起来能用"，只是因为那台机器当时连的网络默认路由 metric 是 300。** 换了台机器、换了个网络，同样的代码就失效了。metric 这种东西，永远要压到比任何可能的 DHCP 值都小，而不是"比我现在这台机器上的值小"。
 
-## 三出口实测（2026-09-23，肇庆 192.xxx.xxx.x 网络）
+## 三出口实测（2026-09-23，本地 192.xxx.xxx.x 网络）
 
 | 出口 | 路径 | 出口 IP | 两机验证 |
 |---|---|---|---|
-| `local` | 本机宽带直连 | `223.xxx.xxx.xxx`（肇庆移动） | 本机 ✓ T480 ✓ |
-| `home` | TCP→10.xxx.xxx.2:8388→佛山家宽 | `119.xxx.xxx.xxx`（佛山电信，家宽动态 IP，9-13 时为 `119.xxx.xxx.xxx`） | 本机 ✓ T480 ✓ |
+| `local` | 本机宽带直连 | `223.xxx.xxx.xxx`（本地网络） | 本机 ✓ T480 ✓ |
+| `home` | TCP→10.xxx.xxx.2:8388→家里宽带 | `119.xxx.xxx.xxx`（家里宽带，动态 IP，9-13 时为 `119.xxx.xxx.xxx`） | 本机 ✓ T480 ✓ |
 | `gzhou` | tun0→10.xxx.xxx.1→服务器 NAT | `8.xxx.xxx.xxx`（广州阿里云） | 本机 ✓ T480 ✓ |
 
 验证方法是脚本内置的：`homevpn link <x>` 后自动 `curl -4 --noproxy '*' https://myip.ipip.net`；家网探活 `ping 192.xxx.xxx.131`（直连 36-43ms）。
@@ -186,7 +186,7 @@ homevpn menu                    # 强制进入菜单
 # 状态一览（隧道/出口/家网/家网探活）
 homevpn status
 
-# 切佛山家宽出口（透明代理）
+# 切家里宽带出口（透明代理）
 sudo homevpn link home
 # 切回本机宽带
 sudo homevpn link local
@@ -210,11 +210,11 @@ ssh kb@192.xxx.xxx.43 "echo '<密码>' | sudo -S /usr/local/bin/homevpn link hom
 
 ## 已知限制与注意事项
 
-1. **`home` 出口只覆盖 TCP**（ss `tcp_only`）：UDP/DNS/ping 走本机；个别 UDP 应用无法走佛山
+1. **`home` 出口只覆盖 TCP**（ss `tcp_only`）：UDP/DNS/ping 走本机；个别 UDP 应用无法走家里宽带
 2. **`path direct/relay` 已冗余**：家网路由现由 openvpn 自管（直连 50 + 中继 100，默认直连优先）；`path` 命令只是临时覆盖，隧道重连后自动还原，保留仅为兼容
 3. **FlClash 冲突**：FlClash 开着会劫持 `10.xxx.xxx.x` / `192.xxx.xxx.x` → 用 homevpn 前先关（脚本有警告提示）
 4. **T480 的 ss-redir 为孤文件**（无包属主）：Pacman 不管它，系统清理时可能被误删；重装用 AUR `shadowsocks-libev-static`，或直接从 PotatoPC 重拷 `/usr/bin/ss-redir`
-5. **家宽出口 IP 是动态的**：佛山电信 IP 会轮换（`119.xxx.xxx.xxx`），验证出口以 `curl myip.ipip.net` 实际值为准
+5. **家宽出口 IP 是动态的**：家里宽带的 IP 会轮换（`119.xxx.xxx.xxx`），验证出口以 `curl myip.ipip.net` 实际值为准
 6. **两机脚本必须保持同步**（除 `SVC` 行）；改动后用 `diff` 核对
 7. **NAT 依赖**：`link home` 需要内核有完整 NAT 支持（`nf_nat` / `xt_nat` / `NF_NAT_REDIRECT`），换内核后务必回归测试
 
