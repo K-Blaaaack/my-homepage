@@ -104,8 +104,8 @@ setup_arch → ... → initramfs ─ (未到达)
 1. **EXP020 待测**: `__primary_switched` 开头 SMC 探针 (`out/giulia_boot_exp20.img`)
    - 关机 → 卡死在 `__primary_switch` 之后/start_kernel 前 (reloc/KASLR 相关) → 放更早探针 (`__cpu_setup` 后)
    - 不关机 → 卡死在 primary_entry 内 (create_init_idmap / __cpu_setup) → 放 H2 探针
-2. 定位卡死区间后深挖 (页表建立 / TCR / reloc / 内存布局)
-3. 建议对比主线 7.1 head.S 与 GKI 6.1 (KSU Image 可反汇编) 的早期路径差异
+2. 定位卡死区间后再往下查 (页表建立 / TCR / reloc / 内存布局)
+3. 对比主线 7.1 head.S 与 GKI 6.1 (KSU Image 可反汇编) 的早期路径差异
 4. 恢复生产配置: 移除 head.S/early_marker 调试代码, VA_BITS 决定最终值
 
 ## 构建产物 (out/)

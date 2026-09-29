@@ -9,13 +9,13 @@ summary: "Arch Linux 下通过 AUR、Chaotic-AUR、Flatpak、debtap 和 distrobo
 
 ## 概述
 
-Arch 官方仓库只提供最核心、最纯净的软件，默认看起来"软件少"。
+Arch 官方仓库只提供最核心、最纯净的软件，默认看起来软件很少。
 
-但结合AUR + Chaotic-AUR + Flatpak + 容器将极大的拓展软件生态
+但把 AUR、Chaotic-AUR、Flatpak 和容器都接上，能装的软件就多得多了。
 
 ## AUR
 
-AUR 是 Arch 的社区仓库，包含几乎所有商业、闭源、冷门软件。
+AUR 是 Arch 的社区仓库，商业软件、闭源软件、冷门软件基本都能在里面找到。
 
 ```bash
 sudo pacman -S --needed git base-devel
@@ -66,7 +66,7 @@ flatpak install flathub com.discordapp.Discord
 
 ### 方案 1：AUR
 
-先在 AUR 里搜有没有原生包：
+先在 AUR 里搜有没有原生包。
 
 ```bash
 yay -Ss 软件名
@@ -74,7 +74,7 @@ yay -Ss 软件名
 
 ### 方案 2：debtap
 
-将 `.deb` / `.rpm` 转换为 Arch 包：
+将 `.deb` / `.rpm` 转换为 Arch 包。
 
 ```bash
 yay -S debtap
@@ -86,7 +86,7 @@ sudo pacman -U xxx.pkg.tar.zst
 
 ### 方案 3：distrobox
 
-用容器运行 Ubuntu / Fedora 环境，直接装 `.deb`：
+用容器跑一个 Ubuntu / Fedora 环境，`.deb` 直接在里面装。
 
 ```bash
 sudo pacman -S distrobox
@@ -117,4 +117,8 @@ sudo apt install ./xxx.deb
 
 ## 总结
 
-Arch Linux 并不是软件少，而是把自由、纯净、可控放在第一位。正确使用 AUR + Chaotic-AUR + Flatpak + 容器后，它将成为 Linux 生态中软件资源最丰富的发行版。
+Arch 官方仓库把自由、纯净、可控放在第一位，代价是默认能装的东西少。
+
+AUR 打底，Chaotic-AUR 省掉本地编译，Flatpak 补桌面软件，`.deb` / `.rpm` 走 debtap 或 distrobox。
+
+这么一套下来，我确实没再为装软件发过愁。

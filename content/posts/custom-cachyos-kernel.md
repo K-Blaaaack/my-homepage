@@ -7,11 +7,11 @@ categories: ["技术笔记"]
 summary: "基于 CachyOS 官方内核源码自编译专属内核：BORE + Clang ThinLTO + x86-64-v3 + LA57 硬禁用。附定制清单、LA57 补丁源码、构建流程、踩坑记录与部署回退方案。"
 ---
 
-Arch 系用户想要"性能内核"，最省事的路子是装 CachyOS 的现成包。但 CachyOS 官方只提供两个成品：主配方的 **EEVDF + ThinLTO**，和 BORE 变体的 **BORE + 无 LTO（GCC）**。我想要的 **BORE + Clang ThinLTO + x86-64-v3 + LA57 硬禁用** 这个组合，官方没有。
+Arch 系用户想要性能内核，最省事的路子是装 CachyOS 的现成包。但 CachyOS 官方只提供两个成品：主配方的 EEVDF + ThinLTO，和 BORE 变体的 BORE + 无 LTO（GCC）。我想要的 **BORE + Clang ThinLTO + x86-64-v3 + LA57 硬禁用** 这个组合，官方没有。
 
 于是就有了这个项目：基于 CachyOS 官方内核源码自编译的专属内核，项目代号 `linux-cachyos-v3-nola57`。
 
-这篇文章记录它的完整配方、构建流程、部署方式和踩过的坑。目标是让接手的人（或者未来的我自己、以及 AI 助手）五分钟内能上手，不用重复摸索。
+这篇文章记录它的完整配方、构建流程、部署方式和踩过的坑。目标是让接手的人、未来的我自己，以及 AI 助手，五分钟内能上手，不用重复摸索。
 
 ## 一句话总览
 
@@ -52,7 +52,7 @@ Arch 系用户想要"性能内核"，最省事的路子是装 CachyOS 的现成�
 | 7 | 下载源 | GitHub 直连 | **ghfast.top 加速** | `_patchsource`、`source` |
 | 8 | nvidia 版本变量 | 615.71.09 | 610.57.04（未启用，无影响） | `_nv_ver` |
 
-对应 PKGBUILD 顶部的选项行——以后要改，改这几行就够了：
+对应 PKGBUILD 顶部的选项行，以后要改，改这几行就够了：
 
 ```bash
 : "${_cpusched:=bore}"
@@ -68,9 +68,9 @@ Arch 系用户想要"性能内核"，最省事的路子是装 CachyOS 的现成�
 
 项目代号里的 `nola57` 就来自这里。
 
-**目的**：强制 4 级页表（等效于"永久 `no5lvl`"），规避 5 级页表相关的兼容性问题。
+**目的**：强制 4 级页表（等效于永久 `no5lvl`），规避 5 级页表相关的兼容性问题。
 
-麻烦在于上游在变。7.2.6 之前内核 Kconfig 里还有 `CONFIG_X86_5LEVEL`，之后被移除了。所以这段逻辑写成了**两代自适应**，直接写死在 PKGBUILD 的 `prepare()` 里：Kconfig 里还有就 `scripts/config -d X86_5LEVEL`；已经被上游移除，就改写解压器强制走 4 级页表。
+麻烦在于上游在变。7.2.6 之前内核 Kconfig 里还有 `CONFIG_X86_5LEVEL`，之后被移除了。所以这段逻辑写成了**两代自适应**，直接写死在 PKGBUILD 的 `prepare()` 里，Kconfig 里还有就 `scripts/config -d X86_5LEVEL`；已经被上游移除，就改写解压器强制走 4 级页表。
 
 完整代码块（原样保留，勿删）：
 
@@ -96,17 +96,17 @@ Arch 系用户想要"性能内核"，最省事的路子是装 CachyOS 的现成�
     fi
 ```
 
-这段代码的设计要点是**失败要响**：找不到文件 `_die`、sed 没生效 `_die`、上游把 `no5lvl` 判断改掉了也 `_die`。宁可构建失败，也不要静默编出一个没打上补丁的内核。
+这段代码的设计要点是**失败要响**，找不到文件 `_die`、sed 没生效 `_die`、上游把 `no5lvl` 判断改掉了也 `_die`。宁可构建失败，也不要静默编出一个没打上补丁的内核。
 
-校验方法很简单：构建日志里出现 `LA57: forced 4-level paging` 就是生效了。
+校验方法很简单，构建日志里出现 `LA57: forced 4-level paging` 就是生效了。
 
-## 这些"不是我们加的"，别记错
+## 这些不是我们加的，别记错
 
-下面这些经常被误认为定制项，其实**全是 CachyOS 官方默认**：
+下面这些经常被误认为定制项，其实全是 CachyOS 官方默认：
 
 `-O3`、`HZ=1000`、full tickless（`NO_HZ_FULL`）、`PREEMPT full`、`THP always`、BBR/BBR3、sched-ext（`SCHED_CLASS_EXT=y`）、IBT、BTF、模块签名、zstd 模块压缩、`MIN_BASE_SLICE_NS=1600000`。
 
-我们的 `config` 文件与官方 BORE 变体 config **逐字节一致**。构建时脚本会往里面写 `SCHED_BORE=y` 和 `X86_64_VERSION=3`，那是选项的自动结果，不是手改 config。
+我们的 `config` 文件与官方 BORE 变体 config **逐字节一致**。构建时脚本会往里面写 `SCHED_BORE=y` 和 `X86_64_VERSION=3`，那是选项的自动结果，没人手改 config。
 
 官方变体对照：
 
@@ -124,10 +124,10 @@ Arch 系用户想要"性能内核"，最省事的路子是装 CachyOS 的现成�
 
 构建根目录 `/home/data2/cachy-build/`，独立数据盘：
 
-- `NEXT-STEP.sh` —— 编译入口脚本
-- `pkgs/` —— 产物输出
-- `srcs/` —— 源码 tarball + 补丁 + 签名
-- `work/linux-cachyos-v3-nola57/` —— `PKGBUILD` + `config`
+- `NEXT-STEP.sh`，编译入口脚本
+- `pkgs/`，产物输出
+- `srcs/`，源码 tarball + 补丁 + 签名
+- `work/linux-cachyos-v3-nola57/`，`PKGBUILD` + `config`
 
 Docker 镜像 `cachy-kbuild:latest`：
 
@@ -136,12 +136,12 @@ Docker 镜像 `cachy-kbuild:latest`：
 
 上游补丁源走 ghfast 加速：`https://ghfast.top/https://raw.githubusercontent.com/cachyos/kernel-patches/master/7.2/`
 
-- `sched/0001-bore-cachy.patch`（BORE 调度器）
-- `misc/dkms-clang.patch`（LTO 内核的 DKMS 兼容）
+- `sched/0001-bore-cachy.patch`，BORE 调度器
+- `misc/dkms-clang.patch`，LTO 内核的 DKMS 兼容
 
 PGP 验签用的两把公钥：`E18447AC…4B8B63C4`（Eric Naim）、`E8B9AA39…57F654FE`（Peter Jung）。
 
-> ⚠️ `/home/data2` 是独立数据盘。**任何操作前先 `findmnt /home/data2` 确认挂载**——这条纪律是被 Emergency Mode 教出来的，见下文踩坑记录。
+> ⚠️ `/home/data2` 是独立数据盘。**任何操作前先 `findmnt /home/data2` 确认挂载**，这条纪律是被 Emergency Mode 教出来的，见下文踩坑记录。
 
 ## 构建命令
 
@@ -165,7 +165,7 @@ bash /home/data2/cachy-build/NEXT-STEP.sh     # 内部 = makepkg -e -s --noconfi
 JOBS=8 CPUSET=0-7 bash /home/data2/cachy-build/NEXT-STEP.sh
 ```
 
-> `makepkg -e` 的前提是"树已经 prepare 过"。新版本第一次构建，要么用完整 `makepkg -s`，要么先 `makepkg -o` 预检再 `-e`。
+> `makepkg -e` 的前提是树已经 prepare 过。新版本第一次构建，要么用完整 `makepkg -s`，要么先 `makepkg -o` 预检再 `-e`。
 
 ## 版本升级标准流程（例：升到 7.2.7-1）
 
@@ -185,7 +185,7 @@ JOBS=8 CPUSET=0-7 bash /home/data2/cachy-build/NEXT-STEP.sh
 8. 预检/验证：日志无 ERROR、`file` 检查内核串、必要时 `makepkg -o` 先跑 prepare
 9. 拉回本机部署
 
-这一串步骤现在已经全自动了——定时任务每晚检查上游、自动重放定制、自动编译、微信通知。那套流水线的细节写在[《内核自动构建流水线：从计划任务到 151MB 的包》](/posts/kernel-autobuild-pipeline/)里。
+这一串步骤现在已经全自动了，定时任务每晚检查上游、自动重放定制、自动编译、微信通知。那套流水线的细节写在[《内核自动构建流水线：从计划任务到 151MB 的包》](/posts/kernel-autobuild-pipeline/)里。
 
 ## 踩坑记录（血泪史）
 
@@ -197,7 +197,7 @@ JOBS=8 CPUSET=0-7 bash /home/data2/cachy-build/NEXT-STEP.sh
 | 系统崩溃进 Emergency Mode | `/home/data2` 挂载失败（fstab 无 nofail） | fstab 改 `nofail,x-systemd.device-timeout=30s`；并解除 `home-data2.mount` 的 mask |
 | 内核装了没生效 | 没重启 | 重启；或检查 UKI 时间戳 |
 
-第三条值得展开：`CPUSET` 比 `-j` 更管用。ThinLTO 的后端线程是 `ld.lld` 自己按 `sched_getaffinity` 拉起来的，**根本不吃 `make -j` 的约束**。要真限住内存峰值，得用 `--cpuset-cpus` 把整个容器能看到的 CPU 数压下去。
+第三条值得展开，`CPUSET` 比 `-j` 更管用。ThinLTO 的后端线程是 `ld.lld` 自己按 `sched_getaffinity` 拉起来的，根本不吃 `make -j` 的约束。要真限住内存峰值，得用 `--cpuset-cpus` 把整个容器能看到的 CPU 数压下去。
 
 ## 部署
 
@@ -223,11 +223,11 @@ JOBS=8 CPUSET=0-7 bash /home/data2/cachy-build/NEXT-STEP.sh
 - cmdline：`/etc/kernel/cmdline`（`root=PARTUUID=... zswap.enabled=0 rw rootfstype=ext4`）
 - 内核备份：`/root/boot-backup-7.2.6/`（官方版 vmlinuz/initramfs/UKI 三件套）
 
-**Windows 双启动**：Windows 在 `sda`（独立 ESP）。把 `sda1` 的 `EFI/Microsoft`（150 文件 / 33MB）复制到 Linux ESP 的 `/boot/EFI/Microsoft`，sd-boot 会自动识别为 `auto-windows` 条目，且排在 Linux 条目**之后**（不抢第一）。固件启动顺序 `0001`(Linux) → `0000`(Windows) → `0002`(兜底)。Windows 大版本更新后如果菜单失效，重新复制一次 `EFI/Microsoft` 即可；删掉它则移除菜单项。
+**Windows 双启动**：Windows 在 `sda`（独立 ESP）。把 `sda1` 的 `EFI/Microsoft`（150 文件 / 33MB）复制到 Linux ESP 的 `/boot/EFI/Microsoft`，sd-boot 会自动识别为 `auto-windows` 条目，且排在 Linux 条目之后，不抢第一。固件启动顺序 `0001`(Linux) → `0000`(Windows) → `0002`(兜底)。Windows 大版本更新后如果菜单失效，重新复制一次 `EFI/Microsoft` 即可；删掉它则移除菜单项。
 
 ### 云服务器（Debian 13 + GRUB，拆包部署）
 
-云服务器上不装 Arch 包，直接从包里**拆**出内核用：
+云服务器上不装 Arch 包，直接从包里拆出内核用：
 
 1. 备好包 → 解包提取：`vmlinuz` → `/boot/vmlinuz-cachyos-<VER>`；模块树 → `/lib/modules/<完整内核名>/`
 2. 生成 initramfs：`update-initramfs -c -k <完整内核名>`（或 dracut）
@@ -245,7 +245,7 @@ JOBS=8 CPUSET=0-7 bash /home/data2/cachy-build/NEXT-STEP.sh
 | 本机（终极） | `/root/boot-backup-7.2.6/` 恢复三件套 |
 | 云服务器 | GRUB 选择原 Debian 6.12.95 内核 |
 
-**永远保留一个能回退的内核**——这条是硬约定，不是建议。
+**永远保留一个能回退的内核**，这条是硬约定，不是建议。
 
 ## 验证清单
 
@@ -277,7 +277,7 @@ A：localversion 三段拼接（pkgrel + pkgbase + 自定义后缀），自定�
 A：`uname -r` 尾部有 `Power-by-R730-Compiled-by-K-Black` 即为是。
 
 **Q：为什么不直接用官方的 `linux-cachyos`？**
-A：官方没有 "BORE + ThinLTO + v3 + nola57" 这个组合；而且 LA57 硬禁用是官方没有的。
+A：官方没有 BORE + ThinLTO + v3 + nola57 这个组合；而且 LA57 硬禁用是官方没有的。
 
 **Q：编译机上的 7.2.2 旧包要删吗？**
 A：建议保留作历史对照（`pkgs/` 里），除非磁盘紧张。
@@ -297,8 +297,8 @@ A：是同一套源码和配置构建的（7.2.2 版），可以直接升级到 
 | 2026-09-24 | — | 自动化健壮性修复：重试空正文 bug、重试改增量、新增巡检回执与异常回执 |
 | 2026-09-26 | — | 新增配套文档《内核自动构建流水线 · 全链路解析》 |
 
-## 结语
+## 写在后面
 
-自己编译内核这件事，门槛其实不在"编译"，而在**版本演进中的维护**：上游改了 Kconfig、补丁路径换了、校验和对不上了、编译机磁盘没挂上——每一个都能让你在半夜面对一台进不了系统的机器。
+自己编译内核这件事，门槛其实不在编译，而在**版本演进中的维护**。上游改了 Kconfig、补丁路径换了、校验和对不上了、编译机磁盘忘了挂，每一个都能让你在半夜面对一台进不了系统的机器。
 
-所以这套方案的最终形态不是"一份能编译成功的 PKGBUILD"，而是三样东西：一份**会自己 `_die` 的定制补丁**（LA57）、一套**重放式合并**的上游跟进机制、和一条**永远留着的回退路径**。有了这三样，内核升级才从"折腾一晚上"变成"睡一觉就好"。
+所以这套方案最后沉淀下来的，是一份会自己 `_die` 的定制补丁（LA57）、一套重放式合并的上游跟进机制、一条永远留着的回退路径。真正做成的是前两样。回退路径还是手动的，每次都得自己去菜单里挑 `arch-linux.efi`，这块我一直想改成自动探测，但还没动。云服务器那边也还停在 7.2.2，得排上。

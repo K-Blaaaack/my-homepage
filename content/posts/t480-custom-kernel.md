@@ -7,11 +7,13 @@ categories: ["技术笔记"]
 summary: "ThinkPad T480 的定制精简内核：按 T480 实际用途裁剪（非官方通用内核），本次换用 CachyOS 官方配方重编，并修正了早期精简时误裁 NAT 模块导致透明代理不可用的问题。附 docker -it 卡死大坑。"
 ---
 
-我给 ThinkPad T480 用的是一个**定制精简内核**——按这台机器的实际用途裁剪过的，不是发行版的通用内核。精简的好处是干净、体积小，但代价是**你得自己想清楚裁掉了什么**。
+我给 ThinkPad T480 用的是一个**定制精简内核**，按这台机器的实际用途裁剪过的，不是发行版的通用内核。精简的好处是干净、体积小，代价是你得自己想清楚裁掉了什么。
 
-我就栽在这上面：早期精简时**不小心把 NAT 相关模块一起裁掉了**。当时没感觉，直到某天发现 [homevpn](/posts/homevpn/) 的"家里宽带出口"不工作了——那条链路依赖 `iptables` 的 `nat` 表做 TCP `REDIRECT`。脚本没改、规则也挂上了，就是流量纹丝不动。
+我就栽在这上面，早期精简时不小心把 NAT 相关模块一起裁掉了。当时没感觉，直到某天发现 [homevpn](/posts/homevpn/) 的“家里宽带出口”不工作了，那条链路依赖 `iptables` 的 `nat` 表做 TCP `REDIRECT`。脚本没改，规则也挂上了。
 
-这次的修正方案是**换用 CachyOS 官方配方重新构建**：内核定位仍然是 T480 专用精简内核，但配置基线换成 CachyOS 的成熟配方，构建时逐项确认 NAT 相关配置保留。顺带也拿到了想要的性能组合——官方现成品里没有 **BORE + ThinLTO**（主配方是 EEVDF + ThinLTO，BORE 变体是无 LTO）。
+就是流量纹丝不动。
+
+这次的修正方案是换用 CachyOS 官方配方重新构建，内核定位仍然是 T480 专用精简内核，配置基线换成 CachyOS 的成熟配方，构建时逐项确认 NAT 相关配置保留。顺带也拿到了想要的性能组合，官方现成品里没有 **BORE + ThinLTO**（主配方是 EEVDF + ThinLTO，BORE 变体是无 LTO）。
 
 它和我的[通用定制内核](/posts/custom-cachyos-kernel/)共用同一套 PKGBUILD 体系，只是产物包名和版本后缀不同。
 
@@ -36,7 +38,7 @@ summary: "ThinkPad T480 的定制精简内核：按 T480 实际用途裁剪（�
 | 产物位置 | 编译服务器 `/home/data2/cachy-build/pkgs/`；工程 `/home/data2/cachy-build/work/linux-cachyos-t480/` |
 | 安装 | T480 于 2026-09-23 14:19（`pacman -U`），重启后为默认启动项 |
 
-版本号同样是 localversion 三段拼接：
+版本号同样是 localversion 三段拼接。
 
 ```
 -1                                      # pkgrel
@@ -47,11 +49,11 @@ summary: "ThinkPad T480 的定制精简内核：按 T480 实际用途裁剪（�
 ## 为什么专门给 T480 定制
 
 1. **T480 专用精简内核**：按 T480 实际用途定制裁剪（非官方通用内核），去掉无关驱动/功能
-2. **历史误裁修正**：此前精简时**不小心裁掉了 NAT 相关模块**，导致透明代理/网关不可用（homevpn `link home` 依赖 `nat` 表 REDIRECT）；本次换用 **CachyOS 配方**重编，并确认 NAT 相关配置保留——`nf_nat` / `iptable_nat` / `nft_nat` / `xt_nat` 及其依赖
+2. **历史误裁修正**：此前精简时不小心裁掉了 NAT 相关模块，导致透明代理/网关不可用（homevpn `link home` 依赖 `nat` 表 REDIRECT）；本次换用 CachyOS 配方重编，并确认 NAT 相关配置保留，`nf_nat` / `iptable_nat` / `nft_nat` / `xt_nat` 及其依赖都在
 3. **性能组合**：随 CachyOS 配方获得 BORE 调度器 + ThinLTO + x86-64-v3 + `-O3` 等优化（官方现成品没有「BORE + ThinLTO」这个组合）
 4. 与通用定制内核保持同一 PKGBUILD 体系，便于长期维护
 
-第 2 条是这次返工的直接原因，也是最值得记下的一条教训——见下文「一次误裁的教训」。
+第 2 条是这次返工的直接原因，也是最值得记下的一条教训，见下文「一次误裁的教训」。
 
 ## 关键配置（以构建后 `.config` 实证为准）
 
@@ -71,7 +73,7 @@ summary: "ThinkPad T480 的定制精简内核：按 T480 实际用途裁剪（�
 
 > 注：静态 `config` 文件是 CachyOS 官方 BORE 基线；`SCHED_BORE` / `X86_64_VERSION=3` / ThinLTO 等是构建时由 PKGBUILD 脚本写入的自动结果，**不是手改 config**。
 
-`CONFIG_NF_NAT_REDIRECT=y` 这一项就是 homevpn 透明代理的命门——`iptables -t nat` 的 `REDIRECT --to-ports 12345` 全靠它。缺了它，`ss-redir` 收不到任何流量，`link home` 表面上成功、实际上一点效果都没有。**这正是早期精简误裁惹的祸**（详见文末「一次误裁的教训」）。
+`CONFIG_NF_NAT_REDIRECT=y` 这一项就是 homevpn 透明代理的命门，`iptables -t nat` 的 `REDIRECT --to-ports 12345` 全靠它。缺了它，`ss-redir` 收不到任何流量，`link home` 表面上成功，实际上一点效果都没有。这就是早期精简误裁惹的祸（详见文末「一次误裁的教训」）。
 
 ## 构建工程与流程
 
@@ -85,7 +87,7 @@ work/linux-cachyos-t480/
 └── pkg/            # 构建中间产物
 ```
 
-PKGBUILD 关键行（未来修改只动这几处）：
+PKGBUILD 关键行（未来修改只动这几处）。
 
 ```bash
 : "${_cpusched:=bore}"
@@ -101,7 +103,7 @@ export KBUILD_BUILD_HOST=R730
 
 ### 构建命令行与一个大坑
 
-在 Docker 容器内跑 `makepkg`（`-j40` 级别并行，约 1 小时）：
+在 Docker 容器内跑 `makepkg`（`-j40` 级别并行，约 1 小时）。
 
 ```bash
 docker run --rm -w /build/work/linux-cachyos-t480 -e MAKEFLAGS=-j40 \
@@ -110,7 +112,7 @@ docker run --rm -w /build/work/linux-cachyos-t480 -e MAKEFLAGS=-j40 \
 
 > ⚠️ **不要用 `docker run -it`**。
 
-这个坑值得单开一段。加了 `-it` 之后，交互式 TTY 会让 `conf --syncconfig` 在遇到新增符号（`(NEW)`）时**等待人工输入而永久卡死**——你就看着日志停在那里，一小时、两小时，什么都没发生。去掉 `-it`（stdin 变成 `/dev/null` → 读到 EOF 自动取默认值）后一次通过。
+这个坑值得单开一段。加了 `-it` 之后，交互式 TTY 会让 `conf --syncconfig` 在遇到新增符号（`(NEW)`）时等待人工输入而永久卡死。我就看着日志停在那里，一小时、两小时，什么都没发生。去掉 `-it` 之后（stdin 变成 `/dev/null` → 读到 EOF 自动取默认值），一次通过。
 
 构建日志落在 `/home/data2/cachy-build/build-t480-0923-*.log`，成功产物拷到 `pkgs/`。
 
@@ -144,12 +146,12 @@ lsmod | grep nf_nat                          # → 已加载（xt_REDIRECT/nft_c
 2. **卸载**：`sudo pacman -R linux-cachyos-t480 linux-cachyos-t480-headers`
 3. 产物包在编译服务器 `pkgs/` 随时可取回重装
 
-和通用内核一样的原则：官方内核一直留着，随时能退回去。
+和通用内核一样，官方内核一直留着，随时能退回去。
 
 ## 重新构建（未来改动后）
 
 1. 编译服务器改 `work/linux-cachyos-t480/PKGBUILD`（选项 / localversion）或 `config`
-2. Docker 内 `makepkg`（**记住：不要 `-it`**）
+2. Docker 内 `makepkg`（**记住，不要 `-it`**）
 3. 取 `pkgs/linux-cachyos-t480-*.pkg.tar.zst` 两个包传到 T480
 4. T480 `sudo pacman -U` 两包 → hook 自动更新 initramfs → 重启（`GRUB_TOP_LEVEL` 已指向同名文件，无需再改）
 
@@ -167,18 +169,20 @@ dmesg | grep -iE 'error|firmware' | tail   # 有无缺固件
 
 ## 一次误裁的教训
 
-这次返工的起因值得完整记一遍，因为它是一个**很容易重复踩**的坑。
+这次返工的起因值得完整记一遍，因为它是个很容易重复踩的坑。
 
-**起因**：早期为了给 T480 做精简，我在裁剪配置时把一批"看起来用不到"的网络模块一起去掉了——其中就包括 NAT 相关的那几个。
+**起因**：早期为了给 T480 做精简，我在裁剪配置时把一批看起来用不到的网络模块一起去掉了，其中就包括 NAT 相关的那几个。
 
-**症状**：homevpn 的 `link home`（家里宽带透明代理）静默失效。具体表现非常具有迷惑性：
+**症状**：homevpn 的 `link home`（家里宽带透明代理）静默失效，而且表现特别迷惑人。
 
-- `homevpn link home` 命令**返回成功**，没有任何报错
-- `iptables -t nat -L HOMEVPN` 能看到规则**确实挂上了**
-- `ss-redir` 进程**确实在跑**
-- 但流量就是不走隧道——出口 IP 还是本机宽带
+- `homevpn link home` 命令返回成功，没有任何报错
+- `iptables -t nat -L HOMEVPN` 能看到规则确实挂上了
+- `ss-redir` 进程确实在跑
+- 但流量就是不走隧道，出口 IP 还是本机宽带
 
-每一层单独看都是"正常"的，问题出在内核不认 `REDIRECT` 这个 target：**模块不存在时，规则挂载本身不报错，只是永远不匹配。**
+每一层单独看都是正常的。问题出在内核压根不认 `REDIRECT` 这个 target。
+
+模块不存在时，规则挂载本身不报错，只是永远不匹配。
 
 **排查路径**（事后总结，比当时快得多）：
 
@@ -192,9 +196,9 @@ ls /usr/lib/modules/$(uname -r)/kernel/net/netfilter/ | grep -E 'nf_nat|nft_nat|
 
 **教训**：
 
-1. **精简内核不要"顺手"删网络模块。** 网络栈的模块依赖关系又深又隐晦，看着无关的 `xt_*` / `nf_*` 往往是某个常用功能的最后一环
-2. **"命令成功"不等于"功能生效"。** netfilter 的规则挂载和模块可用性是两件事，前者不校验后者
-3. **换内核后要有回归清单。** 我现在的清单里固定包含 `iptables -t nat -L` 和 `lsmod | grep nf_nat`——成本两秒钟，能省掉一次"为什么代理没反应"的深夜排查
+1. **精简内核不要顺手删网络模块。** 网络栈的模块依赖又深又隐晦，看着无关的 `xt_*` / `nf_*` 往往就是某个常用功能的最后一环
+2. **命令成功不等于功能生效。** netfilter 的规则挂载和模块可用性是两件事，前者不校验后者
+3. **换内核后要有回归清单。** 我现在的清单里固定包含 `iptables -t nat -L` 和 `lsmod | grep nf_nat`，成本两秒钟，能省掉一次“为什么代理没反应”的深夜排查
 
 ## 变更记录
 
@@ -203,12 +207,6 @@ ls /usr/lib/modules/$(uname -r)/kernel/net/netfilter/ | grep -E 'nf_nat|nft_nat|
 | 2026-09-23 | 基于 CachyOS 配方构建 T480 精简内核（R730，clang 22.1.8 ThinLTO）、安装到 T480、重启验证通过（NAT 相关模块确认保留）；踩坑记录：docker `-it` 导致 syncconfig 卡死，去 `-it` 解决 |
 | 2026-09-27 | 表述修正：内核定位改为「T480 定制精简内核（CachyOS 配方）」；NAT 相关表述改为「历史误裁，本次换 CachyOS 重编修正」 |
 
-## 结语
+T480 现在跑的就是这个内核，`uname -r` 里那串后缀一直在，`iptables -t nat -L` 也正常。换内核之后先跑一遍那两秒钟的检查，这习惯是拿一次深夜排查换来的。
 
-给单台笔记本编内核，收益不在"跑分快了零点几个百分点"，而在于**能力的有无**——按自己的用途裁剪，去掉无关驱动，把想要的性能开关全打开。这台 T480 才算真正按我的用法配齐了。
-
-但精简是把双刃剑：**你省下的每一个模块，都可能是未来某个功能的最后一环。** 我这次就是在 NAT 上栽了一跤——不是配置写错了，而是"当时觉得用不到"。
-
-所以现在的原则是：**精简可以，但要有回归清单兜底**；而且配置基线尽量站在成熟配方（CachyOS）上做减法，而不是从零做加法。前者错了容易发现，后者错了往往要等到某个功能静默失效才暴露。
-
-顺带说一句，这次编译能这么顺，靠的是编译服务器上那台 R730 和容器化的构建环境。而那套环境后来又被进一步自动化了，细节见[《内核自动构建流水线：从计划任务到 151MB 的包》](/posts/kernel-autobuild-pipeline/)。
+顺带说一句，这次编译能这么顺，靠的是编译服务器上那台 R730 和容器化的构建环境。那套环境后来又被进一步自动化了，细节见[《内核自动构建流水线：从计划任务到 151MB 的包》](/posts/kernel-autobuild-pipeline/)。
