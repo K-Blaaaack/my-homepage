@@ -27,15 +27,15 @@ summary: "ThinkPad T480 的定制精简内核：按 T480 实际用途裁剪（�
 
 | 项目 | 值 |
 |---|---|
-| 内核全名（`uname -r`） | `7.2.6-1-cachyos-T480-PE-Power-by-R730-Compiled-by-K-Black` |
+| 内核全名（`uname -r`） | `7.2.6-1-cachyos-T480-PE-KBkernel-cachy` |
 | `uname -v` | `#1 SMP PREEMPT_DYNAMIC Wed, 23 Sep 2026 05:47:47 +0000` |
 | 源码 | CachyOS/linux `cachyos-7.2.6-1`（Linux 7.2.6） |
 | 编译器 | **clang 22.1.8 + LLD 22.1.8**（ThinLTO） |
-| 构建身份 | `K-Black@R730`（`uname -v` 可见） |
+| 构建身份 | `kb@R730`（`uname -v` 可见） |
 | 构建机 | 编译服务器 R730（Docker 容器内构建） |
 | 包 | `linux-cachyos-t480` 7.2.6-1 + `linux-cachyos-t480-headers` 7.2.6-1 |
 | 产物 | `linux-cachyos-t480-7.2.6-1-x86_64.pkg.tar.zst`（≈29 MB）<br>`linux-cachyos-t480-headers-7.2.6-1-x86_64.pkg.tar.zst`（≈38 MB） |
-| 产物位置 | 编译服务器 `/home/data2/cachy-build/pkgs/`；工程 `/home/data2/cachy-build/work/linux-cachyos-t480/` |
+| 产物位置 | 编译服务器 `/home/KBkernel-cachy/pkgs/`；工程 `/home/KBkernel-cachy/work/linux-cachyos-t480/` |
 | 安装 | T480 于 2026-09-23 14:19（`pacman -U`），重启后为默认启动项 |
 
 版本号同样是 localversion 三段拼接。
@@ -43,7 +43,7 @@ summary: "ThinkPad T480 的定制精简内核：按 T480 实际用途裁剪（�
 ```
 -1                                      # pkgrel
 -cachyos                                # pkgname
--T480-PE-Power-by-R730-Compiled-by-K-Black   # 自定义后缀（localversion.30-custom）
+-T480-PE-KBkernel-cachy   # 自定义后缀（localversion.30-custom）
 ```
 
 ## 为什么专门给 T480 定制
@@ -69,7 +69,7 @@ summary: "ThinkPad T480 的定制精简内核：按 T480 实际用途裁剪（�
 | BTF | `CONFIG_DEBUG_INFO_BTF=y`（+`_MODULES=y`） | eBPF/bpftrace |
 | 压缩 | `CONFIG_KERNEL_ZSTD=y`、`CONFIG_MODULE_COMPRESS_ZSTD=y`（ALL） | zstd 内核/模块 |
 | NAT 相关模块 | `CONFIG_NF_NAT=m`、`CONFIG_NFT_NAT=m`、`CONFIG_NFT_MASQ=m`、`CONFIG_IP_NF_NAT=m`、`CONFIG_IP_NF_TARGET_MASQUERADE=m`、`CONFIG_NETFILTER_XT_NAT=m`、`CONFIG_NF_NAT_MASQUERADE=y`、`CONFIG_NF_NAT_REDIRECT=y`、`CONFIG_IP6_NF_NAT=m` 等 | 早期精简误裁，本次（CachyOS 配方）已修正保留 |
-| LA57 | `X86_5LEVEL` 未启用；PKGBUILD 内含 LA57 硬禁用补丁（解压器强制 4 级页表） | 承袭同套 PKGBUILD 补丁；T480（Coffee Lake 8 代）硬件本不支持 5 级页表，无副作用 |
+| Intel 无线 LAR | 包内 `/usr/lib/modprobe.d/iwlwifi-lar.conf`（`options iwlwifi lar_disable=1`）| 承袭同套配方；无需按位置调整法规域 |
 
 > 注：静态 `config` 文件是 CachyOS 官方 BORE 基线；`SCHED_BORE` / `X86_64_VERSION=3` / ThinLTO 等是构建时由 PKGBUILD 脚本写入的自动结果，**不是手改 config**。
 
@@ -77,7 +77,7 @@ summary: "ThinkPad T480 的定制精简内核：按 T480 实际用途裁剪（�
 
 ## 构建工程与流程
 
-**工程位置**：编译服务器 `192.xxx.xxx.237`（经隧道可达）→ `/home/data2/cachy-build/work/linux-cachyos-t480/`
+**工程位置**：编译服务器 `192.xxx.xxx.237`（经隧道可达）→ `/home/KBkernel-cachy/work/linux-cachyos-t480/`
 
 ```
 work/linux-cachyos-t480/
@@ -96,8 +96,8 @@ PKGBUILD 关键行（未来修改只动这几处）。
 : "${_use_lto_suffix:=no}"
 : "${_use_gcc_suffix:=yes}"
 ...
-echo "-T480-PE-Power-by-R730-Compiled-by-K-Black" > localversion.30-custom
-export KBUILD_BUILD_USER=K-Black
+echo "-T480-PE-KBkernel-cachy" > localversion.30-custom
+export KBUILD_BUILD_USER=kb
 export KBUILD_BUILD_HOST=R730
 ```
 
@@ -107,14 +107,14 @@ export KBUILD_BUILD_HOST=R730
 
 ```bash
 docker run --rm -w /build/work/linux-cachyos-t480 -e MAKEFLAGS=-j40 \
-  -v /home/data2/cachy-build:/build cachy-kbuild:latest makepkg -s --noconfirm
+  -v /home/KBkernel-cachy:/build kbkernel-cachy-kbuild:latest makepkg -s --noconfirm
 ```
 
 > ⚠️ **不要用 `docker run -it`**。
 
 这个坑值得单开一段。加了 `-it` 之后，交互式 TTY 会让 `conf --syncconfig` 在遇到新增符号（`(NEW)`）时等待人工输入而永久卡死。我就看着日志停在那里，一小时、两小时，什么都没发生。去掉 `-it` 之后（stdin 变成 `/dev/null` → 读到 EOF 自动取默认值），一次通过。
 
-构建日志落在 `/home/data2/cachy-build/build-t480-0923-*.log`，成功产物拷到 `pkgs/`。
+构建日志落在 `/home/KBkernel-cachy/build-t480-0923-*.log`，成功产物拷到 `pkgs/`。
 
 ## 安装与验证（T480 实测）
 
@@ -130,8 +130,8 @@ sudo pacman -U linux-cachyos-t480-7.2.6-1-x86_64.pkg.tar.zst \
 sudo grub-mkconfig -o /boot/grub/grub.cfg
 
 # 3. 重启后验证
-uname -r                                     # → 7.2.6-1-cachyos-T480-PE-Power-by-R730-Compiled-by-K-Black
-cat /proc/version                            # → (K-Black@R730) (clang version 22.1.8, LLD 22.1.8)
+uname -r                                     # → 7.2.6-1-cachyos-T480-PE-KBkernel-cachy
+cat /proc/version                            # → (kb@R730) (clang version 22.1.8, LLD 22.1.8)
 iptables -t nat -L                           # → nat 表正常列出（NAT 框架可用）
 ls /usr/lib/modules/$(uname -r)/kernel/net/netfilter/ | grep -E 'nf_nat|nft_nat|xt_nat'
 ls /usr/lib/modules/$(uname -r)/kernel/net/ipv4/netfilter/ | grep iptable_nat
@@ -158,10 +158,10 @@ lsmod | grep nf_nat                          # → 已加载（xt_REDIRECT/nft_c
 ## 验证清单（一分钟快检）
 
 ```bash
-uname -r                                   # 版本串含 T480-PE-Power-by-R730
+uname -r                                   # 版本串含 T480-PE-KBkernel-cachy
 zcat /proc/config.gz | grep -E 'SCHED_BORE|LTO_CLANG_THIN|X86_64_VERSION|HZ=1000'   # 若 IKCONFIG 开了
 grep -E 'SCHED_BORE|LTO_CLANG_THIN|X86_64_VERSION|PREEMPT=|HZ=' \
-     /home/data2/cachy-build/work/linux-cachyos-t480/src/cachyos-7.2.6-1/.config   # 编译服务器上
+     /home/KBkernel-cachy/work/linux-cachyos-t480/src/cachyos-7.2.6-1/.config   # 编译服务器上
 sudo iptables -t nat -L >/dev/null && echo "NAT 框架 OK"
 lsmod | grep -E 'nf_nat|nf_conntrack'
 dmesg | grep -iE 'error|firmware' | tail   # 有无缺固件
@@ -209,4 +209,4 @@ ls /usr/lib/modules/$(uname -r)/kernel/net/netfilter/ | grep -E 'nf_nat|nft_nat|
 
 T480 现在跑的就是这个内核，`uname -r` 里那串后缀一直在，`iptables -t nat -L` 也正常。换内核之后先跑一遍那两秒钟的检查，这习惯是拿一次深夜排查换来的。
 
-顺带说一句，这次编译能这么顺，靠的是编译服务器上那台 R730 和容器化的构建环境。那套环境后来又被进一步自动化了，细节见[《内核自动构建流水线：从计划任务到 151MB 的包》](/posts/kernel-autobuild-pipeline/)。
+顺带说一句，这次编译能这么顺，靠的是编译服务器上那台 R730 和容器化的构建环境。那套环境后来又被进一步自动化了，细节见[《内核自动构建流水线：从计划任务到自动发布》](/posts/kernel-autobuild-pipeline/)。
