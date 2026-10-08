@@ -1,6 +1,6 @@
 ---
 title: "内核自动构建流水线：从计划任务到自动发布"
-date: 2026-10-09T21:00:00+08:00
+date: 2026-10-09T02:00:00+08:00
 draft: false
 tags: ["内核", "自动化", "CachyOS", "Docker", "Shell", "CI"]
 categories: ["技术笔记"]
