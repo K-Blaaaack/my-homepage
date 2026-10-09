@@ -30,7 +30,7 @@ kbkernel-autobuild.sh  ← ~890 行 · 总指挥（root 自动降权为 kb）
         └─ 阶段 10-11 产物校验 → 收尾 → 【发布】推配方 + 建 Release → Server酱通知
         │
         ▼
-pkgs/linux-KBkernel-cachy-<ver>-x86_64.pkg.tar.zst（约 120M）
+pkgs/linux-kbkernel-cachy-<ver>-x86_64.pkg.tar.zst（约 120M）
      …-headers-…pkg.tar.zst（约 79M）
      KBkernel-cachy-<ver>-src.tar.zst（对应源码配方包）
 ```
@@ -65,7 +65,7 @@ pkgs/linux-KBkernel-cachy-<ver>-x86_64.pkg.tar.zst（约 120M）
 | `kbkernel-autobuild.env` | 35 | 同上（权限 600） | 配置：SendKey、通知级别、重试/并行/清理参数 |
 | `kbkernel-merge-upstream.py` | ~150 | 同上 | 上游配方「重放式合并」 |
 | `NEXT-STEP.sh` | 31 | 同上 | 编译入口（docker + makepkg） |
-| `PKGBUILD` | ~850 | `…/work/linux-KBkernel-cachy/` | 内核配方（决定编译参数与打包） |
+| `PKGBUILD` | ~850 | `…/work/linux-kbkernel-cachy/` | 内核配方（决定编译参数与打包） |
 | `config` | — | 同上 | 种子内核配置（与 CachyOS 官方一致） |
 | `Dockerfile` | ~50 | `/home/KBkernel-cachy/autobuild/` | 编译容器镜像定义 |
 
@@ -112,7 +112,7 @@ pkgs/linux-KBkernel-cachy-<ver>-x86_64.pkg.tar.zst（约 120M）
 | 1 | 调度器 | `_cpusched:=bore` |
 | 2 | CPU 基线 | `_processor_opt:=generic_v3`（x86-64-v3） |
 | 3 | LTO | `_use_llvm_lto:=thin`（clang ThinLTO） |
-| 4 | 包名后缀 | `_use_lto_suffix:=no`、`_use_gcc_suffix:=yes`，包名稳定为 `linux-KBkernel-cachy` |
+| 4 | 包名后缀 | `_use_lto_suffix:=no`、`_use_gcc_suffix:=yes`，包名稳定为 `linux-kbkernel-cachy` |
 | 5 | 镜像 | `_patchsource` 与 release URL 加 `ghfast.top` 前缀（幂等） |
 | 6 | NVIDIA 模块锁版 | `_nv_ver=610.57.04` |
 | 7 | 构建身份 | `KBUILD_BUILD_HOST=R730`、`KBUILD_BUILD_USER=kb`、时间戳取真实北京时间 |
@@ -153,7 +153,7 @@ rc=${PIPESTATUS[0]}
 | 用户 | `kb`（uid/gid 1000 对齐宿主）；免密 sudo；`USER kb`（makepkg 拒绝 root） |
 | 公钥 | 预导入两把 CachyOS 公钥并断言恰好 2 把（关 keyboxd 防锁残留） |
 | makepkg.conf | `PACKAGER`、`PKGDEST=/build/pkgs`、`SRCDEST=/build/srcs`、`COMPRESSZST=(zstd -c -T0 -8 -)`；**故意不设 MAKEFLAGS**（让 `docker run -e` 生效） |
-| WorkDir | `/build/work/linux-KBkernel-cachy` |
+| WorkDir | `/build/work/linux-kbkernel-cachy` |
 
 那个"断言恰好 2 把公钥"的小检查很实用：`gpg --import` 若因 keyboxd 锁残留只导入一把，验签阶段才会莫名其妙失败，不如在镜像构建时就把问题堵死。
 
@@ -195,8 +195,8 @@ make -C tools/bpf/bpftool vmlinux.h feature-clang-bpf-co-re=1
 ### 打包与产物命名
 
 - 内核包：`vmlinuz` → `/usr/lib/modules/<release>/`；`ZSTD_CLEVEL=19 make modules_install INSTALL_MOD_STRIP=1`
-- headers 包：安装 build 树并 strip、删 `.o`、建 `/usr/src/linux-KBkernel-cachy` 软链
-- 命名：`pkgbase=linux-KBkernel-cachy`、`pkgver=7.2.9`、`pkgrel=2` ⇒ `linux-KBkernel-cachy-7.2.9-2-x86_64.pkg.tar.zst`；内核版本串 `7.2.9-2-KBkernel-cachy`
+- headers 包：安装 build 树并 strip、删 `.o`、建 `/usr/src/linux-kbkernel-cachy` 软链
+- 命名：`pkgbase=linux-kbkernel-cachy`、`pkgver=7.2.9`、`pkgrel=2` ⇒ `linux-kbkernel-cachy-7.2.9-2-x86_64.pkg.tar.zst`；内核版本串 `7.2.9-2-KBkernel-cachy`
 
 ## 发布（这一步是新的）
 
@@ -233,7 +233,7 @@ make -C tools/bpf/bpftool vmlinux.h feature-clang-bpf-co-re=1
 
 | 类别 | 位置/内容 |
 |---|---|
-| 产物 | `pkgs/linux-KBkernel-cachy-<ver>-*.pkg.tar.zst` ＋ `…-headers-…` ＋ 配方包（sha256 记录于通知与 LAST-RESULT） |
+| 产物 | `pkgs/linux-kbkernel-cachy-<ver>-*.pkg.tar.zst` ＋ `…-headers-…` ＋ 配方包（sha256 记录于通知与 LAST-RESULT） |
 | 状态 | `autobuild/state`（pending/attempts/target_ver/last_ok_ver/last_fail/…） |
 | 结果 | `autobuild/LAST-RESULT.txt` |
 | 日志 | `autobuild/logs/`（各阶段日志＋运行日志，保留 30 天）；根目录 `build-*.log`（makepkg 完整日志） |
@@ -259,7 +259,7 @@ bash /home/KBkernel-cachy/kbkernel-autobuild.sh --simulate-remote 7.2.9-2   # �
 | 文件 | 位置 |
 |---|---|
 | 主脚本 / 合并脚本 / 配置 / 编译入口 | `编译服务器:/home/KBkernel-cachy/` |
-| PKGBUILD / config / 构建树 | `编译服务器:/home/KBkernel-cachy/work/linux-KBkernel-cachy/` |
+| PKGBUILD / config / 构建树 | `编译服务器:/home/KBkernel-cachy/work/linux-kbkernel-cachy/` |
 | 镜像定义 | `编译服务器:/home/KBkernel-cachy/autobuild/Dockerfile` |
 | 产物 / 源码 / 日志 / 状态 | `编译服务器:/home/KBkernel-cachy/{pkgs,srcs,autobuild}/` |
 

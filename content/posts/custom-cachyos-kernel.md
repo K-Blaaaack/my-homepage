@@ -22,7 +22,7 @@ Arch 系用户想要性能内核，最省事的路子是装 CachyOS 的现成包
 | 项目 | 值 |
 |---|---|
 | 内核全名（`uname -r`） | `7.2.9-2-KBkernel-cachy` |
-| 包 | `linux-KBkernel-cachy` 7.2.9-2 + `-headers` 7.2.9-2 |
+| 包 | `linux-kbkernel-cachy` 7.2.9-2 + `-headers` 7.2.9-2 |
 | 源码 | CachyOS/linux release `cachyos-7.2.9-2`（Linux 7.2.9） |
 | 编译器 | clang 23.1.1 + ld.lld（ThinLTO） |
 | 构建 | 编译服务器 R730（Docker 容器内，`-j40`，约 35 分钟） |
@@ -79,7 +79,7 @@ Arch 系用户想要性能内核，最省事的路子是装 CachyOS 的现成包
 校验也很直接，拆包看一眼：
 
 ```bash
-tar -xOf linux-KBkernel-cachy-<ver>-x86_64.pkg.tar.zst usr/lib/modprobe.d/iwlwifi-lar.conf
+tar -xOf linux-kbkernel-cachy-<ver>-x86_64.pkg.tar.zst usr/lib/modprobe.d/iwlwifi-lar.conf
 # 期望：options iwlwifi lar_disable=1
 ```
 
@@ -110,11 +110,11 @@ tar -xOf linux-KBkernel-cachy-<ver>-x86_64.pkg.tar.zst usr/lib/modprobe.d/iwlwif
 - `NEXT-STEP.sh`，编译入口脚本
 - `pkgs/`，产物输出
 - `srcs/`，源码 tarball + 补丁 + 签名
-- `work/linux-KBkernel-cachy/`，`PKGBUILD` + `config`
+- `work/linux-kbkernel-cachy/`，`PKGBUILD` + `config`
 
 Docker 镜像 `kbkernel-cachy-kbuild:latest`：
 
-- 用户 `kb`（uid 1000），WorkDir=`/build/work/linux-KBkernel-cachy`
+- 用户 `kb`（uid 1000），WorkDir=`/build/work/linux-kbkernel-cachy`
 - `/home/builder/.makepkg.conf`：`PACKAGER="K-Black <aa1231951@outlook.com>"`、`PKGDEST=/build/pkgs`、`SRCDEST=/build/srcs`
 
 上游补丁源走 ghfast 加速：`https://ghfast.top/https://raw.githubusercontent.com/cachyos/kernel-patches/master/7.2/`
@@ -131,8 +131,8 @@ PGP 验签用的两把公钥：`E18447AC…4B8B63C4`（Eric Naim）、`E8B9AA39�
 **完整构建**（新版本首次，会自己下载 / 解包 / 打补丁 / prepare / 编译）：
 
 ```bash
-cd /home/KBkernel-cachy/work/linux-KBkernel-cachy
-docker run --rm -it -w /build/work/linux-KBkernel-cachy -e MAKEFLAGS=-j40 \
+cd /home/KBkernel-cachy/work/linux-kbkernel-cachy
+docker run --rm -it -w /build/work/linux-kbkernel-cachy -e MAKEFLAGS=-j40 \
   -v /home/KBkernel-cachy:/build kbkernel-cachy-kbuild:latest makepkg -s --noconfirm
 ```
 
@@ -161,7 +161,7 @@ JOBS=8 CPUSET=0-7 bash /home/KBkernel-cachy/NEXT-STEP.sh
    gpg --verify cachyos-7.2.7-1.tar.gz.asc cachyos-7.2.7-1.tar.gz
    ```
 3. 改 PKGBUILD 版本变量：`_major=7.2`、`_minor=7`、`_tagrel=1`（先备份 PKGBUILD）
-4. 更新校验和：`docker run --rm -w /build/work/linux-KBkernel-cachy -v /home/KBkernel-cachy:/build kbkernel-cachy-kbuild:latest makepkg -g`，把输出替换 PKGBUILD 末尾的 `b2sums=(...)`
+4. 更新校验和：`docker run --rm -w /build/work/linux-kbkernel-cachy -v /home/KBkernel-cachy:/build kbkernel-cachy-kbuild:latest makepkg -g`，把输出替换 PKGBUILD 末尾的 `b2sums=(...)`
 5. **清干净 `src/` 目录**（`rm -rf src/*`，必须！）
 6. 建/更新 `src/` 下符号链接（可选，让 makepkg 直接找到本地文件）
 7. 完整构建（见上），产物在 `pkgs/`
