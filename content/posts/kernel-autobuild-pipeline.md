@@ -116,7 +116,7 @@ pkgs/linux-kbkernel-cachy-<ver>-x86_64.pkg.tar.zst（约 120M）
 | 5 | 镜像 | `_patchsource` 与 release URL 加 `ghfast.top` 前缀（幂等） |
 | 6 | NVIDIA 模块锁版 | `_nv_ver=610.57.04` |
 | 7 | 构建身份 | `KBUILD_BUILD_HOST=R730`、`KBUILD_BUILD_USER=kb`、时间戳取真实北京时间 |
-| 8 | 定制与合规 | 包内写入 `/usr/lib/modprobe.d/iwlwifi-lar.conf`（关 Intel 无线 LAR）+ `COPYING` 许可文本 + 派生声明 |
+| 8 | 定制与合规 | 补丁补回 iwlwifi `lar_disable` 参数 + 包内写入 `/usr/lib/modprobe.d/iwlwifi-lar.conf`（关 Intel 无线 LAR）+ `COPYING` 许可文本 + 派生声明 |
 
 结尾执行多项存在性断言，全过才输出 `merge-ok`。
 
@@ -284,6 +284,7 @@ bash /home/KBkernel-cachy/kbkernel-autobuild.sh --simulate-remote 7.2.9-2   # �
 |---|---|---|
 | 2026-09-26 | v1.0 | 首版：基于全链路脚本逐行阅读整理 |
 | 2026-10-09 | v2.0 | 流水线重建后重写：改名 `kbkernel-*`、路径 `/home/KBkernel-cachy`、关 Intel 无线 LAR、下载换源阈值 512KB/s·30s、逐阶段进度显示、**新增 GitHub 配方仓库与自动发布**、1Panel 周期改 `0 22`（服务器已北京时间） |
+| 2026-10-09 | v2.1 | 包名改小写（`linux-kbkernel-cachy`，合规）；**LAR 修正**：上游已删 `lar_disable` 参数，改由 `prepare()` 补丁补回（原先纯 modprobe.d 空操作） |
 
 ---
 

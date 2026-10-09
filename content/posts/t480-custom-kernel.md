@@ -69,7 +69,7 @@ summary: "ThinkPad T480 的定制精简内核：按 T480 实际用途裁剪（�
 | BTF | `CONFIG_DEBUG_INFO_BTF=y`（+`_MODULES=y`） | eBPF/bpftrace |
 | 压缩 | `CONFIG_KERNEL_ZSTD=y`、`CONFIG_MODULE_COMPRESS_ZSTD=y`（ALL） | zstd 内核/模块 |
 | NAT 相关模块 | `CONFIG_NF_NAT=m`、`CONFIG_NFT_NAT=m`、`CONFIG_NFT_MASQ=m`、`CONFIG_IP_NF_NAT=m`、`CONFIG_IP_NF_TARGET_MASQUERADE=m`、`CONFIG_NETFILTER_XT_NAT=m`、`CONFIG_NF_NAT_MASQUERADE=y`、`CONFIG_NF_NAT_REDIRECT=y`、`CONFIG_IP6_NF_NAT=m` 等 | 早期精简误裁，本次（CachyOS 配方）已修正保留 |
-| Intel 无线 LAR | 包内 `/usr/lib/modprobe.d/iwlwifi-lar.conf`（`options iwlwifi lar_disable=1`）| 承袭同套配方；无需按位置调整法规域 |
+| Intel 无线 LAR | 补丁补回 iwlwifi `lar_disable` 参数 + 包内 `/usr/lib/modprobe.d/iwlwifi-lar.conf`（`options iwlwifi lar_disable=1`）| 承袭同套配方；无需按位置调整法规域 |
 
 > 注：静态 `config` 文件是 CachyOS 官方 BORE 基线；`SCHED_BORE` / `X86_64_VERSION=3` / ThinLTO 等是构建时由 PKGBUILD 脚本写入的自动结果，**不是手改 config**。
 

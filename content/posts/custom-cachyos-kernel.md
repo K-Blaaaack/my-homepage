@@ -45,7 +45,7 @@ Arch 系用户想要性能内核，最省事的路子是装 CachyOS 的现成包
 | 1 | 调度器 | 主:EEVDF / BORE变体:BORE | **BORE** | PKGBUILD `_cpusched:=bore` |
 | 2 | LTO | 主:ThinLTO / BORE变体:无 | **ThinLTO** | `_use_llvm_lto:=thin` |
 | 3 | CPU 指令集 | native（跟随编译机） | **generic_v3** | `_processor_opt:=generic_v3` |
-| 4 | Intel 无线 LAR | 启用 | **关闭**（`lar_disable=1`） | 包内 `/usr/lib/modprobe.d/iwlwifi-lar.conf` |
+| 4 | Intel 无线 LAR | 启用 | **关闭**（`lar_disable=1`） | 补丁补回 `lar_disable` 参数 + 包内 `/usr/lib/modprobe.d/iwlwifi-lar.conf` |
 | 5 | 包名后缀 | cachyos | `-KBkernel-cachy` | `_pkgsuffix` |
 | 6 | 构建身份 | cachyos | `kb` / `R730`（时间戳北京时间） | `export KBUILD_BUILD_*` |
 | 7 | 下载源 | GitHub 直连 | **ghfast.top 加速** | `_patchsource`、`source` |
@@ -67,21 +67,33 @@ Arch 系用户想要性能内核，最省事的路子是装 CachyOS 的现成包
 
 **目的**：关掉 iwlwifi 的 **LAR（Location Aware Regulatory，定位感知法规域）**，让无线驱动改用网卡固件/EEPROM 里的法规域，而不是按位置动态调整。
 
-实现不碰内核源码，随包放一个 modprobe 配置就够：
+**踩坑**：一开始我只随包放了个 modprobe 配置：
 
 ```
 /usr/lib/modprobe.d/iwlwifi-lar.conf
     options iwlwifi lar_disable=1
 ```
 
-这一行由**重放式合并脚本**在生成 PKGBUILD 时写进 `package()`，所以上游怎么改都不会丢。
+结果**根本没生效**——上游 iwlwifi 早已把这个 `lar_disable` 参数**删掉了**，`options iwlwifi lar_disable=1` 只会让驱动报一句"未知参数"然后忽略。
 
-校验也很直接，拆包看一眼：
+**正确做法：打补丁把参数补回内核源码**，在 `prepare()` 里改三处：
+
+- `iwlwifi/iwl-modparams.h`：`struct iwl_mod_params` 加 `bool lar_disable;`
+- `iwlwifi/iwl-drv.c`：注册 `module_param_named(lar_disable, iwlwifi_mod_params.lar_disable, …)`
+- `iwlwifi/mvm/mvm.h`：`iwl_mvm_is_lar_supported()` 里加 `if (iwlwifi_mod_params.lar_disable) return false;`（放在变量声明之后，避开内核的 `-Wdeclaration-after-statement`）
+
+这样 modprobe.d 里的 `lar_disable=1` 才真正生效。补丁由**重放式合并脚本**注入上游 PKGBUILD 的 `prepare()`，所以上游怎么改都不会丢。
+
+校验：
 
 ```bash
+modinfo iwlwifi | grep lar_disable
+# 期望：parm: lar_disable:disable LAR functionality (default: N) (bool)
 tar -xOf linux-kbkernel-cachy-<ver>-x86_64.pkg.tar.zst usr/lib/modprobe.d/iwlwifi-lar.conf
 # 期望：options iwlwifi lar_disable=1
 ```
+
+> ⚠️ 硬件边界：这套只对 **mvm 路径（WiFi6 及更早）** 有效。**WiFi7 新卡的 mld 驱动** `iwl_mld_hw_verify_preconditions()` 硬性要求 LAR 必须开（`WARN_ON(!lar_enabled)`），本参数对它无效。
 
 ## 这些不是我们加的，别记错
 
@@ -280,6 +292,7 @@ A：是同一套源码和配置构建的（7.2.2 版），可以直接升级到 
 | 2026-09-24 | — | 自动化健壮性修复：重试空正文 bug、重试改增量、新增巡检回执与异常回执 |
 | 2026-09-26 | — | 新增配套文档《内核自动构建流水线 · 全链路解析》 |
 | 2026-10-09 | 7.2.9-2 | 流水线重建（编译服务器重装后）：改名 `KBkernel-cachy`、关闭 Intel 无线 LAR、新增 GitHub 配方仓库与自动发布；首次自动构建成功（约 35 分钟，无 OOM） |
+| 2026-10-09 | 7.2.9-2 | 包名改小写（`linux-kbkernel-cachy`）；**修正 LAR**：发现上游已无 `lar_disable` 参数，补丁补回（原先纯 modprobe.d 是空操作）；两内核重建 + T480 换装 |
 
 ## 写在后面
 
