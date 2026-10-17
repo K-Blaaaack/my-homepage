@@ -13,7 +13,9 @@ summary: "Hyps 是一个 Bash 脚本集合。做 GUI 最大的风险，是把上
 
 这套流程我用了很久。它跑不跑得起来倒不是问题。麻烦的是每改一次配置都像手工排雷。键名记不住、路径带空格就炸、注释被手滑删掉、哪个开关是开着的完全靠翻文件。
 
-所以我写了 [Hyps Hub](https://github.com/K-Blaaaack/Hyps-Hub)，一个 Qt 6 / QML 的原生 Linux 客户端，把这套操作搬到图形界面里。
+所以有了 [Hyps Hub](https://github.com/K-Blaaaack/Hyps-Hub)，一个 Qt 6 / QML 的原生 Linux 客户端，把这套操作搬到图形界面里。
+
+先说明一下，这个项目的代码是 AI 写的，这篇稿子也是它整理的。我负责给任务书、划边界、看截图验收、决定发布。过程写在[另一篇](/posts/ai-dev-brief/)里，这篇只讲项目本身。
 
 ![首次初始化向导](screenshots/onboarding.webp)
 
@@ -21,7 +23,7 @@ summary: "Hyps 是一个 Bash 脚本集合。做 GUI 最大的风险，是把上
 
 ## 上游是一个脚本集合，不是一个程序
 
-动手之前我把上游源码读了一遍，结论直接决定了架构。
+动手之前先读了一遍上游源码，结论直接决定了架构。
 
 - **没有机器接口。** 没有 JSON、没有 `--format`，`init.sh --check` 是唯一结构稳定、值得解析的输出。
 - **没有 `game start`。** 启动游戏的唯一真实入口就是 `scripts/<Game>.sh`，脚本内部靠 `GAME_NAME` 决定跑哪个游戏。
