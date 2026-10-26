@@ -1,0 +1,35 @@
+{
+  "name": "k-black-homepage",
+  "version": "3.0.0",
+  "private": true,
+  "type": "module",
+  "description": "K-BLACK 个人站 V3：自有 Node 构建内核 + 运行时内核 + 真实启动序列",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "node scripts/build-all.mjs",
+    "build:css": "node scripts/build-css.mjs",
+    "build:js": "node scripts/build-js.mjs",
+    "build:site": "node build/index.mjs",
+    "fetch:content": "node scripts/fetch-content.mjs",
+    "serve": "node scripts/serve.mjs",
+    "check": "node scripts/check-all.mjs",
+    "check:links": "node scripts/check-links.mjs",
+    "check:budget": "node scripts/check-budget.mjs",
+    "check:tokens": "node scripts/check-tokens.mjs",
+    "check:boot": "node scripts/check-boot.mjs",
+    "check:parity": "node scripts/check-parity.mjs",
+    "check:css": "node scripts/check-css-parity.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2",
+    "fast-glob": "^3.3.3",
+    "gray-matter": "^4.0.3",
+    "highlight.js": "^11.12.0",
+    "html-validate": "^11.17.0",
+    "lightningcss": "^1.33.0",
+    "markdown-it": "^15.0.3",
+    "markdown-it-anchor": "^10.0.0"
+  }
+}

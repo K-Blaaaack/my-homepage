@@ -1,0 +1,73 @@
+/* ============================================================================
+   K-BLACK · Arknights Visual System · L5 motion（动效层）
+   ----------------------------------------------------------------------------
+   来源：assets/css/main.css §12 Motion + 散落在 §05/§07/§11 的 @keyframes
+         + §14 末尾的 prefers-reduced-motion 降级块
+   @keyframes 按名解析，与出现顺序无关，因此集中到本层；reduced-motion 块仍是
+   全站最后一道降级权威，包含 .main-wrap 的可见性例外（无 JS / 减动效时必须出正文）。
+   V3 新增：.no-js .loader / .no-js .main-wrap（契约 §3.5 无 JS 兜底）。
+   ============================================================================ */
+
+/* ═══ 12 Motion ═════════════════════════════════════════════════════════ */
+/* 区块显现
+   ⚠️ 不能用 clip-path 做隐藏态：元素被完全裁剪后可见面积为 0，
+      IntersectionObserver 不再报告相交，.vis 永远加不上 —— 内容会永久不可见。
+      这里只用 opacity + transform（不影响相交判定），并加 3s 兜底动画，
+      即使观察器失效也绝不会出现空白页面。 */
+.rv{
+  opacity:0;transform:translateX(-14px);
+  transition:opacity var(--t-reveal) var(--ease),transform var(--t-reveal) var(--ease);
+  animation:rvSafe 0s linear 3s forwards;
+}
+.rv.vis{opacity:1;transform:none}
+.rv-d1{transition-delay:.06s}.rv-d2{transition-delay:.12s}.rv-d3{transition-delay:.18s}.rv-d4{transition-delay:.24s}
+
+.main-wrap{opacity:0;transition:opacity var(--t-slow) var(--ease-out)}
+.main-wrap.show{opacity:1}
+/* 命中启动动画冷却（<head> 判定并打标记）：直接出正文 */
+html.prts-skip .loader{display:none}
+html.prts-skip .main-wrap{opacity:1;transition:none}
+/* V3 新增：无 JS 兜底（契约 §3.5）—— <html class="no-js"> 时遮罩不挡、正文立即可见。
+   JS 在 head 内联脚本里把 no-js 换成 js；禁用 JS 时这两条就是唯一防线。 */
+.no-js .loader{display:none}
+.no-js .main-wrap{opacity:1}
+
+
+/* ── @keyframes：全站动效曲线集中于此（按名解析，顺序无关） ── */
+/* 尘埃上浮（§05 Atmosphere） */
+@keyframes floatUp{
+  0%{opacity:0;transform:translateY(100vh) scale(.6)}
+  12%{opacity:.55}
+  88%{opacity:.55}
+  100%{opacity:0;transform:translateY(-12vh) scale(1)}
+}
+/* 光池漂移（§05 Atmosphere） */
+@keyframes drift{
+  0%{transform:translate(0,0) scale(1);opacity:.45}
+  25%{transform:translate(28px,-36px) scale(1.08);opacity:.7}
+  50%{transform:translate(-18px,18px) scale(.94);opacity:.5}
+  75%{transform:translate(36px,26px) scale(1.04);opacity:.62}
+  100%{transform:translate(0,0) scale(1);opacity:.45}
+}
+/* 滚动提示脉冲（§07 Hero） */
+@keyframes pulse{0%,100%{opacity:.35}50%{opacity:1}}
+/* 首屏标题上升（§07 Hero） */
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+/* 终端光标（§11 loader） */
+@keyframes blink{50%{opacity:0}}
+/* 显现兜底（§12；观察器失效时 3s 后强制显示） */
+@keyframes rvSafe{to{opacity:1;transform:none}}
+
+
+/* ═══ 14b Accessibility · prefers-reduced-motion ═════════════════════════ */
+/* 来源：原 §14 末尾的同一媒体查询，原样搬运（含 .main-wrap 例外）。
+   本块与宽度断点无属性交集，前置到 platform-*.css 之前不改变任何计算值。 */
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;
+    transition-duration:.01ms!important;scroll-behavior:auto!important}
+  .rv{opacity:1;transform:none;animation:none}
+  .main-wrap{opacity:1}
+  .particle,.orb{display:none}
+  .hero-scroll i{animation:none;opacity:.6}
+  .loader-cursor{animation:none}
+}

@@ -1,18 +1,18 @@
-# Hugo build output
+# 构建产物
+dist/
 public/
 resources/
+.cache/
 
-# Hugo generated
+# Hugo 遗留
 .hugo_build.lock
 
-# OS files
+# OS / 编辑器
 .DS_Store
 Thumbs.db
-
-# Editor files
 *.swp
 *.swo
 *~
 
-# Node modules (if any)
+# 依赖
 node_modules/

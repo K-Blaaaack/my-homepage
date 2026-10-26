@@ -1,7 +1,0 @@
-{{ $css := resources.Get "css/main.css" }}
-{{ if $css }}
-{{ $css = $css | fingerprint }}
-<link rel="stylesheet" href="{{ $css.RelPermalink }}">
-{{ else }}
-<link rel="stylesheet" href="/css/main.css">
-{{ end }}

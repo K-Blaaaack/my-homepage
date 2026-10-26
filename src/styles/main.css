@@ -1,0 +1,44 @@
+/* ============================================================================
+   K-BLACK · Arknights Visual System · V3 入口（只做 @import，不含任何规则）
+   ----------------------------------------------------------------------------
+   来源：assets/css/main.css（548 行 / 36 278 B / 14 节）拆为 7 层。
+   原则：类名与规则逐字搬运，零改名、零删除；视觉零回归由
+         scripts/check-css-parity.mjs 逐声明 + 层叠顺序校验。
+
+   加载顺序 = 层叠顺序，不要调整：
+     tokens → base → components → pages → motion → platform-desktop → platform-mobile
+
+   ┌─ 层 / 文件 ────────────┬─ 原文件节号 ──────────────────────────────────────┐
+   │ tokens.css             │ 02 Design Tokens（:root 唯一权威）                │
+   │ base.css               │ 01 Reset · 03 Stage · 04 Geometry · 05 Atmosphere │
+   │ components.css         │ 06 Topbar · 07 Hero · 08 Section · 09 Components   │
+   │ pages.css              │ 10 Page Blocks（档案/技术栈/链接/关于/页脚/404）   │
+   │                        │ 11 Content（正文/.chroma/PRTS 终端 .loader-*）     │
+   │ motion.css             │ 12 Motion + 全部 @keyframes + reduced-motion      │
+   │ platform-desktop.css   │ 13 Desktop Spacing（min-width:1025px）            │
+   │ platform-mobile.css    │ 14 Responsive（max-width:768px / 竖屏）           │
+   └────────────────────────┴───────────────────────────────────────────────────┘
+
+   为什么 §10 与 §11 同层：两者共享大量同属性、同特异性选择器（font-size / color /
+   padding / margin-bottom …）。若 §11 进 components 层（先于 §10），这些选择器的
+   层叠次序会反转 —— 所以 §11 与 §10 一起放在 pages 层，全局次序 06→09→10→11 不变。
+
+   两处跨层移动（均已校验无属性交集，计算值不变）：
+     · @keyframes floatUp/drift/pulse/fadeUp/blink 从 §05/§07/§11 集中到 motion.css
+       —— 关键帧按名解析，定义位置与顺序不影响任何元素的动画结果。
+     · prefers-reduced-motion 从 §14 末尾移到 motion.css 末尾 —— 它只与 motion 层
+       的 .rv/.main-wrap/.particle/.orb/.hero-scroll/.loader-cursor 交互，与宽度断点
+       无属性交集。
+
+   V3 新增（契约 §4 白名单，共 5 项）：.no-js .loader / .no-js .main-wrap /
+   .loader-line.warn / .loader-retry / .ovl-*（覆盖层实装：搜索 + 文章目录，
+   类名以 src/js/overlay.js 的真实输出为准，见 components.css 层头注释）。
+   ============================================================================ */
+
+@import "./tokens.css";
+@import "./base.css";
+@import "./components.css";
+@import "./pages.css";
+@import "./motion.css";
+@import "./platform-desktop.css";
+@import "./platform-mobile.css";

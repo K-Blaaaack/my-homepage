@@ -1,0 +1,426 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-10-26T23:59:00+08:00",
+  "generated_by": "auditor (task-1)",
+  "repo": "/home/kb/github/my-homepage",
+  "method": {
+    "build_cmd": "hugo --gc --minify -d /tmp/kb-build/out",
+    "build_runs": 3,
+    "gzip_cmd": "gzip -9 -c",
+    "note": "所有字节数为构建产物实测值；gzip 为单文件 gzip -9 后字节数，非传输层压缩"
+  },
+  "toolchain": {
+    "hugo_version": "v0.168.0+extended+withdeploy",
+    "extended": true,
+    "version_pin_file": null,
+    "node_tooling": false,
+    "external_deps": 0
+  },
+  "build_ms": 36,
+  "build_ms_samples": [
+    36,
+    36,
+    36
+  ],
+  "build_wall_ms": 67,
+  "build_wall_ms_samples": [
+    67,
+    67,
+    66
+  ],
+  "build_warnings": [
+    ".Site.Data was deprecated in Hugo v0.156.0 and will be removed in a future release. Use hugo.Data instead."
+  ],
+  "pages": 141,
+  "html_pages": 81,
+  "xml_pages": 60,
+  "output_files": 163,
+  "output_bytes": 826482,
+  "non_page_files": 9,
+  "static_files": 11,
+  "html_bytes": 338217,
+  "html_gzip_bytes": 73389,
+  "html_avg_bytes": 4175,
+  "home_html_bytes": 12819,
+  "home_html_gzip_bytes": 3857,
+  "css_bytes": 36278,
+  "css_gzip_bytes": 9927,
+  "css_extra_bytes": 3225,
+  "css_extra_note": "static/css/error.css，未指纹，被 58 个 tag 页 + 404 引用",
+  "css_source_bytes": 36278,
+  "css_source_gzip_bytes": 9862,
+  "css_fingerprinted": true,
+  "js_bytes": 7813,
+  "js_gzip_bytes": 3105,
+  "js_source_bytes": 7813,
+  "js_source_gzip_bytes": 3040,
+  "js_fingerprinted": true,
+  "images_bytes": 343580,
+  "images_breakdown": {
+    "content_webp_bytes": 269026,
+    "content_webp_count": 8,
+    "icons_and_svg_bytes": 74554,
+    "icons_and_svg_count": 7
+  },
+  "source_metrics": {
+    "layouts_files": 20,
+    "layouts_bytes": 16725,
+    "layouts_lines": 392,
+    "css_lines": 548,
+    "css_sections": 14,
+    "css_rule_blocks": 259,
+    "css_media_queries": 3,
+    "css_important": 3,
+    "js_lines": 192,
+    "js_iife_modules": 9,
+    "content_md_files": 21,
+    "content_md_bytes": 131620,
+    "content_dir_bytes": 408622,
+    "data_files": 3,
+    "static_files": 11,
+    "inline_style_attrs_in_layouts": 11,
+    "inline_style_attrs_in_output": 129,
+    "pages_with_inline_style": 22,
+    "pages_with_inline_script": 22,
+    "aria_attributes_in_layouts": 0
+  },
+  "largest_pages": [
+    {
+      "path": "/posts/poweredge-r730-fanctl/index.html",
+      "bytes": 54714,
+      "note": "9 个 <pre> 代码块合计 44026 字节，占页面 80%"
+    },
+    {
+      "path": "/posts/kernel-autobuild-pipeline/index.html",
+      "bytes": 32272
+    },
+    {
+      "path": "/posts/custom-cachyos-kernel/index.html",
+      "bytes": 28536
+    },
+    {
+      "path": "/posts/homevpn/index.html",
+      "bytes": 24566
+    },
+    {
+      "path": "/posts/hyps-hub/index.html",
+      "bytes": 23820
+    },
+    {
+      "path": "/index.html",
+      "bytes": 12819
+    }
+  ],
+  "largest_assets": [
+    {
+      "path": "/posts/hyps-hub/screenshots/editor.webp",
+      "bytes": 46882,
+      "type": "image"
+    },
+    {
+      "path": "/posts/hyps-hub/screenshots/home.webp",
+      "bytes": 42564,
+      "type": "image"
+    },
+    {
+      "path": "/posts/hyps-hub/screenshots/onboarding.webp",
+      "bytes": 37090,
+      "type": "image"
+    },
+    {
+      "path": "/posts/hyps-hub/screenshots/diagnostics.webp",
+      "bytes": 36474,
+      "type": "image"
+    },
+    {
+      "path": "/posts/hyps-hub/screenshots/games.webp",
+      "bytes": 36400,
+      "type": "image"
+    },
+    {
+      "path": "/css/main.<hash>.css",
+      "bytes": 36278,
+      "type": "css"
+    },
+    {
+      "path": "/posts/hyps-hub/screenshots/tasks.webp",
+      "bytes": 32818,
+      "type": "image"
+    },
+    {
+      "path": "/icon-512.png",
+      "bytes": 31792,
+      "type": "image"
+    },
+    {
+      "path": "/posts/ai-dev-brief/shots/editor-before.webp",
+      "bytes": 18506,
+      "type": "image"
+    },
+    {
+      "path": "/js/main.<hash>.js",
+      "bytes": 7813,
+      "type": "js"
+    }
+  ],
+  "page_type_breakdown": {
+    "home": 1,
+    "404": 1,
+    "posts_list": 1,
+    "posts_single": 16,
+    "tags_index": 1,
+    "tags_term": 57,
+    "default_single": 4,
+    "empty_tag_pages": 58
+  },
+  "a11y_issues": [
+    {
+      "id": "a11y-viewport-no-zoom",
+      "severity": "high",
+      "issue": "viewport 禁用缩放（maximum-scale=1,user-scalable=no），违反 WCAG 1.4.4，低视力用户无法放大",
+      "evidence": "layouts/_default/baseof.html:5、layouts/_default/list.html:5、layouts/404.html:5；产物 81 个 HTML 中 81 个带该属性"
+    },
+    {
+      "id": "a11y-burger-no-aria",
+      "severity": "high",
+      "issue": "移动端菜单按钮无可访问名称与展开状态：无 aria-label、无 aria-expanded、无 aria-controls，内部 <i> 空元素",
+      "evidence": "layouts/partials/nav.html:15；全仓 layouts/ 中 aria-* 属性数量为 0（grep -r 'aria-\\|role=' layouts/ 无结果）"
+    },
+    {
+      "id": "a11y-no-skip-link",
+      "severity": "medium",
+      "issue": "无 skip link，键盘用户每页需 Tab 穿过 5 个导航项",
+      "evidence": "layouts/ 与 assets/css/main.css 中无 skip-link 定义；main.css:514 的 prts-skip 是启动动画冷却标记，与跳转无关"
+    },
+    {
+      "id": "a11y-no-landmarks",
+      "severity": "medium",
+      "issue": "缺少 main/article/header 语义地标，正文区仅为 div.sec / div.page-box",
+      "evidence": "产物 81 个 HTML 中 <main> 0 个、<article> 0 个、<header> 0 个；layouts/index.html:2-7 全部为 section/div 结构"
+    },
+    {
+      "id": "a11y-img-no-dims",
+      "severity": "medium",
+      "issue": "8 张正文截图无 width/height，加载时无占位，产生 CLS",
+      "evidence": "产物 /posts/hyps-hub/index.html 6 处、/posts/ai-dev-brief/index.html 2 处 <img> 无尺寸；模板层 nav/footer 的 img 有尺寸（nav.html:4、footer.html:2）"
+    },
+    {
+      "id": "a11y-tabs-no-roving",
+      "severity": "medium",
+      "issue": "首页 4 个 tab 为裸 button，无 role=tab/aria-selected/tablist，选中态仅靠 class",
+      "evidence": "layouts/partials/news.html:21-24；assets/js/main.js:129-133 只切 class"
+    },
+    {
+      "id": "a11y-contrast-disabled",
+      "severity": "low",
+      "issue": "--disabled #5a6165 在 --ink #080a0b 上对比度 3.15:1，低于 4.5:1，用于 9px 小字",
+      "evidence": "assets/css/main.css:44（--disabled 定义）、:165（.nav-brand-sub 使用 color:var(--disabled)，font-size:9px）"
+    },
+    {
+      "id": "a11y-positive-focus-reduced-motion",
+      "severity": "info",
+      "issue": "已处理项：:focus-visible 有统一轮廓；prefers-reduced-motion 关动画并隐藏粒子/光球",
+      "evidence": "assets/css/main.css:105（:focus-visible）、:540-546（prefers-reduced-motion 块）"
+    }
+  ],
+  "seo_missing": [
+    {
+      "id": "seo-no-canonical",
+      "missing": "rel=canonical",
+      "scope": "0/81 HTML",
+      "evidence": "grep -l 'canonical' -r out --include='*.html' → 0"
+    },
+    {
+      "id": "seo-no-og",
+      "missing": "Open Graph（og:title/og:description/og:image/og:url）",
+      "scope": "0/81 HTML",
+      "evidence": "grep -l 'og:title' → 0；layouts/_default/baseof.html head 区（:3-16）无 og 标签"
+    },
+    {
+      "id": "seo-no-twitter",
+      "missing": "Twitter Card",
+      "scope": "0/81 HTML",
+      "evidence": "grep -l 'twitter:card' → 0"
+    },
+    {
+      "id": "seo-no-jsonld",
+      "missing": "JSON-LD 结构化数据（Person/BlogPosting/BreadcrumbList）",
+      "scope": "0/81 HTML",
+      "evidence": "grep -l 'ld+json' → 0"
+    },
+    {
+      "id": "seo-no-robots",
+      "missing": "robots.txt",
+      "scope": "产物根目录无此文件",
+      "evidence": "hugo.toml 未设 enableRobotsTXT；out/robots.txt 不存在"
+    },
+    {
+      "id": "seo-no-home-rss",
+      "missing": "首页 RSS（/index.xml）",
+      "scope": "首页无 feed",
+      "evidence": "hugo.toml:31-32 outputs.home = [\"HTML\"]；产物有 59 个 xml（57 tag + tags/index + posts/index），无根 index.xml"
+    },
+    {
+      "id": "seo-description-duplicated",
+      "missing": "逐页独立 description",
+      "scope": "22 个页面共用同一句「K-Black 个人主页」，59 个页面无 description",
+      "evidence": "grep 统计：<meta name=description content=\"K-Black 个人主页\"> 出现 22 次；tags/*.html 与 404.html 无 description。根因：layouts/_default/baseof.html:9 只读 .Description，而 16 篇正文写的是 summary（content/posts/*.md front matter），模板中无一处读取 .Summary/.Params.summary"
+    },
+    {
+      "id": "seo-thin-tag-pages",
+      "missing": "taxonomy 页有效内容",
+      "scope": "57 个 tag 页 + 1 个 tags 索引页均为空壳，全部进 sitemap",
+      "evidence": "out/tags/*/index.html 共 58 个，含 href=/posts/ 的为 0 个，平均 575 字节；layouts/_default/list.html:11-17 只渲染 .Title + 返回按钮，未 range .Pages；sitemap.xml 含全部 tag URL"
+    },
+    {
+      "id": "seo-orphan-tags",
+      "missing": "tag 页内部入口",
+      "scope": "0 个链接指向 /tags/",
+      "evidence": "grep -ro 'href=/tags/' out --include='*.html' → 0；layouts/posts/single.html:10 用 <span class=tag> 而非 <a>"
+    },
+    {
+      "id": "seo-title-format",
+      "missing": "标题模板统一性",
+      "scope": "一致但无站点后缀差异化，tag 页为「Linux - K-BLACK」",
+      "evidence": "layouts/_default/baseof.html:8 与 layouts/_default/list.html:8 两套写法"
+    }
+  ],
+  "content_issues": [
+    {
+      "id": "content-summary-unused",
+      "issue": "16 篇正文写了 summary，模板从不渲染，也不进 meta",
+      "evidence": "grep -rn '\\.Summary\\|\\.Params.summary' layouts/ → 无结果"
+    },
+    {
+      "id": "content-frontmatter-drift",
+      "issue": "front matter 字段不统一：16 篇用 tags[]+categories[]+summary，3 篇用单值 tag（info.md、stack/index.md、wip.md），type 只出现 1 次",
+      "evidence": "content/info.md:2 tag:\"ABOUT\"；content/stack/index.md:2-3 tag+type；content/wip.md:2"
+    },
+    {
+      "id": "content-categories-dead",
+      "issue": "categories 被写入 16 篇并被 posts 列表渲染，但 hugo.toml 未声明 categories taxonomy，无 /categories/ 页",
+      "evidence": "hugo.toml:34-35 只有 tag=\"tags\"；layouts/posts/list.html:10 渲染 .Params.categories"
+    },
+    {
+      "id": "content-category-typo",
+      "issue": "categories 拼写错误 \"tyest\"，已出现在线上列表页",
+      "evidence": "content/posts/test.md front matter；产物 out/posts/index.html 出现 1 次 <div class=news-date>tyest</div>"
+    },
+    {
+      "id": "content-test-pages",
+      "issue": "两篇测试内容在生产构建中：/测试/ 与 /posts/test/，并进 sitemap",
+      "evidence": "content/测试.md、content/posts/test.md（draft:false）；sitemap.xml 含 k-black.top/测试/ 与 /posts/test/"
+    },
+    {
+      "id": "content-non-ascii-slug",
+      "issue": "URL 使用中文 slug，需百分号编码",
+      "evidence": "content/测试.md；sitemap.xml 中 https://k-black.top/%E6%B5%8B%E8%AF%95/"
+    },
+    {
+      "id": "content-draft-untracked",
+      "issue": "draft:true 的 a-posts.md 处于未跟踪状态，易被误提交或误删",
+      "evidence": "git status → ?? content/posts/a-posts.md；content/posts/a-posts.md:3 draft: true"
+    },
+    {
+      "id": "content-profile-hardcoded",
+      "issue": "首页档案卡内容写死在模板（技术栈 12 项、兴趣 9 项、自我介绍 2 段），与 data/stack.toml 双份维护",
+      "evidence": "layouts/partials/profile.html:7-8、14-19、27-31；同内容另存 data/stack.toml（2698 字节）"
+    },
+    {
+      "id": "content-posts-list-thin",
+      "issue": "文章列表只显示日期/分类/标题，不显示 summary，16 篇正文的可读摘要未被利用",
+      "evidence": "layouts/posts/list.html:8-12"
+    },
+    {
+      "id": "content-news-tabs-hardcoded",
+      "issue": "首页 tab 分类写死 4 项（all/post/site/ba），与 data/news.toml 的 category 值靠约定对齐",
+      "evidence": "layouts/partials/news.html:21-24；data/news.toml 提供 category 字段"
+    }
+  ],
+  "engineering_issues": [
+    {
+      "id": "eng-no-ci",
+      "issue": "无 .github/、无任何 CI 配置",
+      "evidence": "ls -a 无 .github；无 Makefile/package.json/Taskfile"
+    },
+    {
+      "id": "eng-deploy-unknown",
+      "issue": "部署方式仅页面自述 Cloudflare Workers + static/CNAME，仓库内无部署脚本/配置",
+      "evidence": "layouts/partials/about.html:7；static/CNAME:1（k-black.top）→ 具体部署链路待验证"
+    },
+    {
+      "id": "eng-public-stale",
+      "issue": "public/ 被 .gitignore 忽略但与源码不同步：缺 26 个文件（hyps-hub、ai-dev-brief、8 张截图、16 个新 tag 页），残留 4 个过期资源",
+      "evidence": "comm 对比 public/ 与全新构建：仅 public 有 css/main.css、css/main.fd91c8ec…css、js/main.js、js/main.369e336d…js；仅新版有 26 个文件；public 141 文件 / 1.3M vs 新构建 163 文件 / 826482 字节"
+    },
+    {
+      "id": "eng-deprecated-api",
+      "issue": "4 处 .Site.Data 已废弃（Hugo v0.156 起），升级即断",
+      "evidence": "layouts/partials/news.html:7,38、layouts/partials/links.html:4、layouts/stack/single.html:7"
+    },
+    {
+      "id": "eng-dead-code",
+      "issue": "links.html partial 无任何调用点，是死模板",
+      "evidence": "grep -rn 'partial \"links' layouts/ → 无结果"
+    },
+    {
+      "id": "eng-duplicate-nav",
+      "issue": "桌面上行导航与移动菜单 5 个链接在 nav.html 中重复写两遍，改一处要改两处",
+      "evidence": "layouts/partials/nav.html:9-13 与 :19-23"
+    },
+    {
+      "id": "eng-inline-arrow",
+      "issue": "同一返回箭头 SVG polyline 在 5 个模板内联重复",
+      "evidence": "layouts/_default/single.html:8、layouts/_default/list.html:16、layouts/stack/single.html:18、layouts/404.html:17、layouts/partials/profile.html:21（svg-defs.html 已有 #i-arrow 可复用）"
+    },
+    {
+      "id": "eng-inline-style",
+      "issue": "模板内联 style 11 处；产物 22 页共 129 个内联 style 属性",
+      "evidence": "grep -rc 'style=\"' layouts/ → posts/single.html 5、stack/single.html 2、_default/single.html 1、posts/list.html 1、baseof.html 1、svg-defs.html 1"
+    },
+    {
+      "id": "eng-no-version-pin",
+      "issue": "未锁定 Hugo 版本，机器上无 .hugo-version/.tool-versions",
+      "evidence": "ls -a 无版本文件；hugo.toml 无 module 依赖"
+    },
+    {
+      "id": "eng-no-tests",
+      "issue": "无测试、无质量门禁（HTML 校验/链接检查/a11y 扫描均无）",
+      "evidence": "仓库 79 个被跟踪文件，无 test/lint 配置"
+    },
+    {
+      "id": "eng-backup-dir",
+      "issue": "backup/ 存有迁移前旧的纯静态站点（7 个文件），被跟踪但与构建无关",
+      "evidence": "git ls-files backup → 7 个文件；backup/index.html 33418 字节"
+    },
+    {
+      "id": "eng-rss-partial",
+      "issue": "sitemap 与 59 个 RSS 中，tag feed 全部指向空模板页；sitemap 未包含 lastmod 的页面（/info/ /stack/ /wip/）",
+      "evidence": "out/sitemap.xml 末尾 3 个 <url> 无 lastmod"
+    }
+  ],
+  "largest_content": [
+    {
+      "path": "content/posts/kernel-autobuild-pipeline.md",
+      "chars": 12577
+    },
+    {
+      "path": "content/posts/custom-cachyos-kernel.md",
+      "chars": 11295
+    },
+    {
+      "path": "content/posts/poweredge-r730-fanctl/index.md",
+      "chars": 11228
+    },
+    {
+      "path": "content/posts/homevpn.md",
+      "chars": 10219
+    },
+    {
+      "path": "content/posts/t480-custom-kernel.md",
+      "chars": 8422
+    }
+  ],
+  "sitemap_urls": 80,
+  "xml_bytes": 89382
+}

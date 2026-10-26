@@ -1,0 +1,84 @@
+/* ============================================================================
+   K-BLACK · Arknights Visual System · L1 tokens（令牌层）
+   ----------------------------------------------------------------------------
+   层职责：唯一令牌权威。全仓 :root 只允许出现在本文件；其它层只准消费 var(--x)。
+   来源：assets/css/main.css §02 Design Tokens —— 逐值搬运，既有数值一个未改。
+   V3 新增令牌只做两件事：① 把原文件里散落的十六进制/rgba 字面量收归令牌
+   （计算值与原文件完全一致，见 check-css-parity.mjs 的 var 解析比对）；
+   ② 预留覆盖层 z 轴常量。
+   ============================================================================ */
+
+:root{
+  /* — Ink 墨阶：近黑基底，靠灰阶差营造纵深 — */
+  --ink:#080a0b;          /* 舞台基底 */
+  --ink-2:#0e1112;        /* 面板 */
+  --ink-3:#141819;        /* 浮层 / 悬停底 */
+  --ink-4:#1a1f21;        /* 激活底 */
+  --rule:#242a2d;         /* 1px 分隔线 */
+  --line:#333b3f;         /* 边框线 */
+  --line-h:#4a5459;       /* 悬停边框 */
+
+  /* — Paper 纸阶：文字 — */
+  --paper:#f4f6f6;        /* 一级：标题 / 核心数值 */
+  --paper-2:#c3cbcd;      /* 二级：正文 */
+  --muted:#8d9396;        /* 三级：注释 / 时间戳 */
+  --disabled:#5a6165;
+
+  /* — Signal 信号色：选中 / 进度 / 主操作，占画面 <15% — */
+  --signal:#18d1ff;
+  --signal-d:#0f9dc4;
+  --signal-dim:rgba(24,209,255,.12);
+
+  /* — State 状态色：仅表状态，不作装饰 — */
+  --state:#c8eb21;        /* 成功 / 可用 / 下载 */
+  --warn:#e0a34a;         /* 损耗 / 物资 / 倒计时 */
+  --danger:#e0524f;       /* 危险 / 失败 */
+
+  /* — 兼容层：既有类名的旧变量 — */
+  --black:var(--ink); --dark:var(--ink-2);
+  --card:var(--ink-2); --card-h:var(--ink-3);
+  --border:var(--line); --border-h:var(--line-h);
+  --text:var(--paper); --dim:var(--paper-2);
+  --accent:var(--signal); --gold:var(--warn);
+
+  /* — Type：生产字体族的安全替代，逐级回退，不自托管 — */
+  --cjk:"Noto Sans SC","Source Han Sans SC","HarmonyOS Sans SC","MiSans","PingFang SC","Microsoft YaHei",sans-serif;
+  --display:"Arial Narrow","Roboto Condensed","DIN Condensed","Bebas Neue","Hanson Bold",var(--cjk);
+  --tech:"Space Grotesk","IBM Plex Sans","Outfit",system-ui,var(--cjk);
+  --serif:"Noto Serif SC","Source Han Serif SC","Playfair Display",Georgia,serif;
+  --mono:"IBM Plex Mono","JetBrains Mono","SFMono-Regular",Consolas,monospace;
+  --font:var(--cjk);
+
+  /* — 字距：显示标题收紧，微标签放开 — */
+  --ls-display:-.045em; --ls-title:-.025em; --ls-body:0; --ls-micro:.16em; --ls-caps:.12em;
+
+  /* — Geometry：0 圆角；切角为精确 45° 直线切割 — */
+  --cut-lg:14px; --cut-md:10px; --cut-sm:7px; --cut-xs:4px;
+
+  /* — Motion：直接交互 180–350ms；区块显现 700ms；注意力循环 1.6–2.4s — */
+  --t-fast:.18s; --t-base:.28s; --t-slow:.35s; --t-reveal:.7s;
+  --ease:cubic-bezier(.22,.8,.2,1);
+  --ease-out:ease-out;
+
+  /* — Texture — */
+  --stripe:repeating-linear-gradient(-45deg,rgba(244,246,246,.14) 0 2px,transparent 2px 6px);
+  --grid-4:linear-gradient(rgba(244,246,246,.028) 1px,transparent 1px),linear-gradient(90deg,rgba(244,246,246,.028) 1px,transparent 1px);
+  --noise:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+
+  /* — V3 新增：语法高亮字符串色（原 §11 .chroma .s 内联 #7fb8c4 收归令牌） — */
+  --code-str:#7fb8c4;
+
+  /* — V3 新增：原内联 rgba 收归令牌（计算值与原文件逐字节等价） — */
+  --glow-1:rgba(24,209,255,.055);   /* .orb-1 光池 */
+  --glow-2:rgba(24,209,255,.04);    /* .orb-2 光池 */
+  --glow-3:rgba(200,235,33,.022);   /* .orb-3 光池 */
+  --scanline:rgba(0,0,0,.05);       /* .hero-scanlines CRT 扫描线 */
+  --nav-bg:rgba(8,10,11,.86);       /* .nav 顶栏底 */
+  --mob-bg:rgba(8,10,11,.97);       /* .mob 移动菜单底 */
+  --hero-veil:rgba(0,0,0,.58);      /* .hero-bg 边缘压暗 */
+  --ovl-veil:rgba(0,0,0,.72);       /* V3 覆盖层遮罩（搜索 backdrop） */
+
+  /* — V3 新增：z 轴常量（覆盖层 / 终端 / toast；既有层叠值原样收归） — */
+  --z-base:0; --z-content:1; --z-mob:99; --z-nav:100;
+  --z-ovl:9000; --z-terminal:9999; --z-toast:10000;
+}

@@ -1,0 +1,75 @@
+# 首页文案（原 layouts/partials/*.html 里的硬编码中文，契约 §3.6）
+# 模板只负责结构与类名，文案一律从这里取。
+
+[hero]
+prefix = "PERSONAL PAGE://"
+title = "K-BLACK"
+cta = "READ MORE"
+scroll = "SCROLL"
+
+[news]
+badge = "BREAKING NEWS"
+post_tag = "文章"
+default_link_text = "更多情报 READ MORE"
+latest_count = 5
+
+[profile]
+label = "PROFILE 档案"
+intro_label = "INTRODUCTION"
+intro_title = "关于我"
+intro = [
+  "大家好，我是 K-Black，一名热衷于编程和开发的技术爱好者。专注于开源软件开发和技术分享。",
+  "目前在研究 Linux Kernel 编译，通过修改参数与配置文件来提升系统使用体验。除了开发，还喜欢搞 ESP32 单片机。",
+]
+stack_label = "STACK 技术栈"
+stack_title = "技术栈"
+stack_more = "查看全部"
+stack_tags = [
+  "Linux", "Arch Linux", "Kernel 编译", "Android / AOSP",
+  "C / C++ / Rust", "Python", "Shell", "Docker / Podman",
+  "Proxmox VE", "网络工程", "ESP32", "AI Agent",
+]
+interests_label = "INTERESTS 兴趣"
+interests_title = "兴趣"
+interests_tags = [
+  "开源软件 / 技术分享", "硬件 DIY", "Homelab / NAS", "网络工程",
+  "内核 / 刷机", "AI / LLM", "游戏 / Minecraft", "二次元", "生活 / 创作",
+]
+status_label = "STATUS 状态"
+status_title = "运行状态"
+status_running = "已运行 "
+status_updated = "上次更新 "
+status_pending = "计算中..."
+
+[about]
+label = "ABOUT 关于"
+[[about.cards]]
+label = "DEPLOY 部署"
+title = "部署方式"
+body = '本站由 <strong>Node 构建内核</strong> 生成，部署至 <strong>Cloudflare Workers</strong> 全球网络'
+[[about.cards]]
+label = "CONTACT 联系"
+title = "联系方式"
+body = '<a href="mailto:{email}">{email}</a>'
+[[about.cards]]
+label = "SOURCE 源码"
+title = "本站源码"
+body = '<a href="{github_source}" target="_blank">GitHub 仓库</a>'
+
+# 新闻筛选 tab（顺序即渲染顺序；第一个带 on = true）
+[[news.tabs]]
+key = "all"
+label = "最新"
+on = true
+
+[[news.tabs]]
+key = "post"
+label = "文章"
+
+[[news.tabs]]
+key = "site"
+label = "站点"
+
+[[news.tabs]]
+key = "ba"
+label = "蔚蓝档案"

@@ -1,0 +1,20 @@
+/* ============================================================================
+   K-BLACK · Arknights Visual System · L7 platform-mobile（移动断点）
+   ----------------------------------------------------------------------------
+   来源：assets/css/main.css §14 Responsive 的宽度/朝向媒体查询
+   （原 §14 末尾的 prefers-reduced-motion 已移入 motion.css 末尾，规则零改动）
+   ============================================================================ */
+
+/* ═══ 14 Responsive ═════════════════════════════════════════════════════ */
+/* 竖屏重排；orientation 必须与宽度上限组合，否则宽屏高窗口会误判为手机 */
+@media(max-width:768px),(max-width:1024px) and (orientation:portrait){
+  .nav-links{display:none}
+  .burger{display:block}
+  .sec{padding:56px 16px}
+  .prof-grid,.about-grid,.links-grid{grid-template-columns:1fr}
+  /* 页脚改为单列：文字在上，logo 在下 */
+  .foot{grid-template-columns:1fr;grid-template-rows:auto auto auto;row-gap:16px;padding:32px 16px}
+  .foot-copy{grid-area:1/1}
+  .foot-links{grid-area:2/1}
+  .foot-logo{grid-area:3/1;justify-self:start}
+}

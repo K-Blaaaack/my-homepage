@@ -1,0 +1,46 @@
+# 站点级配置（原 hugo.toml [params] 的迁移落点，契约 §3.6）
+# builder 负责读取；改文案只改这里，不改模板。
+
+title = "K-BLACK"
+base = "https://k-black.top/"
+lang = "zh-cn"
+description = "K-Black 个人主页"
+author = "K-Black"
+email = "k-black@k-black.top"
+
+# 首页 PROFILE / STATUS 卡片里的运行时计时基准（原 .Site.Params.startTime / lastDeploy）
+start_time = "2025/11/29 10:11:45"
+last_deploy = "2026/09/27 22:32:15"
+
+github = "https://github.com/K-Blaaaack/"
+github_homepage = "https://github.com/K-Blaaaack/"
+github_source = "https://github.com/K-Blaaaack/my-homepage"
+
+[footer]
+copy = "K-Black. All rights reserved."
+
+# 导航（桌面 nav 与移动 mob 共用一份，原模板里写了两遍）
+[[nav]]
+key = "home"
+href = "/"
+label = "INDEX 首页"
+
+[[nav]]
+key = "posts"
+href = "/posts/"
+label = "POSTS 文章"
+
+[[nav]]
+key = "stack"
+href = "/stack/"
+label = "STACK 技术栈"
+
+[[nav]]
+key = "profile"
+href = "/#profile"
+label = "PROFILE 档案"
+
+[[nav]]
+key = "about"
+href = "/#about"
+label = "ABOUT 关于"

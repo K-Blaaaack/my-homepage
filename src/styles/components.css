@@ -1,0 +1,281 @@
+/* ============================================================================
+   K-BLACK · Arknights Visual System · L3 components（组件层）
+   ----------------------------------------------------------------------------
+   来源：assets/css/main.css §06 Topbar & Navigation / §07 Hero / §08 Section System
+         / §09 Components
+   规则逐条搬运，选择器与声明零改名、零删除；颜色 / z 轴换成 var(--x)。
+   @keyframes pulse / fadeUp 收拢到 motion.css。
+   §11 Content（含 .chroma 与 PRTS 终端 .loader-*）放在 pages.css —— 它与 §10 同层
+   才能保住原文件 10 → 11 的层叠次序（同属性同特异性的选择器相对次序必须不变）。
+   V3 新增（契约 §4 白名单）：.ovl-* 覆盖层预留；启动序列的 .loader-line.warn /
+   .loader-retry 随 .loader-* 一起在 pages.css 末尾。
+   ============================================================================ */
+
+/* ═══ 06 Topbar & Navigation ════════════════════════════════════════════ */
+.nav{position:fixed;top:0;left:0;width:100%;z-index:var(--z-nav);border-bottom:1px solid var(--rule);
+  background:var(--nav-bg);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.nav-in{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:56px}
+.nav-brand{display:flex;align-items:center;gap:11px}
+/* 顶栏 logo：正方形标识，置于昵称前（56px 导航内留足上下边距） */
+.nav-brand-logo{display:block;height:30px;width:auto;flex-shrink:0}
+.nav-brand-en{font-family:var(--display);font-size:19px;font-weight:700;letter-spacing:var(--ls-title);color:var(--paper);text-transform:uppercase}
+.nav-brand-sub{font-size:9px;letter-spacing:var(--ls-micro);color:var(--muted);text-transform:uppercase}
+.nav-links{display:flex;gap:26px;counter-reset:nav}
+.nav-links a{counter-increment:nav;font-size:11px;letter-spacing:var(--ls-caps);color:var(--muted);
+  padding:19px 0;position:relative;transition:color var(--t-fast) var(--ease-out);text-transform:uppercase}
+/* NN 索引 —— Ark 内容模式要求「双语标签 + 区块索引」 */
+.nav-links a::before{content:counter(nav,decimal-leading-zero);margin-right:7px;
+  font-family:var(--mono);font-size:9px;letter-spacing:.06em;color:var(--disabled)}
+.nav-links a::after{content:"";position:absolute;bottom:0;left:0;width:100%;height:2px;background:var(--signal);
+  transform:scaleX(0);transform-origin:left;transition:transform var(--t-base) var(--ease)}
+.nav-links a:hover{color:var(--paper-2)}
+.nav-links a.on{color:var(--paper)}
+.nav-links a:hover::after,.nav-links a.on::after{transform:scaleX(1)}
+.burger{display:none;background:none;border:none;cursor:pointer;width:40px;height:40px;position:relative}
+.burger i{display:block;height:1px;background:var(--paper-2);position:absolute;left:10px;right:10px;transition:var(--t-base) var(--ease-out)}
+.burger i:nth-child(1){top:14px}.burger i:nth-child(2){top:20px}.burger i:nth-child(3){top:26px}
+.burger.open i:nth-child(1){top:20px;transform:rotate(45deg)}
+.burger.open i:nth-child(2){opacity:0}
+.burger.open i:nth-child(3){top:20px;transform:rotate(-45deg)}
+.mob{display:none;position:fixed;inset:0;z-index:var(--z-mob);flex-direction:column;align-items:stretch;justify-content:center;padding:0 32px;
+  background:var(--mob-bg);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
+.mob.open{display:flex}
+.mob a{font-family:var(--display);font-size:20px;font-weight:700;letter-spacing:.02em;color:var(--muted);text-transform:uppercase;
+  display:flex;justify-content:space-between;align-items:center;padding:18px 0;border-bottom:1px solid var(--rule);
+  transition:color var(--t-fast) var(--ease-out)}
+.mob a:hover{color:var(--paper)}
+.mob a.on{color:var(--paper);border-left:2px solid var(--signal);padding-left:14px}
+
+
+/* ═══ 07 Hero · 主视觉舞台 ══════════════════════════════════════════════ */
+/* 依据：显示标题锚定在下三分之一 / 边缘，配紧凑元数据；允许字形在视口边缘被裁切 */
+.hero{position:relative;width:100%;height:100vh;min-height:600px;display:flex;
+  align-items:flex-end;justify-content:flex-start;overflow:hidden}
+.hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 45%,transparent 22%,var(--hero-veil) 100%)}
+.hero-content{position:relative;z-index:var(--z-content);width:100%;text-align:left;
+  padding:0 6vw 13vh 5vw;animation:fadeUp var(--t-reveal) var(--ease) both}
+.hero-prefix{font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--muted);margin-bottom:14px;text-transform:uppercase}
+/* 巨型显示标题：窄体、极紧行高、负字距，左端字形刻意溢出画布被裁切 */
+.hero-title{font-family:var(--display);font-size:clamp(64px,15vw,190px);font-weight:700;
+  letter-spacing:var(--ls-display);line-height:.82;color:var(--paper);text-transform:uppercase;
+  margin-left:-.055em;white-space:nowrap}
+.hero-date{font-family:var(--mono);font-size:12px;letter-spacing:.14em;color:var(--muted);
+  margin-top:18px;font-variant-numeric:tabular-nums}
+.hero-cta{display:inline-flex;align-items:center;gap:10px;margin-top:28px;padding:13px 26px 13px 22px;min-height:44px;
+  background:var(--ink-2);border:1px solid var(--line);border-left:2px solid var(--signal);
+  font-size:11px;font-weight:700;letter-spacing:.14em;color:var(--paper-2);text-transform:uppercase;
+  transition:background var(--t-fast) var(--ease-out),color var(--t-fast) var(--ease-out),border-color var(--t-fast) var(--ease-out)}
+.hero-cta:hover{background:var(--ink-3);border-color:var(--line-h);color:var(--paper)}
+.hero-cta:active{transform:scale(.98)}
+.hero-cta svg{width:7px;height:14px;fill:none;stroke:currentColor}
+/* 滚动提示移到右边缘，避让左下角的标题块 */
+.hero-scroll{position:absolute;bottom:32px;right:34px;display:flex;flex-direction:column;align-items:center;gap:6px}
+.hero-scroll span{font-size:9px;letter-spacing:.2em;color:var(--muted);writing-mode:vertical-rl;text-transform:uppercase}
+.hero-scroll i{width:1px;height:34px;background:linear-gradient(to bottom,var(--line-h),transparent);animation:pulse 2s linear infinite}
+
+
+/* ═══ 08 Section System ═════════════════════════════════════════════════ */
+/* 计数器挂在 .sec-hd 上而非 .sec：公告区没有 .sec-hd，自然不占序号。
+   不用 :has()，避免选择器支持差异导致编号错位。 */
+body{counter-reset:sec}
+.sec{position:relative;max-width:1200px;margin:0 auto;padding:80px 24px}
+.sec-hd{display:flex;align-items:center;gap:14px;margin-bottom:40px;counter-increment:sec}
+/* 区块标识：NN 索引 + 双语标签 + 警戒线标尺 */
+.sec-tag{display:flex;align-items:center;gap:12px;font-size:11px;font-weight:700;
+  letter-spacing:.14em;color:var(--signal);white-space:nowrap;text-transform:uppercase}
+.sec-tag::before{content:counter(sec,decimal-leading-zero) " / ";font-family:var(--mono);font-weight:400;
+  letter-spacing:.08em;color:var(--muted)}
+.sec-line{flex:1;height:8px;background:
+  var(--stripe) left center/38px 8px no-repeat,
+  linear-gradient(var(--rule),var(--rule)) left center/100% 1px no-repeat}
+
+
+/* ═══ 09 Components ═════════════════════════════════════════════════════ */
+
+/* ── 状态徽标：实底 + 左上切角 ── */
+.news-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.news-hd-left{display:flex;align-items:center;gap:12px}
+.news-badge{font-size:10px;font-weight:700;letter-spacing:var(--ls-micro);color:var(--ink);padding:5px 11px;
+  background:var(--state);text-transform:uppercase;
+  clip-path:polygon(var(--cut-xs) 0,100% 0,100% 100%,0 100%,0 var(--cut-xs))}
+
+/* ── 技术面板：扁平表面 + 单一强边（左）+ 双角括弧 ── */
+.news-featured{
+  position:relative;padding:32px;margin-bottom:16px;
+  background-color:var(--ink-2);
+  background-image:linear-gradient(var(--signal),var(--signal)),linear-gradient(var(--signal),var(--signal)),
+    linear-gradient(var(--signal),var(--signal)),linear-gradient(var(--signal),var(--signal));
+  background-position:right top,right top,left bottom,left bottom;
+  background-size:12px 1px,1px 12px,12px 1px,1px 12px;background-repeat:no-repeat;
+  border:1px solid var(--line);border-left:2px solid var(--signal);
+  transition:border-color var(--t-fast) var(--ease-out)
+}
+.news-featured:hover{border-color:var(--line-h)}
+.news-feat-tag{font-size:10px;font-weight:700;letter-spacing:var(--ls-micro);color:var(--state);margin-bottom:10px;text-transform:uppercase}
+.news-feat-title{font-size:clamp(20px,3.4vw,30px);font-weight:700;letter-spacing:var(--ls-title);line-height:1.2;margin-bottom:10px;color:var(--paper)}
+.news-feat-date{font-family:var(--mono);font-size:12px;letter-spacing:.08em;color:var(--muted);font-variant-numeric:tabular-nums}
+.news-feat-link{display:inline-flex;align-items:center;gap:8px;margin-top:18px;font-size:11px;font-weight:700;
+  letter-spacing:.14em;color:var(--signal);text-transform:uppercase;transition:color var(--t-fast) var(--ease-out)}
+.news-feat-link:hover{color:var(--paper)}
+.news-feat-link svg{width:7px;height:14px;fill:none;stroke:currentColor;transition:transform var(--t-base) var(--ease)}
+.news-feat-link:hover svg{transform:translateX(4px)}
+
+/* ── Tab：选中态 2px 信号色下划线 ── */
+.tabs{display:flex;gap:0;margin-bottom:20px;border-bottom:1px solid var(--rule)}
+.tab{position:relative;min-height:44px;padding:13px 22px;background:none;border:none;cursor:pointer;
+  font-size:12px;font-weight:500;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;
+  transition:color var(--t-fast) var(--ease-out)}
+.tab::after{content:"";position:absolute;bottom:-1px;left:0;width:100%;height:2px;background:var(--signal);
+  transform:scaleX(0);transform-origin:left;transition:transform var(--t-base) var(--ease)}
+.tab:hover{color:var(--paper-2)}
+.tab.on{color:var(--signal)}
+.tab.on::after{transform:scaleX(1)}
+
+/* ── 列表：悬停换底 + 左信号条，不做位移动画 ── */
+.news-list{display:flex;flex-direction:column;gap:0}
+.news-item{display:flex;align-items:center;gap:16px;padding:15px 16px 15px 14px;cursor:pointer;
+  border-bottom:1px solid var(--rule);border-left:2px solid transparent;
+  transition:background var(--t-fast) var(--ease-out),border-color var(--t-fast) var(--ease-out)}
+.news-item:hover{background:var(--ink-3);border-left-color:var(--signal)}
+.news-item.hide{display:none}
+.news-tag{font-size:10px;font-weight:500;letter-spacing:.08em;padding:4px 9px;white-space:nowrap;
+  background:var(--ink-3);border:1px solid var(--line);color:var(--paper-2);
+  clip-path:polygon(var(--cut-xs) 0,100% 0,100% 100%,0 100%,0 var(--cut-xs))}
+.news-item:hover .news-tag{border-color:var(--signal);color:var(--signal)}
+.news-body{flex:1;min-width:0}
+.news-date{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--muted);
+  margin-bottom:3px;font-variant-numeric:tabular-nums}
+.news-title{font-size:14px;color:var(--paper-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.news-item:hover .news-title{color:var(--paper)}
+.news-arrow{display:flex;flex-shrink:0;color:var(--muted);transition:color var(--t-fast) var(--ease-out)}
+.news-item:hover .news-arrow{color:var(--signal);transform:translateX(4px)}
+.news-arrow svg{width:7px;height:15px}
+.news-more{display:inline-flex;align-items:center;gap:8px;margin-top:18px;font-size:11px;font-weight:700;
+  letter-spacing:.14em;color:var(--signal);text-transform:uppercase;transition:color var(--t-fast) var(--ease-out)}
+.news-more:hover{color:var(--paper)}
+.news-more svg{width:7px;height:14px;fill:none;stroke:currentColor}
+.news-more:hover svg{transform:translateX(4px)}
+
+/* ── 标签 Chip：左上 4px 单切 ── */
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tag{display:inline-flex;align-items:center;height:26px;padding:0 9px;
+  font-size:11px;font-weight:500;letter-spacing:.04em;color:var(--paper-2);
+  background:var(--ink-3);border:1px solid var(--line);
+  clip-path:polygon(var(--cut-xs) 0,100% 0,100% 100%,0 100%,0 var(--cut-xs))}
+
+/* ── 操作按钮：方角 + 左信号条 ── */
+.btn{display:inline-flex;align-items:center;gap:10px;min-height:44px;padding:12px 24px 12px 20px;margin-top:18px;
+  font-size:11px;font-weight:700;letter-spacing:.14em;color:var(--paper-2);text-transform:uppercase;cursor:pointer;
+  background:var(--ink-2);border:1px solid var(--line);border-left:2px solid var(--signal);
+  transition:background var(--t-fast) var(--ease-out),color var(--t-fast) var(--ease-out),border-color var(--t-fast) var(--ease-out)}
+.btn:hover{background:var(--ink-3);border-color:var(--line-h);color:var(--paper)}
+.btn:active{transform:scale(.98)}
+.btn svg{width:7px;height:14px;fill:none;stroke:currentColor}
+
+
+/* ═══ V3 覆盖层（.ovl-*）════════════════════════════════════════════════════
+   kernel 侧 src/js/overlay.js 负责 DOM / 状态 / 键盘，本层只给视觉，不改结构。
+   类名以 overlay.js 的实际输出为准（2026-10-27 逐行核对，与最初给的清单有 3 处偏差）：
+
+     搜索  .ovl.ovl-search#ovlSearch[hidden]
+             ├ .ovl-backdrop[data-close]
+             └ .ovl-panel[role=document]
+                 ├ .ovl-title#ovlSearchTitle
+                 ├ .ovl-close            (button，文案 Esc)
+                 ├ .ovl-input[role=combobox]
+                 ├ .ovl-status[role=status]
+                 ├ .ovl-list > .ovl-item#ovl-opt-<i>[aria-selected]
+                 │              └ .ovl-kind / .ovl-label / .ovl-sub
+                 └ .ovl-hint
+
+     目录  .ovl.ovl-toc#ovlToc
+             ├ .ovl-toc-toggle#ovlTocTitle[aria-expanded]
+             └ .ovl-toc-list#ovlTocList
+                 └ .ovl-toc-item(.is-sub) > .ovl-toc-link[aria-current]
+
+   与最初清单的 3 处差异（kernel 已确认，按代码实现，未让其改名）：
+     ① 显隐用 [hidden] 属性（root.hidden / list.hidden），不是 .open 类
+        → 写 .ovl[hidden] / .ovl-toc-list[hidden]，并带 !important 兜底；
+     ② 选中态只认 aria-selected="true" 与 aria-current="location"，不写 .on
+        （.on 只用于导航与 tab，保持原样）；
+     ③ "ovl-opt-" 是 <li> 的 id（aria-activedescendant 指向它），不是类名，无需样式；
+        目录二级项另有 .is-sub（H3 缩进），最初清单没有，已补。
+   区分两个根：.ovl 是共用基类（只给 position/z-index），.ovl-search 与 .ovl-toc 各自布局。
+
+   z 轴：--z-ovl(9000) < --z-terminal(9999)，终端永远压住覆盖层。
+   几何：.ovl-panel / .ovl-toc 的 45° 切角复用 base.css §04 的同一份配方。 */
+
+/* 共享壳：位置与层级；显隐交给 [hidden]（kernel 用 root.hidden 开关）。
+   !important 兜底：万一有别的 display 规则命中根节点，关闭态也不会残留可见 */
+.ovl{position:fixed;z-index:var(--z-ovl)}
+.ovl[hidden]{display:none!important}
+
+
+/* ── 搜索覆盖层：居中面板 + 遮罩 ── */
+.ovl-search{inset:0;display:flex;align-items:center;justify-content:center;padding:10vh 16px}
+.ovl-backdrop{position:absolute;inset:0;background:var(--ovl-veil);
+  -webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px)}
+.ovl-panel{position:relative;z-index:1;display:flex;flex-direction:column;
+  width:min(680px,92vw);max-height:70vh;overflow:hidden;
+  background:var(--ink);border:1px solid var(--line);border-left:2px solid var(--signal)}
+.ovl-title{margin:0;padding:13px 76px 12px 16px;border-bottom:1px solid var(--rule);
+  font-family:var(--display);font-size:13px;font-weight:700;letter-spacing:var(--ls-micro);
+  color:var(--paper);text-transform:uppercase}
+/* 关闭键绝对定位在标题行右侧：DOM 里它是 .ovl-panel 的第二个子节点，
+   不靠改结构，也不和标题抢行高 */
+.ovl-close{position:absolute;top:9px;right:11px;z-index:2;min-height:26px;padding:4px 9px;cursor:pointer;
+  font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;
+  background:var(--ink-2);border:1px solid var(--line);
+  transition:color var(--t-fast) var(--ease-out),border-color var(--t-fast) var(--ease-out)}
+.ovl-close:hover{color:var(--signal);border-color:var(--line-h)}
+.ovl-input{width:100%;padding:12px 16px;background:var(--ink-2);border:none;
+  border-bottom:1px solid var(--rule);font-family:var(--mono);font-size:13px;color:var(--paper)}
+.ovl-input::placeholder{color:var(--disabled)}
+.ovl-status{margin:0;padding:8px 16px;border-bottom:1px solid var(--rule);
+  font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--muted)}
+/* 列表占满剩余高度并自己滚，面板不超过 70vh */
+.ovl-list{flex:1;min-height:0;margin:0;padding:0;overflow-y:auto;list-style:none;overscroll-behavior:contain}
+.ovl-item{display:flex;align-items:center;gap:12px;padding:11px 16px;cursor:pointer;
+  border-bottom:1px solid var(--rule);border-left:2px solid transparent;
+  transition:background var(--t-fast) var(--ease-out),border-color var(--t-fast) var(--ease-out)}
+.ovl-item:hover{background:var(--ink-3);border-left-color:var(--signal)}
+/* 键盘选中：--signal 左边框 + --signal-dim 底（鼠标悬停用 --ink-3，两者可区分）。
+   只认 aria-selected="true"（kernel 唯一真值），不写 .on —— .on 只归导航/tab */
+.ovl-item[aria-selected="true"]{background:var(--signal-dim);border-left-color:var(--signal)}
+.ovl-kind{flex-shrink:0;padding:2px 6px;font-size:9px;letter-spacing:var(--ls-micro);color:var(--muted);
+  border:1px solid var(--line);text-transform:uppercase;--cut:var(--cut-xs);
+  clip-path:polygon(var(--cut) 0,100% 0,100% 100%,0 100%,0 var(--cut))}
+.ovl-label{flex:1;min-width:0;font-size:13px;color:var(--paper-2);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ovl-item:hover .ovl-label,.ovl-item[aria-selected="true"] .ovl-label{color:var(--paper)}
+.ovl-sub{flex-shrink:0;max-width:38%;font-family:var(--mono);font-size:11px;color:var(--muted);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ovl-hint{margin:0;padding:8px 16px;border-top:1px solid var(--rule);
+  font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--disabled)}
+
+
+/* ── 文章目录：右侧固定，≥1280px 才出现（正文 780px，右侧留白够放 220px） ── */
+.ovl-toc{position:fixed;top:96px;right:24px;width:220px;max-height:calc(100vh - 160px);display:none;
+  overflow-y:auto;padding:12px 14px;--cut:var(--cut-sm);
+  background:var(--ink-2);border:1px solid var(--line);border-left:2px solid var(--signal)}
+.ovl-toc-toggle{display:block;width:100%;margin:0;padding:0 0 10px;cursor:pointer;text-align:left;
+  background:none;border:none;font-family:var(--mono);font-size:9px;letter-spacing:var(--ls-micro);
+  color:var(--muted);text-transform:uppercase}
+.ovl-toc-toggle:hover{color:var(--signal)}
+.ovl-toc-list{margin:0;padding:0;list-style:none}
+/* kernel 用 list.hidden 折叠（aria-expanded 同步）；同样 !important 兜底 */
+.ovl-toc-list[hidden]{display:none!important}
+.ovl-toc-item{margin:0}
+.ovl-toc-item.is-sub{padding-left:12px}
+.ovl-toc-link{display:block;padding:5px 0 5px 9px;border-left:1px solid var(--rule);
+  font-size:11px;line-height:1.5;color:var(--muted);
+  transition:color var(--t-fast) var(--ease-out),border-color var(--t-fast) var(--ease-out)}
+.ovl-toc-link:hover{color:var(--paper-2);border-left-color:var(--line-h)}
+/* 滚动高亮同样只认 aria-current="location"（kernel 的 syncActive 写的就是它） */
+.ovl-toc-link[aria-current]{color:var(--signal);border-left-color:var(--signal)}
+@media(min-width:1280px){.ovl-toc{display:block}}
+
+
+/* ── 焦点可见：面板有 clip-path，外描边会被裁掉，统一用内描边 --signal ── */
+.ovl-input:focus-visible,.ovl-close:focus-visible,
+.ovl-toc-toggle:focus-visible,.ovl-toc-link:focus-visible{outline:2px solid var(--signal);outline-offset:-2px}

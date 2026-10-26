@@ -1,0 +1,61 @@
+/* ============================================================================
+   K-BLACK · Arknights Visual System · L2 base（基底层）
+   ----------------------------------------------------------------------------
+   来源：assets/css/main.css §01 Reset / §03 Stage / §04 Geometry / §05 Atmosphere
+   规则逐条搬运，选择器与声明零改名、零删除；只把颜色与 z 轴换成 var(--x)。
+   @keyframes floatUp / drift 已收拢到 motion.css（关键帧按名解析，与出现顺序无关）。
+   ============================================================================ */
+
+/* ═══ 01 Reset ═══════════════════════════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+
+/* ═══ 03 Stage ═══════════════════════════════════════════════════════════ */
+html{scroll-behavior:smooth;font-size:16px;background:var(--ink)}
+body{
+  font-family:var(--font);
+  color:var(--paper-2);
+  letter-spacing:var(--ls-body);
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+  background-color:var(--ink);
+  background-image:var(--noise),var(--grid-4);
+  background-size:140px 140px,64px 64px,64px 64px;
+  background-attachment:fixed;
+}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit}
+::selection{background:var(--signal);color:var(--ink)}
+:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+/* 线性图标统一 1.5px 圆端点（覆盖 SVG 呈现属性，不改结构） */
+svg[viewBox="0 0 7 15"]{stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+
+
+/* ═══ 04 Geometry · 45° 切角 ════════════════════════════════════════════ */
+.cut,.prof-card,.stack-card,.about-card,.news-featured,.page-box,.loader-terminal,.post-content pre,
+.ovl-panel,.ovl-toc{
+  --cut:var(--cut-md);
+  clip-path:polygon(var(--cut) 0,100% 0,100% calc(100% - var(--cut)),calc(100% - var(--cut)) 100%,0 100%,0 var(--cut));
+}
+/* 切角处 1px 边框线保持连续，不断裂 */
+.cut::before,.prof-card::before,.stack-card::before,.about-card::before,.lnk::before,.page-box::before,.loader-terminal::before,.post-content pre::before,
+.ovl-panel::before,.ovl-toc::before{
+  content:"";position:absolute;left:0;top:calc(var(--cut) - 1px);
+  width:calc(var(--cut) * 1.4143);height:1px;background:var(--line);
+  transform:rotate(-45deg);transform-origin:0 50%;z-index:var(--z-content);
+}
+
+
+/* ═══ 05 Atmosphere · 尘埃 / 光线 / 扫描线 ══════════════════════════════ */
+/* 尘埃粒子：JS 生成并设定 size/duration/delay，此处只定义形态与轨迹 */
+.hero-particles{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:var(--z-base)}
+.particle{position:absolute;background:var(--signal);border-radius:0;opacity:0;animation-name:floatUp;animation-timing-function:linear;animation-iteration-count:infinite}
+/* 面板光线：低频冷色光池，营造终端机箱内的环境光变化 */
+.hero-orbs{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:var(--z-base)}
+.orb{position:absolute;border-radius:50%;filter:blur(90px);opacity:0;animation-name:drift;animation-timing-function:linear;animation-iteration-count:infinite}
+.orb-1{width:520px;height:520px;background:var(--glow-1);top:10%;left:4%;animation-duration:28s}
+.orb-2{width:400px;height:400px;background:var(--glow-2);top:56%;right:6%;animation-duration:34s;animation-delay:-12s}
+.orb-3{width:300px;height:300px;background:var(--glow-3);bottom:6%;left:42%;animation-duration:24s;animation-delay:-6s}
+/* 扫描线：终端 CRT 质感，透明度 ≤22% 不影响阅读 */
+.hero-scanlines{position:absolute;inset:0;pointer-events:none;z-index:var(--z-base);opacity:.22;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,var(--scanline) 2px,var(--scanline) 4px)}

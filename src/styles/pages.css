@@ -1,0 +1,204 @@
+/* ============================================================================
+   K-BLACK · Arknights Visual System · L4 pages（页面级组合层）
+   ----------------------------------------------------------------------------
+   来源：assets/css/main.css §10 Page Blocks（档案 / 技术栈 / 链接 / 关于 / 页脚 / 404）
+         + §11 Content（文章正文 / 代码 / 语法高亮 .chroma / PRTS 启动终端 .loader-*）
+   为什么 §10 与 §11 同层：原文件里 10 在 11 之前，两者共享大量同属性、同特异性的
+   选择器（font-size / color / padding / margin-bottom…）。若把 §11 塞进 components
+   层（先于 §10 加载），就会反转这些选择器的层叠次序。同层放置 = 零次序变化。
+   规则逐条搬运，选择器与声明零改名、零删除；颜色换成 var(--x)。
+   V3 新增：.loader-line.warn（超时降级行）、.loader-retry（失败重试，复用 .cut 配方）。
+   ============================================================================ */
+
+/* ═══ 10 Page Blocks ════════════════════════════════════════════════════ */
+/* 档案卡片：2px 顶边作为唯一强边 */
+.prof-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.prof-card{position:relative;padding:28px;background:var(--ink-2);
+  border:1px solid var(--line);border-top:2px solid var(--line-h);
+  transition:border-color var(--t-fast) var(--ease-out)}
+.prof-card:hover{border-color:var(--line-h);border-top-color:var(--signal)}
+.prof-card.wide{grid-column:1/-1}
+.prof-label{font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:.2em;color:var(--muted);
+  margin-bottom:12px;text-transform:uppercase}
+.prof-card h2{font-family:var(--display);font-size:28px;font-weight:700;letter-spacing:var(--ls-title);
+  line-height:1.05;margin-bottom:14px;color:var(--paper);text-transform:uppercase}
+.prof-card h3{font-size:15px;font-weight:700;letter-spacing:.02em;margin-bottom:14px;color:var(--paper-2)}
+.prof-card p{font-size:14px;color:var(--paper-2);line-height:1.75;margin-bottom:8px}
+.prof-more{display:inline-flex;align-items:center;gap:6px;margin-top:18px;font-size:10px;font-weight:700;
+  letter-spacing:.14em;color:var(--signal);text-transform:uppercase;transition:color var(--t-fast) var(--ease-out)}
+.prof-more:hover{color:var(--paper)}
+.prof-more svg{width:5px;height:10px;fill:none;stroke:currentColor}
+
+/* 技术栈页 */
+.stack-lead{font-size:14px;color:var(--paper-2);line-height:1.75;margin:-24px 0 32px}
+.stack-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px;align-items:start}
+.stack-card{position:relative;padding:24px 26px;background:var(--ink-2);
+  border:1px solid var(--line);border-top:2px solid var(--line-h);
+  transition:border-color var(--t-fast) var(--ease-out)}
+.stack-card:hover{border-color:var(--line-h);border-top-color:var(--signal)}
+.stack-card h3{font-size:15px;font-weight:700;margin-bottom:16px;color:var(--paper-2)}
+
+/* 链接列表 */
+.links-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
+.lnk{position:relative;display:flex;align-items:center;gap:14px;padding:16px 20px;background:var(--ink-2);
+  border:1px solid var(--line);transition:background var(--t-fast) var(--ease-out),border-color var(--t-fast) var(--ease-out)}
+.lnk:hover{background:var(--ink-3);border-color:var(--line-h)}
+.lnk.hide{display:none}
+.lnk-ico{display:flex;align-items:center;justify-content:center;width:38px;height:38px;flex-shrink:0;
+  font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.06em;color:var(--signal);
+  background:var(--ink);border:1px solid var(--line);
+  clip-path:polygon(var(--cut-xs) 0,100% 0,100% 100%,0 100%,0 var(--cut-xs))}
+.lnk-body{flex:1;min-width:0}
+.lnk-name{font-size:14px;font-weight:700;margin-bottom:3px;color:var(--paper)}
+.lnk-desc{font-size:12px;color:var(--muted)}
+.lnk-arrow{display:flex;flex-shrink:0;color:var(--muted);transition:color var(--t-fast) var(--ease-out)}
+.lnk:hover .lnk-arrow{color:var(--signal);transform:translateX(4px)}
+
+/* 关于区 */
+.about-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.about-card{position:relative;padding:24px;background:var(--ink-2);
+  border:1px solid var(--line);border-top:2px solid var(--line-h);
+  transition:border-color var(--t-fast) var(--ease-out)}
+.about-card:hover{border-color:var(--line-h);border-top-color:var(--signal)}
+.about-label{font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:.2em;color:var(--muted);
+  margin-bottom:12px;text-transform:uppercase}
+.about-card h3{font-size:15px;font-weight:700;margin-bottom:10px;color:var(--paper-2)}
+.about-card p{font-size:13px;color:var(--muted);line-height:1.7}
+.about-card strong{color:var(--signal);font-weight:700}
+.about-card a{color:var(--signal);border-bottom:1px solid transparent;transition:border-color var(--t-fast) var(--ease-out)}
+.about-card a:hover{border-bottom-color:var(--signal)}
+.about-card p#runtime{font-family:var(--mono);font-size:18px;font-weight:700;line-height:1.4;
+  color:var(--paper);font-variant-numeric:tabular-nums}
+.about-sm{font-family:var(--mono)!important;font-size:12px!important;color:var(--muted)!important;margin-top:5px!important}
+
+/* 页脚：左侧版权 + 链接上下堆叠，右侧 logo，两者垂直居中对齐 */
+.foot{display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto;
+  align-items:center;column-gap:40px;row-gap:9px;
+  max-width:1200px;margin:0 auto;padding:34px 24px;border-top:1px solid var(--rule)}
+.foot-copy{grid-area:1/1;font-family:var(--mono);font-size:11px;
+  letter-spacing:.08em;color:var(--muted);margin:0}
+.foot-links{grid-area:2/1;display:flex;gap:22px}
+/* logo 跨两行并垂直居中，与左侧文字块同处一个水平带 */
+.foot-logo{grid-area:1/2/3/3;align-self:center;display:block;height:48px;width:auto}
+.foot-links a{font-size:11px;font-weight:700;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;
+  transition:color var(--t-fast) var(--ease-out)}
+.foot-links a:hover{color:var(--signal)}
+
+/* 独立页 / 404 */
+.page-box{position:relative;width:90%;max-width:460px;padding:48px 40px;text-align:center;background:var(--ink-2);
+  border:1px solid var(--line);border-top:2px solid var(--line-h);--cut:var(--cut-lg)}
+.page-box .tag{font-family:var(--mono);font-size:9px;letter-spacing:.2em;color:var(--muted);margin-bottom:16px;
+  background:none;border:none;height:auto;padding:0;clip-path:none;text-transform:uppercase}
+.page-box h1{font-family:var(--display);font-size:34px;font-weight:700;letter-spacing:-.04em;line-height:1;
+  margin-bottom:20px;color:var(--paper);text-transform:uppercase}
+.page-box .page-content{font-size:14px;color:var(--paper-2);line-height:1.75;margin-bottom:8px}
+.page-box .page-content p{margin-bottom:8px}
+.page-box .hl{color:var(--signal)}
+
+
+/* ═══ 11 Content ════════════════════════════════════════════════════════ */
+.post-content{max-width:780px;font-size:16px;line-height:1.8;color:var(--paper-2)}
+.post-content h1{font-family:var(--display);font-size:38px;font-weight:700;letter-spacing:-.04em;line-height:1.05;
+  color:var(--paper);margin:40px 0 16px;text-transform:uppercase}
+/* H2 带信号色短标尺 */
+.post-content h2{position:relative;font-size:24px;font-weight:700;letter-spacing:var(--ls-title);color:var(--paper);
+  margin:36px 0 16px;padding-bottom:10px;border-bottom:1px solid var(--rule)}
+.post-content h2::after{content:"";position:absolute;left:0;bottom:-1px;width:52px;height:2px;background:var(--signal)}
+.post-content h3{font-size:19px;font-weight:700;color:var(--paper);margin:28px 0 12px}
+.post-content h4{font-size:16px;font-weight:700;color:var(--paper);margin:20px 0 8px}
+.post-content p{margin-bottom:20px}
+.post-content ul,.post-content ol{margin:14px 0;padding-left:28px}
+.post-content li{margin-bottom:8px;line-height:1.8}
+.post-content code{font-family:var(--mono);font-size:13px;padding:2px 6px;
+  background:var(--ink-3);border:1px solid var(--rule);color:var(--signal)}
+.post-content pre{position:relative;padding:20px;margin:20px 0;overflow-x:auto;
+  background:var(--ink);border:1px solid var(--line)}
+.post-content pre code{padding:0;background:none;border:none;font-size:13px;line-height:1.7;color:var(--paper-2)}
+.post-content table{width:100%;border-collapse:collapse;margin:20px 0}
+.post-content th,.post-content td{padding:11px 14px;border:1px solid var(--rule);font-size:13px;text-align:left}
+.post-content th{background:var(--ink-2);color:var(--paper);font-weight:700}
+.post-content strong{color:var(--paper);font-weight:700}
+.post-content a{color:var(--signal);border-bottom:1px solid transparent;transition:border-color var(--t-fast) var(--ease-out)}
+.post-content a:hover{border-bottom-color:var(--signal)}
+.post-content blockquote{padding:14px 20px;margin:20px 0;background:var(--ink-2);
+  border-left:2px solid var(--signal);color:var(--paper-2)}
+.post-content hr{border:none;border-top:1px solid var(--rule);margin:32px 0}
+.post-content img{max-width:100%;height:auto;border:1px solid var(--line)}
+
+.code-wrap{position:relative}
+.code-wrap .copy-btn{position:absolute;top:8px;right:8px;display:flex;align-items:center;gap:6px;min-height:32px;
+  padding:6px 11px 6px 9px;cursor:pointer;opacity:0;
+  font-family:var(--font);font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;
+  background:var(--ink-2);border:1px solid var(--line);border-left:2px solid var(--signal);
+  transition:opacity var(--t-fast) var(--ease-out),background var(--t-fast) var(--ease-out),color var(--t-fast) var(--ease-out)}
+.code-wrap:hover .copy-btn{opacity:1}
+.code-wrap .copy-btn:hover{background:var(--ink-3);color:var(--paper);border-color:var(--line-h)}
+.code-wrap .copy-btn.copied{background:var(--signal-dim);color:var(--signal);border-color:var(--signal)}
+.code-wrap .copy-btn svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+
+/* 语法高亮：信号青 / 状态绿 / 墨阶 */
+.chroma{color:var(--paper-2);background-color:transparent;-webkit-text-size-adjust:none}
+.chroma .err{color:var(--danger)}
+.chroma .lnlinks{outline:none;text-decoration:none;color:inherit}
+.chroma .lntd{vertical-align:top;padding:0;margin:0;border:0}
+.chroma .lntable{border-spacing:0;padding:0;margin:0;border:0}
+.chroma .hl{background-color:var(--ink-3)}
+.chroma .lnt,.chroma .ln{white-space:pre;-webkit-user-select:none;user-select:none;margin-right:.4em;padding:0 .4em;color:var(--disabled)}
+.chroma .line{display:flex}
+.chroma .k,.chroma .kc,.chroma .kn,.chroma .kp,.chroma .kr,.chroma .o,.chroma .ow,.chroma .or,
+.chroma .nt,.chroma .cp,.chroma .cpf{color:var(--signal)}
+.chroma .kd,.chroma .kt,.chroma .nb,.chroma .nl,.chroma .nv,.chroma .vc,.chroma .vg,
+.chroma .vi,.chroma .vm,.chroma .bp{color:var(--paper)}
+.chroma .kd,.chroma .nl,.chroma .nb,.chroma .bp{font-style:italic}
+.chroma .nf,.chroma .fm,.chroma .na,.chroma .nc{color:var(--state)}
+.chroma .gi{color:var(--state);font-weight:700}
+.chroma .s,.chroma .sa,.chroma .sb,.chroma .sc,.chroma .dl,.chroma .sd,.chroma .s2,.chroma .se,
+.chroma .sh,.chroma .si,.chroma .sx,.chroma .sr,.chroma .s1,.chroma .ss{color:var(--code-str)}
+.chroma .m,.chroma .mb,.chroma .mf,.chroma .mh,.chroma .mi,.chroma .il,.chroma .mo{color:var(--warn)}
+.chroma .c,.chroma .ch,.chroma .cm,.chroma .c1,.chroma .cs{color:var(--muted)}
+.chroma .no,.chroma .nd,.chroma .ni,.chroma .ne,.chroma .nn,.chroma .nx,.chroma .p,
+.chroma .ld,.chroma .gp,.chroma .gs,.chroma .gt,.chroma .w{color:var(--paper-2)}
+.chroma .gd{color:var(--danger)}
+.chroma .ge{text-decoration:underline}
+.chroma .go{color:var(--muted)}
+.chroma .gu{font-weight:700;color:var(--paper)}
+.chroma .gl{text-decoration:underline}
+
+/* PRTS 启动终端 */
+.loader{position:fixed;inset:0;z-index:var(--z-terminal);display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:var(--ink);transition:opacity var(--t-slow),visibility var(--t-slow)}
+.loader.hide{opacity:0;visibility:hidden;pointer-events:none}
+.loader-terminal{position:relative;width:min(560px,90vw);font-family:var(--mono);
+  background:var(--ink);border:1px solid var(--line)}
+.loader-term-bar{display:flex;align-items:center;gap:6px;padding:9px 12px;background:var(--ink-2);border-bottom:1px solid var(--rule)}
+.loader-term-dot{width:5px;height:5px;background:var(--line-h)}
+.loader-term-title{font-size:10px;letter-spacing:.14em;color:var(--muted);margin-left:8px;text-transform:uppercase}
+.loader-term-body{display:flex;flex-direction:column;gap:2px;padding:20px;min-height:210px}
+.loader-line{font-size:12px;line-height:1.85;color:var(--signal);opacity:0;transform:translateY(4px);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  transition:opacity .3s var(--ease-out),transform .3s var(--ease-out)}
+.loader-line.show{opacity:1;transform:translateY(0)}
+.loader-line.dim{color:var(--muted)}
+.loader-line.gold{color:var(--state)}
+.loader-line.err,.loader-line.red{color:var(--danger)}
+.loader-cursor{display:inline-block;width:7px;height:13px;margin-left:2px;vertical-align:middle;
+  background:var(--signal);animation:blink .8s step-end infinite}
+.loader-progress{display:flex;align-items:center;gap:10px;margin-top:16px}
+.loader-pbar{position:relative;flex:1;height:4px;overflow:hidden;background:var(--ink);border:1px solid var(--line)}
+.loader-pbar-fill{height:100%;width:0;background:var(--signal);transition:width var(--t-fast) linear}
+.loader-ptxt{min-width:34px;font-size:10px;letter-spacing:.08em;color:var(--muted);
+  text-align:right;font-variant-numeric:tabular-nums}
+
+/* ── V3 新增：启动序列的降级态与重试（契约 §4 允许；31 号文档 §7） ── */
+/* 全局超时放行 / 后台降级：黄色行，与 .red 失败行区分 */
+.loader-line.warn{color:var(--warn)}
+/* 失败重试：复用 .cut 按钮配方（0 圆角 / 1px --line / hover --line-h / 文字 --signal）。
+   切角几何自带（单角 4px，与 .tag/.news-badge/.lnk-ico 同款小控件配方），
+   kernel 只给 className="loader-retry" 也能正确显示，不依赖 markup 加 .cut。 */
+.loader-retry{position:relative;display:inline-flex;--cut:var(--cut-xs);
+  clip-path:polygon(var(--cut) 0,100% 0,100% 100%,0 100%,0 var(--cut));align-items:center;gap:8px;min-height:32px;margin-top:12px;padding:7px 16px 7px 13px;
+  font-family:var(--font);font-size:11px;font-weight:700;letter-spacing:.14em;color:var(--signal);text-transform:uppercase;cursor:pointer;
+  background:var(--ink-2);border:1px solid var(--line);border-left:2px solid var(--signal);
+  transition:background var(--t-fast) var(--ease-out),color var(--t-fast) var(--ease-out),border-color var(--t-fast) var(--ease-out)}
+.loader-retry:hover{background:var(--ink-3);border-color:var(--line-h);color:var(--paper)}
+.loader-retry:active{transform:scale(.98)}
