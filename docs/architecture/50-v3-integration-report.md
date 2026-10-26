@@ -128,3 +128,26 @@ loader display:none · main-wrap opacity:1 · 进度 100% · 6 条 `boot:*` meas
 - 删除 50 项（Hugo 目录）
 - 修改 1 项（`.gitignore`）
 - 新增 13 项（`build/` `templates/` `src/` `scripts/` `data/*.toml` `docs/` `.github/` `package*.json` `static/_headers` `.htmlvalidate.json`）
+
+
+---
+
+## 9. 运行时同步（实时更新，第二轮追加）
+
+**问题**：第一版把内容同步放在构建期，push 文章仓库后必须重建站点才生效——不符合「实时更新」的原始需求。
+
+**修正**：静态页保留（SEO / 无 JS / URL parity），另加运行时层。
+
+| 能力 | 实现 | 证据（Firefox BiDi，本地 16 篇 / 模拟远端 17 篇） |
+|---|---|---|
+| 清单比对 | 远端 `meta.json`（jsDelivr → raw 双源，各 2s）与本地基线比 | 启动行：`[  OK  ] 文章清单 16 篇 · 远端 17 篇 · 9 ms` |
+| 列表热更新 | 只替换 `[data-remote-list]` 子容器，静态新闻保留 | 列表 5 条，首条为新文章；`.remote-note`「已同步 1 篇更新」 |
+| 新文章直达 | 404 页识别 `/posts/<slug>/` → 拉 md → marked 渲染 → 注入 | `#remoteArticle` 显示正文、`title` 与 canonical 更新、`pre.chroma` 高亮生效 |
+| 离线降级 | 双源都失败 → WARN 行，不动列表 | `[ WARN ] 文章清单 离线缓存 · 16 篇`，列表仍 5 条，正文可读 |
+| 可访问性 | 克隆模板后 `aria-label` 用标题覆盖 | `aria-label="实时同步验证：这篇文章没有重新构建过"` |
+
+**体积代价**：入口 gzip 5,890 → 6,109 B（预算 6.5 KB）；`marked`（14.4 KB gz）只在 404 渲染时加载，`hljs` 按需注册 bash/ini/cpp（整包 53.9 → 13.1 KB gz）。
+
+**顺带修掉的构建 bug**：chunk 互相引用时旧构建只回写入口的 chunk 名，导致 overlay 动态 import 404（内核阶段 FAIL）。现在引用先归一化再算哈希、全局回写。
+
+**门禁**：新增 `check:remote`（`data-content-base` / `#postItemTpl` / `[data-remote-list]` / 404 容器 / 动态 import / 超时与 catch），已并入 `npm run check`。

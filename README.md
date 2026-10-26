@@ -36,6 +36,17 @@ npm run check                       # tokens / boot / links / budget / parity / 
 CONTENT_DIR=/path/to/articles npm run build
 ```
 
+## 实时更新（不需要重新构建）
+
+文章仓库 push 之后，站点**下次访问**就能看到，不用等站点重建：
+
+1. 运行时拉远端清单（jsDelivr 优先，raw 兜底，各 2s 超时），与构建期 `/meta.json` 比对；
+2. 比基线新 → 只替换 `[data-remote-list]` 子容器，并在顶部显示「已同步 N 篇更新」；
+3. 访问尚未构建的新文章 `/posts/<slug>/` → 404 页客户端渲染（marked + 按需 hljs），标题/描述/canonical 一并更新；
+4. 远端不可达 → 一行 `[ WARN ] 文章清单 离线缓存`，静态内容照常。
+
+代价：运行时能力全部在按需 chunk 里，入口 gzip 5.97 KB；首屏不加载 marked/hljs。
+
 ## 设计要点
 
 - **静态 MPA**：81 页，URL 与迁移前 1:1（`/posts/<slug>/`、`/tags/<slug>/`、中文路径不变）。
@@ -47,9 +58,9 @@ CONTENT_DIR=/path/to/articles npm run build
 
 | 项 | 上限 | 当前 |
 |---|---|---|
-| CSS | 9.9 KB | 7.17 KB |
-| JS 入口 | 6.0 KB | 5.75 KB |
-| 首页 HTML | 4.5 KB | 4.24 KB |
+| CSS | 9.9 KB | 7.26 KB |
+| JS 入口 | 6.5 KB | 5.97 KB |
+| 首页 HTML | 4.5 KB | 4.40 KB |
 | 单页 HTML | 55 KB | 34.5 KB |
 
 ## 发布

@@ -147,6 +147,9 @@ body{counter-reset:sec}
   margin-bottom:3px;font-variant-numeric:tabular-nums}
 .news-title{font-size:14px;color:var(--paper-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .news-item:hover .news-title{color:var(--paper)}
+/* 运行时注入的摘要行（remote.js 克隆 #postItemTpl）：两行截断，超出打点 */
+.news-summary{margin-top:4px;font-size:13px;line-height:1.6;color:var(--muted);
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .news-arrow{display:flex;flex-shrink:0;color:var(--muted);transition:color var(--t-fast) var(--ease-out)}
 .news-item:hover .news-arrow{color:var(--signal);transform:translateX(4px)}
 .news-arrow svg{width:7px;height:15px}
@@ -155,6 +158,39 @@ body{counter-reset:sec}
 .news-more:hover{color:var(--paper)}
 .news-more svg{width:7px;height:14px;fill:none;stroke:currentColor}
 .news-more:hover svg{transform:translateX(4px)}
+
+/* ── 运行时同步提示条 ─────────────────────────────────────────────────────
+   remote.js 注入：<p class="remote-note"><span>已同步 N 篇…</span><button class="cut">刷新</button></p>
+   文字左、按钮右；容器给 cursor 是契约要求，真正可点的是内层 .cut 按钮。
+   hover 用 --paper 而非 --signal-dim：--signal-dim 是 rgba(24,209,255,.12) 的背景色令牌，
+   当文字色在 --ink 上对比度约 1.1:1（等于看不见）；要「变暗」请改用 --disabled。 */
+.remote-note{display:flex;align-items:center;gap:12px;margin:0 0 12px;padding:6px 10px;
+  border-left:2px solid var(--signal);font-size:12px;line-height:1.6;color:var(--signal);cursor:pointer}
+.remote-note:hover{color:var(--paper)}
+/* .cut 只给几何，按钮配方在这里补；position:relative 让 .cut::before 的 1px 斜线留在按钮内 */
+.remote-note .cut,.remote-error + .cut{position:relative;flex-shrink:0;margin-left:auto;--cut:var(--cut-xs);
+  min-height:26px;padding:3px 10px;cursor:pointer;font-family:var(--mono);font-size:10px;
+  letter-spacing:.08em;color:var(--signal);text-transform:uppercase;background:var(--ink-2);
+  border:1px solid var(--line);
+  transition:color var(--t-fast) var(--ease-out),border-color var(--t-fast) var(--ease-out)}
+.remote-note .cut:hover,.remote-error + .cut:hover{color:var(--paper);border-color:var(--line-h)}
+.remote-note .cut:disabled,.remote-error + .cut:disabled{color:var(--disabled);cursor:default}
+
+/* ── 运行时远程文章（404 外壳运行时会补挂 main.css，故放本层） ────────────────
+   remote.js 注入链：.remote-loading → .remote-head(.remote-title + .remote-meta)
+   + .post-content.remote-article（正文复用 §11 的 .post-content）；失败态
+   .remote-error + button.cut（紧邻兄弟，配方与 .remote-note .cut 共用一条规则）。
+   .remote-title 沿用文章页标题的字号/字重（28px/400，见 templates/posts/single.mjs
+   的 <h1>），字距沿用外壳的 -.03em，不另造一套。 */
+.remote-loading{margin:0;padding:24px 0 24px 12px;border-left:1px solid var(--signal);
+  font-family:var(--mono);font-size:12px;line-height:1.7;color:var(--muted)}
+.remote-head{margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid var(--line)}
+.remote-title{margin:0 0 12px;font-family:var(--display);font-size:28px;font-weight:400;
+  letter-spacing:-.03em;line-height:1.2;color:var(--paper)}
+.remote-meta{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin:0;
+  font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--muted)}
+.remote-error{margin:0 0 12px;padding:12px 0 12px 12px;border-left:1px solid var(--danger);
+  font-family:var(--mono);font-size:12px;line-height:1.7;color:var(--danger)}
 
 /* ── 标签 Chip：左上 4px 单切 ── */
 .tags{display:flex;flex-wrap:wrap;gap:6px}

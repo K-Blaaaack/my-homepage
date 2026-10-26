@@ -10,7 +10,7 @@
 | 项 | 结论 |
 |---|---|
 | 构建器 | **完全弃用 Hugo**，自有 Node 构建（markdown-it + highlight.js + lightningcss + esbuild） |
-| 内容源 | **独立仓库** `K-Blaaaack/articles`，站点构建期读取（不是运行时拉取） |
+| 内容源 | **独立仓库** `K-Blaaaack/articles`：构建期固化静态页 + 运行时增量同步（push 即生效，见 §7） |
 | 渲染形态 | 静态 MPA + 渐进增强；URL 与现状 1:1 |
 | 视觉 | 令牌与类名不变；只允许新增覆盖层与启动失败态 |
 | 运行时 | 原生 ESM，esbuild 打包 + 动态分包；启动序列 6 个真实检查点 |
@@ -237,3 +237,53 @@ node scripts/check-parity.mjs   # 新旧 URL 集合 diff
 - 首页 HTML gzip ≤ 4.5 KB；CSS gzip ≤ 9.9 KB；JS gzip ≤ 6 KB。
 - 断网首页：红行 + 可重试 + 正文可读。
 - 禁用 JS：正文立即可见，无遮罩。
+
+---
+
+## 7. 运行时同步（实时更新，2026-10-27 追加）
+
+**目标**：向 `K-Blaaaack/articles` push 之后，站点**下次访问**即可看到新文章与新列表，不需要重新构建站点。
+
+**双轨制**：
+
+| 轨 | 时机 | 作用 |
+|---|---|---|
+| 静态 | 构建期 | SEO、首屏、无 JS、URL parity；由 `/meta.json` 作为「本地基线」 |
+| 运行时 | 每次访问 | 拉远端 `meta.json`，比基线新则重渲染列表；新文章 URL 由 404 页客户端渲染 |
+
+### 7.1 远端地址
+
+```
+<html data-content-base="https://raw.githubusercontent.com/K-Blaaaack/articles/main">
+```
+
+- 清单：`{base}/meta.json`
+- 正文：`{base}/posts/<slug>/index.md`
+- 媒体：`{base}/posts/<slug>/<相对路径>`
+
+### 7.2 判定规则
+
+- 比较 `articles.length` 与最新文章 slug；**只增不减**（远端少于本地时不动，避免旧缓存覆盖新构建）。
+- 请求 2s 超时；失败静默降级，不阻塞启动、不影响正文可读性。
+- 状态写入 `remoteState = { status: 'same'|'stale'|'offline', localCount, remoteCount, fetchedAt }`。
+
+### 7.3 列表热更新
+
+- 容器：`[data-remote-list="home"|"posts"|"tag"]`（tag 容器带 `data-tag`）。
+- 模板：`<template id="postItemTpl">`，类名与静态列表项**逐字一致**。
+- 更新后在列表顶部插入 `.remote-note`：「已同步 N 篇更新 · 来自内容仓库」。
+
+### 7.4 新文章直达
+
+- 触发：`data-page="404"` 且 `pathname` 匹配 `^/posts/([^/]+)/$` 且 slug 不在本地 meta。
+- 流程：拉 md → 解析 front matter → 运行时 markdown 渲染 → 注入 `#remoteArticle` → 更新 title/description/canonical。
+- 失败：显示「该文章可能尚未构建，稍后再试」+ 重试按钮，不白屏。
+
+### 7.5 预算
+
+- 入口 gzip ≤ 6.2 KB；`marked` 与 `highlight.js` **只能**出现在按需 chunk。
+- 运行时同步代码不得进入首屏关键路径：manifest 阶段失败也要放行。
+
+### 7.6 门禁
+
+- `check:remote`：断言 `data-content-base` 存在、`#postItemTpl` 与 `[data-remote-list]` 存在、`remote.js` 为动态 import（入口无静态引用）、失败路径含 catch。

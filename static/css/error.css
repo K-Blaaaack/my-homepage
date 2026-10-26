@@ -12,7 +12,7 @@
 }
 body{
   font-family:var(--cjk);color:var(--paper-2);
-  display:flex;justify-content:center;align-items:center;min-height:100vh;
+  display:flex;flex-wrap:wrap;justify-content:center;align-items:center;align-content:center;min-height:100vh;
   -webkit-font-smoothing:antialiased;
   background-color:var(--ink);
   background-image:
@@ -42,5 +42,29 @@ p{font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:26px}
 .btn:hover{background:var(--ink-3);border-color:var(--line-h);border-left-color:var(--signal);color:var(--paper)}
 .btn:active{transform:scale(.98)}
 .btn svg{width:7px;height:14px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+/* ── 运行时注入的 tag 列表（remote.js 克隆 #postItemTpl 生成 .news-item） ──
+   tag 终页只加载本文件，不引 main.css，所以这里给一份最小可用样式：
+   令牌与 main.css 同源（--ink-2/--ink-3/--line/--line-h/--signal/--paper/--paper-2/--muted），
+   尺寸贴近首页列表（14px 标题 / 13px 摘要 / 11px 日期 / 9px 标签 / 7×15 箭头），不追求逐像素一致。
+   .posts-list 用 flex-basis:100% 独占一行（body 已 flex-wrap），空容器高度为 0，404 外观不变。 */
+.posts-list{flex:0 0 100%;width:100%;max-width:720px;margin:0 auto;padding:0 16px;text-align:left}
+.news-item{display:flex;align-items:center;gap:14px;padding:13px 14px 13px 12px;margin-bottom:8px;
+  color:inherit;text-decoration:none;background:var(--ink-2);
+  border:1px solid var(--line);border-left:2px solid transparent;
+  transition:background .18s ease-out,border-color .18s ease-out}
+.news-item:hover{background:var(--ink-3);border-left-color:var(--signal)}
+.news-tag{flex-shrink:0;padding:3px 7px;font-family:var(--mono);font-size:9px;letter-spacing:.08em;
+  color:var(--muted);background:var(--ink-3);border:1px solid var(--line);white-space:nowrap;
+  clip-path:polygon(4px 0,100% 0,100% 100%,0 100%,0 4px)}
+.news-body{flex:1;min-width:0}
+.news-title{font-size:14px;color:var(--paper-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.news-item:hover .news-title{color:var(--paper)}
+.news-summary{margin-top:4px;font-size:13px;line-height:1.6;color:var(--muted);
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.news-date{margin-top:4px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--muted);
+  font-variant-numeric:tabular-nums}
+.news-arrow{display:flex;flex-shrink:0;color:var(--muted);transition:color .18s ease-out}
+.news-item:hover .news-arrow{color:var(--signal)}
+.news-arrow svg{width:7px;height:15px}
 :focus-visible{outline:2px solid var(--signal);outline-offset:2px}
 @media(prefers-reduced-motion:reduce){*{transition-duration:.01ms!important}}

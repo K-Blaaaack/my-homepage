@@ -36,6 +36,13 @@ const NEW_SELECTOR_ALLOW = [
   '.no-js .main-wrap',       // 无 JS：正文立即可见（契约 §3.5）
   '.loader-line.warn',       // 启动超时降级行（31 号文档 §7）
   '.loader-retry',           // 启动失败重试（含 :hover/:active/:focus-visible）
+  '.news-summary',           // 运行时注入的摘要行（两行截断）
+  '.remote-note',            // 运行时同步提示条（含内层 .cut 按钮配方）
+  '.remote-loading',         // 404 远程文章：加载占位
+  '.remote-head',            // 404 远程文章：头部容器
+  '.remote-title',           // 404 远程文章：标题
+  '.remote-meta',            // 404 远程文章：日期/标签行
+  '.remote-error',           // 404 远程文章：失败态（含紧邻的 button.cut）
   '.ovl',                    // 覆盖层全部：.ovl / .ovl-search / .ovl-toc / .ovl-*
                              //   选中态用 .ovl-item[aria-selected="true"]、.ovl-toc-link[aria-current]，
                              //   不用 .on（.on 只归导航/tab，未改原规则）

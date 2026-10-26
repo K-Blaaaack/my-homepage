@@ -9,6 +9,7 @@ const checks = [
   ['links', 'scripts/check-links.mjs'],
   ['budget', 'scripts/check-budget.mjs'],
   ['parity', 'scripts/check-parity.mjs'],
+  ['remote', 'scripts/check-remote.mjs'],
   ['css', 'scripts/check-css-parity.mjs'],
   ['html', null], // html-validate，单独处理
 ];

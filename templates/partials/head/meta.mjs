@@ -16,8 +16,6 @@ export function headMeta({ site, page }) {
     `<meta property="og:url" content="${esc(canonical)}">`,
     `<meta property="og:image" content="${esc(image)}">`,
     `<meta name="twitter:card" content="summary">`,
-    `<meta name="twitter:title" content="${esc(page.title)}">`,
-    `<meta name="twitter:description" content="${esc(desc)}">`,
   ];
   if (page.jsonLd) tags.push(`<script type="application/ld+json">${jsonld(page.jsonLd)}</script>`);
   return tags.join('\n');

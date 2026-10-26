@@ -1,6 +1,7 @@
 /** 移植自 layouts/partials/news.html */
 import { esc } from '../../build/html.mjs';
 import { monthPath, dayPath } from '../../build/config.mjs';
+import { postItemTemplate } from './remote-tpl.mjs';
 
 const arrow = '<div class="news-arrow"><svg viewBox="0 0 7 15" width="7" height="15"><use href="#i-arrow"/></svg></div>';
 
@@ -69,8 +70,11 @@ ${tabs}
   </div>
 
   <div class="news-list" id="newsList">
+    <div data-remote-list="home" data-limit="${limit}">
 ${postItems}
+    </div>
 ${dataItems}
   </div>
+${postItemTemplate()}
 </div>`;
 }

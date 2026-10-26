@@ -71,7 +71,7 @@ const FOCUSABLE = 'a[href],button:not([disabled]),input,select,textarea,[tabinde
 
 let mounted = false;
 
-export function init({ store, platform, meta, index, doc = document, win = window } = {}) {
+export function init({ store, platform, meta, index, remote = null, remoteState = null, doc = document, win = window } = {}) {
   if (mounted) return 3;
   mounted = true;
   const state = store.state;
@@ -83,6 +83,13 @@ export function init({ store, platform, meta, index, doc = document, win = windo
   try { views.push(createSearch({ store, platform, docs, meta: meta || state.data.meta, doc, win })); } catch (e) { console.error('[overlay] search', e); }
   try { views.push(createToc({ platform, doc, win })); } catch (e) { console.error('[overlay] toc', e); }
   try { initPage({ doc, win, platform }); views.push('page'); } catch (e) { console.error('[overlay] page', e); }
+  try {
+    // 远端同步层（独立 chunk）：列表热更新 + 404 新文章直达
+    if (remote && typeof remote.mount === 'function') {
+      const n = remote.mount({ doc, win, store, platform, meta: meta || state.data.meta, remoteState });
+      views.push('remote:' + n);
+    }
+  } catch (e) { console.error('[overlay] remote', e); }
 
   return views.length;
 }

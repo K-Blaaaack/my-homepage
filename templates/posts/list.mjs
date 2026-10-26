@@ -1,6 +1,7 @@
 /** 移植自 layouts/posts/list.html */
 import { esc } from '../../build/html.mjs';
 import { monthPath } from '../../build/config.mjs';
+import { postItemTemplate } from '../partials/remote-tpl.mjs';
 
 export function postsListMain({ posts }) {
   const items = posts
@@ -17,8 +18,9 @@ export function postsListMain({ posts }) {
     .join('\n');
   return `<div class="sec" style="min-height:calc(100vh - 56px);padding-top:80px">
   <div class="sec-hd"><div class="sec-tag">POSTS 文章</div><div class="sec-line"></div></div>
-  <div class="posts-list">
+  <div class="posts-list" data-remote-list="posts">
 ${items}
   </div>
+${postItemTemplate()}
 </div>`;
 }

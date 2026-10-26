@@ -5,8 +5,15 @@
  */
 import { esc } from '../../build/html.mjs';
 import { errorShell } from '../partials/error-shell.mjs';
+import { postItemTemplate } from '../partials/remote-tpl.mjs';
 
-export function taxonomyPage({ lang, title, heading, dataPage = 'list' }) {
+export function taxonomyPage({ lang, title, heading, dataPage = 'list', tagSlug, metaCount, assets }) {
+  // tag 终页：外壳仍是 0 链接（1:1 现状），列表容器留给运行时按 data-tag 拉取
+  const extra = tagSlug
+    ? `<div class="posts-list" data-remote-list="tag" data-tag="${esc(tagSlug)}"></div>
+${postItemTemplate()}
+`
+    : '';
   return errorShell({
     lang,
     title,
@@ -14,5 +21,9 @@ export function taxonomyPage({ lang, title, heading, dataPage = 'list' }) {
     tag: 'TAXONOMY',
     heading: heading || title,
     content: '',
+    extra,
+    metaCount,
+    assets,
+    withMainCss: false, // tag 页维持只加载 error.css（现状外观不变）
   });
 }

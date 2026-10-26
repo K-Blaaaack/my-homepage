@@ -103,6 +103,21 @@ export const STAGES = [
       if (!n) throw new Error('清单为空');
       ctx.meta = meta;
       ctx.store.setData({ meta, metaError: null });
+
+      // 远端清单：独立 chunk + 双源（jsDelivr → raw），失败只降级成 WARN，不阻塞启动
+      if (ctx.remoteEnabled !== false) {
+        try {
+          const remote = ctx.remote || await (ctx.loadRemote ? ctx.loadRemote() : import('./remote.js'));
+          ctx.remote = remote;
+          const st = await remote.sync({ doc: ctx.doc, meta });
+          ctx.remoteState = st;
+          ctx.store.setData({ remote: st });
+          if (st && st.status !== 'offline') {
+            return { detail: n + ' 篇 · 远端 ' + st.remoteCount + ' 篇 · ' + (now() - t0).toFixed(0) + ' ms' };
+          }
+        } catch (err) { /* 静默降级 */ }
+        return { warn: true, detail: '离线缓存 · ' + n + ' 篇' };
+      }
       return { detail: n + ' 篇 · ' + (now() - t0).toFixed(0) + ' ms' };
     },
   },
@@ -138,7 +153,10 @@ export const STAGES = [
       const t0 = now();
       let views = 0;
       if (ctx.kernel && typeof ctx.kernel.init === 'function') {
-        views = ctx.kernel.init({ store: ctx.store, platform: ctx.platform, meta: ctx.meta, index: ctx.index }) || 0;
+        views = ctx.kernel.init({
+          store: ctx.store, platform: ctx.platform, meta: ctx.meta, index: ctx.index,
+          remote: ctx.remote, remoteState: ctx.remoteState,
+        }) || 0;
       }
       await frame(ctx.win);
       return { detail: '搜索 / 目录 / 标签 · ' + (now() - t0).toFixed(0) + ' ms', views };
@@ -342,7 +360,10 @@ export async function boot(opts = {}) {
   const ctx = {
     store, platform, doc, win,
     meta: null, index: null, kernel: null,
+    remote: null, remoteState: null,
     kernelEnabled,
+    remoteEnabled: opts.remote !== false,
+    loadRemote: opts.loadRemote,
     metaUrl: opts.metaUrl || '/meta.json',
     indexUrl: opts.indexUrl || '/search/index.json',
     loadKernel: opts.loadKernel,
@@ -441,7 +462,10 @@ async function play(ctx, store, term, ctl, { debug, setProgress, record, ss }) {
       if (stage.kind === 'header') {
         term.write(stage.line || OK + stage.label, '', stage.id);
       } else {
-        term.write(OK + stage.label + ' ' + (result && result.detail ? result.detail : ms.toFixed(0) + ' ms'), '', stage.id);
+        // result.warn = 远端不可达但本地可用：降级行，不算失败（红色留给真失败）
+        const warn = !!(result && result.warn);
+        const detail = result && result.detail ? result.detail : ms.toFixed(0) + ' ms';
+        term.write((warn ? WARN : OK) + stage.label + ' ' + detail, warn ? 'warn' : '', stage.id);
       }
     },
     onFail(stage, reason, index, done) {

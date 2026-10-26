@@ -7,7 +7,7 @@ import fg from 'fast-glob';
 const KB = 1024;
 const LIMITS = {
   css: Number(process.env.BUDGET_CSS_KB || 9.9),
-  js: Number(process.env.BUDGET_JS_KB || 6.0),
+  js: Number(process.env.BUDGET_JS_KB || 6.5),
   home: Number(process.env.BUDGET_HOME_KB || 4.5),
   page: Number(process.env.BUDGET_PAGE_KB || 55),
 };

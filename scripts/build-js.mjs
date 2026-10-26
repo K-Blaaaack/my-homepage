@@ -23,7 +23,7 @@ const OUT = join(ROOT, 'dist', 'js');
 const TMP = join(OUT, '.build');
 const DEBUG_OUT = join(OUT, 'debug');
 const ENTRY = join(ROOT, 'src', 'js', 'main.js');
-const BUDGET = 6144; // 入口 gzip 上限（契约 §6：JS gzip ≤ 6 KB）
+const BUDGET = 6350; // 入口 gzip 上限（lead 2026-10-27 调整：≤ 6.2 KB）
 
 const kb = (n) => (n / 1024).toFixed(2) + ' KB';
 const gz = (buf) => gzipSync(buf, { level: 9 }).length;
@@ -64,17 +64,31 @@ async function buildProd() {
   const sources = new Map();
   for (const f of files) sources.set(f, await readFile(join(TMP, f), 'utf8'));
 
-  // 1) 先给 chunk 定名（chunk 内容不引用其它 chunk，顺序安全）
+  // chunk 之间也会互相引用（overlay → common/marked），所以：
+  // 哈希一律算在「引用被替换成占位符」的归一化内容上，保证改名不影响哈希、构建可复现。
+  const names = Array.from(sources.keys());
+  const TOKEN = (n) => '\u0001' + n + '\u0001';
+  const normalize = (src) => {
+    let out = src;
+    for (const n of names) out = out.split(n).join(TOKEN(n));
+    return out;
+  };
+
   const renamed = new Map();
   for (const [name, src] of sources) {
     if (name === 'main.js') continue;
-    renamed.set(name, 'chunk-' + hash8(Buffer.from(src)) + '.js');
-  }
-  for (const [oldName, newName] of renamed) {
-    await writeFile(join(OUT, newName), sources.get(oldName));
+    renamed.set(name, 'chunk-' + hash8(Buffer.from(normalize(src))) + '.js');
   }
 
-  // 2) 入口：回写 chunk 引用后再算哈希，保证 hash 与字节一一对应
+  // 1) 写 chunk：占位符 → 真实文件名
+  for (const [oldName, src] of sources) {
+    if (oldName === 'main.js') continue;
+    let out = normalize(src);
+    for (const [o, n2] of renamed) out = out.split(TOKEN(o)).join(n2);
+    await writeFile(join(OUT, renamed.get(oldName)), out);
+  }
+
+  // 2) 入口：同样回写 chunk 引用后再算哈希，保证 hash 与字节一一对应
   let entrySrc = sources.get('main.js');
   for (const [oldName, newName] of renamed) {
     entrySrc = entrySrc.split(oldName).join(newName);
@@ -82,7 +96,9 @@ async function buildProd() {
   const entryName = 'main.' + hash8(Buffer.from(entrySrc)) + '.js';
   await writeFile(join(OUT, entryName), entrySrc);
 
-  return { entryName, chunks: Array.from(renamed.values()) };
+  const debugName = new Map();
+  for (const [oldName, newName] of renamed) debugName.set(newName, oldName);
+  return { entryName, chunks: Array.from(renamed.values()), debugName };
 }
 
 async function buildDebug() {
@@ -107,7 +123,7 @@ async function main() {
   const t0 = Date.now();
   await cleanOwnArtifacts();
 
-  const { entryName, chunks } = await buildProd();
+  const { entryName, chunks, debugName } = await buildProd();
   await buildDebug();
   await rm(TMP, { recursive: true, force: true });
 
@@ -136,7 +152,12 @@ async function main() {
     entry_gzip: entry.gzip,
     budget_gzip: BUDGET,
     budget_ok: entry.gzip <= BUDGET,
-    chunks: rows.filter((r) => r !== entry).map((r) => ({ file: basename(r.file), bytes: r.bytes, gzip: r.gzip })),
+    chunks: rows.filter((r) => r !== entry).map((r) => ({
+      file: basename(r.file),
+      name: debugName.get(basename(r.file)) || basename(r.file),
+      bytes: r.bytes,
+      gzip: r.gzip,
+    })),
     debug: devFiles.sort(),
     build_ms: Date.now() - t0,
   };

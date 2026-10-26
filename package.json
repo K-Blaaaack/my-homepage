@@ -20,7 +20,8 @@
     "check:tokens": "node scripts/check-tokens.mjs",
     "check:boot": "node scripts/check-boot.mjs",
     "check:parity": "node scripts/check-parity.mjs",
-    "check:css": "node scripts/check-css-parity.mjs"
+    "check:css": "node scripts/check-css-parity.mjs",
+    "check:remote": "node scripts/check-remote.mjs"
   },
   "devDependencies": {
     "esbuild": "^0.28.2",
@@ -31,5 +32,8 @@
     "lightningcss": "^1.33.0",
     "markdown-it": "^15.0.3",
     "markdown-it-anchor": "^10.0.0"
+  },
+  "dependencies": {
+    "marked": "^18.1.2"
   }
 }

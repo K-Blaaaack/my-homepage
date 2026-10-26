@@ -6,6 +6,14 @@ import { fileURLToPath } from 'node:url';
 import { parseToml } from './toml.mjs';
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+/** 运行时实时同步的内容源（模板写进 <html data-content-base>，静态页内容不受影响） */
+export const CONTENT_BASE =
+  process.env.CONTENT_BASE || 'https://cdn.jsdelivr.net/gh/K-Blaaaack/articles@main';
+
+/** 主源不可用时的回退源（<html data-content-fallback>） */
+export const CONTENT_FALLBACK =
+  process.env.CONTENT_FALLBACK || 'https://raw.githubusercontent.com/K-Blaaaack/articles/main';
+
 export const DIST_DIR = path.join(ROOT, 'dist');
 export const STATIC_DIR = path.join(ROOT, 'static');
 export const DATA_DIR = path.join(ROOT, 'data');

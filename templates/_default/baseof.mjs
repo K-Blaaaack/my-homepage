@@ -8,6 +8,7 @@
  *   - <noscript> 兜底：无 JS 时 loader 隐藏、正文可见
  */
 import { esc } from '../../build/html.mjs';
+import { CONTENT_BASE, CONTENT_FALLBACK } from '../../build/config.mjs';
 import { headMeta } from '../partials/head/meta.mjs';
 import { cssLink } from '../partials/head/css.mjs';
 import { jsScripts } from '../partials/head/js.mjs';
@@ -32,12 +33,13 @@ const NO_JS = `<script>document.documentElement.classList.remove("no-js");docume
 <script>setTimeout(function(){if(!window.__kb){document.documentElement.classList.remove("js");document.documentElement.classList.add("no-js")}},4000);</script>
 <noscript><style>.loader{display:none!important}.main-wrap{opacity:1!important}</style></noscript>`;
 
-export function documentShell({ site, page, assets, year, main }) {
+export function documentShell({ site, page, assets, year, main, metaCount }) {
   const isHome = page.dataPage === 'home';
   return `<!DOCTYPE html>
-<html lang="${esc(site.lang)}" class="no-js" data-page="${esc(page.dataPage)}">
+<html lang="${esc(site.lang)}" class="no-js" data-page="${esc(page.dataPage)}" data-content-base="${esc(CONTENT_BASE)}" data-content-fallback="${esc(CONTENT_FALLBACK)}">
 <head>
 <meta charset="UTF-8">
+<meta name="kb:meta-count" content="${Number(metaCount) || 0}">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="${esc(page.themeColor || '#080a0b')}">
 <meta name="color-scheme" content="dark">

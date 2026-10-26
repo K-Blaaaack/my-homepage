@@ -119,7 +119,7 @@ export function createRenderer(ctx) {
   const withShell = (route, fields, main) => {
     const page = pageCtx(route, fields);
     page.jsonLd = jsonLdFor({ site, route, page });
-    return documentShell({ site, page, assets, year, main });
+    return documentShell({ site, page, assets, year, main, metaCount: ctx.posts.length });
   };
 
   return {
@@ -176,6 +176,8 @@ export function createRenderer(ctx) {
             title: `Tags - ${site.title}`,
             heading: 'Tags',
             dataPage: 'list',
+            metaCount: ctx.posts.length,
+            assets,
           });
 
         case 'tag':
@@ -184,10 +186,18 @@ export function createRenderer(ctx) {
             title: `${route.tag.name} - ${site.title}`,
             heading: route.tag.name,
             dataPage: 'list',
+            tagSlug: route.tag.slug,
+            metaCount: ctx.posts.length,
+            assets,
           });
 
         case '404':
-          return notFoundPage({ lang: site.lang, siteTitle: site.title });
+          return notFoundPage({
+            lang: site.lang,
+            siteTitle: site.title,
+            metaCount: ctx.posts.length,
+            assets,
+          });
 
         default:
           throw new Error(`未知路由类型: ${route.kind}`);

@@ -1,6 +1,11 @@
 /** 移植自 layouts/partials/head/js.html：运行时计时 + 入口模块 */
 import { esc } from '../../../build/html.mjs';
 
+/** 仅入口模块 + onerror 回退（404 / tag 页用，不带运行时计时） */
+export function entryScript({ assets }) {
+  return `<script type="module" src="${esc(assets.js)}" onerror="document.documentElement.classList.replace('js','no-js')"></script>`;
+}
+
 export function jsScripts({ site, assets }) {
   return `<script>
 (function(){
@@ -10,5 +15,5 @@ export function jsScripts({ site, assets }) {
   u();setInterval(u,1000);
 })();
 </script>
-<script type="module" src="${esc(assets.js)}" onerror="document.documentElement.classList.replace('js','no-js')"></script>`;
+${entryScript({ assets })}`;
 }
