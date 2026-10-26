@@ -92,7 +92,7 @@ function readManifest(file) {
 /**
  * 解析 dist/css 与 dist/js 的指纹产物（stylist / kernel 产出）。
  * 优先读 manifest.json（集成契约）；读不到时降级 glob，并在日志里 warn。
- * @returns {{css: string, js: string, notes: string[]}}
+ * @returns {{css: string, js: string, overlay: string|null, notes: string[]}}
  */
 export function resolveAssets() {
   const notes = [];
@@ -101,6 +101,13 @@ export function resolveAssets() {
 
   let css = cssManifest && typeof cssManifest.file === 'string' ? cssManifest.file : null;
   let js = jsManifest && typeof jsManifest.entry === 'string' ? '/js/' + jsManifest.entry : null;
+
+  // overlay chunk：按 kernel manifest 的 name 字段定位（不靠哈希猜）
+  let overlay = null;
+  const chunks = jsManifest && Array.isArray(jsManifest.chunks) ? jsManifest.chunks : [];
+  const named = chunks.find((c) => c && c.name === 'chunk-overlay.js');
+  if (named && typeof named.file === 'string') overlay = '/js/' + named.file;
+  else if (jsManifest) notes.push('dist/js/manifest.json 缺 chunk name 字段，只 modulepreload 入口');
 
   const pick = (dir, re) => {
     if (!fs.existsSync(dir)) return null;
@@ -121,7 +128,7 @@ export function resolveAssets() {
   if (css === '/css/main.css') notes.push('dist/css 无指纹产物，HTML 引用 /css/main.css');
   if (js === '/js/main.js') notes.push('dist/js 无指纹产物，HTML 引用 /js/main.js');
 
-  return { css, js, notes };
+  return { css, js, overlay, notes };
 }
 
 /** 日期格式化：统一按内容源的 +08:00 输出，不依赖构建机时区 */

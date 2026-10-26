@@ -1,5 +1,6 @@
 /** build/content.mjs — 读取内容仓库：文章、独立页、标签、媒体清单 */
 
+import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import fg from 'fast-glob';
@@ -98,7 +99,11 @@ export function loadContent(contentDir) {
       continue;
     }
 
-    const raw = fs.readFileSync(abs, 'utf8');
+    // 正文哈希：对 md 原始字节做 sha256 取前 16 位十六进制。
+    // 不 trim、不做换行归一化 —— 必须与内容仓库 gen-meta.mjs 逐字节一致。
+    const bytes = fs.readFileSync(abs);
+    const hash = createHash('sha256').update(bytes).digest('hex').slice(0, 16);
+    const raw = bytes.toString('utf8');
     let parsed;
     try {
       parsed = matter(raw);
@@ -123,6 +128,7 @@ export function loadContent(contentDir) {
         bundle: isBundle,
         url: `/posts/${slug}/`,
         out: `posts/${slug}/index.html`,
+        hash,
         ...fm,
         body: parsed.content,
       });

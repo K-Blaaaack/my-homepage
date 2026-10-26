@@ -8,6 +8,7 @@ export function headMeta({ site, page }) {
   const tags = [
     `<title>${esc(page.title)}</title>`,
     `<meta name="description" content="${esc(desc)}">`,
+    page.postHash ? `<meta name="kb:post-hash" content="${esc(page.postHash)}">` : '',
     `<link rel="canonical" href="${esc(canonical)}">`,
     `<meta property="og:type" content="${esc(page.ogType || 'website')}">`,
     `<meta property="og:site_name" content="${esc(site.title)}">`,

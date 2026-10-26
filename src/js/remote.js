@@ -7,9 +7,10 @@
  *  3. markdown / hljs 只在「404 页命中未构建的新文章」时才 import，不进入口包。
  */
 
-// 国内网络：raw.githubusercontent.com 常被重置，jsDelivr 优先，raw 兜底。
-const DEFAULT_PRIMARY = 'https://cdn.jsdelivr.net/gh/K-Blaaaack/articles@main';
-const DEFAULT_FALLBACK = 'https://raw.githubusercontent.com/K-Blaaaack/articles/main';
+// 文章必须实时：gh raw 是实时源（branch head），排第一；jsDelivr 只做兜底。
+const DEFAULT_PRIMARY = 'https://raw.githubusercontent.com/K-Blaaaack/articles/main';
+const DEFAULT_FALLBACK = 'https://cdn.jsdelivr.net/gh/K-Blaaaack/articles@main';
+const isRaw = (u) => /raw\.githubusercontent\.com/i.test(String(u || ''));
 const SHIFT = 8 * 3600 * 1000;
 const trimBase = (v) => String(v || '').trim().replace(/\/+$/, '');
 
@@ -49,19 +50,26 @@ let offlineLogged = false;
 
 export function getRemoteState() { return state; }
 
-/** 双源：data-content-base（首选）+ data-content-fallback（兜底），缺省 jsDelivr → raw。 */
+/**
+ * 双源：gh raw（实时）永远排第一，jsDelivr 兜底。
+ * 两个属性都读，谁像 raw 谁优先 —— builder 给的顺序不影响实时性。
+ */
 export function contentBases(doc = document) {
-  let primary = '';
-  let fallback = '';
+  let a = '';
+  let b = '';
   try {
     const el = doc && doc.documentElement;
     if (el) {
-      primary = trimBase(el.getAttribute('data-content-base'));
-      fallback = trimBase(el.getAttribute('data-content-fallback'));
+      a = trimBase(el.getAttribute('data-content-base'));
+      b = trimBase(el.getAttribute('data-content-fallback'));
     }
   } catch { /* 忽略 */ }
-  if (!primary) primary = DEFAULT_PRIMARY;
-  if (!fallback) fallback = /jsdelivr/i.test(primary) ? DEFAULT_FALLBACK : DEFAULT_PRIMARY;
+  const list = [a, b].filter(Boolean);
+  const raw = list.filter(isRaw)[0] || '';
+  const rest = list.filter((u) => u !== raw);
+  const primary = raw || rest[0] || DEFAULT_PRIMARY;
+  const others = list.filter((u) => u !== primary);
+  let fallback = others[0] || (primary === DEFAULT_PRIMARY ? DEFAULT_FALLBACK : DEFAULT_PRIMARY);
   if (fallback === primary) fallback = '';
   return { primary, fallback };
 }
@@ -139,10 +147,43 @@ export function compareMeta(localArticles, remoteArticles) {
   const remoteCount = r.length;
   const newestLocal = l[0] ? String(l[0].slug || '') : '';
   const newestRemote = r[0] ? String(r[0].slug || '') : '';
+  const bySlug = {};
+  for (const a of l) if (a && a.slug) bySlug[a.slug] = a;
+  // 逐篇 hash 全等比较：改老文章正文时篇数和最新 slug 都不变，只有 hash 会变
+  let changed = 0;
+  for (const a of r) {
+    const b = bySlug[a && a.slug];
+    if (b && a.hash && b.hash && a.hash !== b.hash) changed += 1;
+  }
+  const added = Math.max(0, remoteCount - localCount);
   let status = 'same';
-  if (remoteCount > localCount) status = 'stale';
-  else if (remoteCount === localCount && newestRemote && newestRemote !== newestLocal) status = 'stale';
-  return { status, localCount, remoteCount, newestLocal, newestRemote, added: Math.max(0, remoteCount - localCount) };
+  if (added > 0 || (remoteCount === localCount && newestRemote && newestRemote !== newestLocal)) status = 'stale';
+  if (changed > 0) status = 'updated'; // updated 是 superset：也可能同时有新增
+  return { status, localCount, remoteCount, newestLocal, newestRemote, added, changed };
+}
+
+/** 顶层 commit（builder / 内容仓库产出，字段名容错）。 */
+export function commitOf(meta) {
+  const m = meta || {};
+  return String(m.commit || m.commit_sha || m.rev || m.sha || '');
+}
+
+/**
+ * commit 锁定基址：jsDelivr 对 @main 有缓存，md/图片必须走 @<commit> 才必然新鲜。
+ * 拿不到 commit 时回落原基址。
+ */
+export function pinned(base, commit) {
+  const b = String(base || '').replace(/\/+$/, '');
+  const c = String(commit || '');
+  if (!c || !/jsdelivr/i.test(b)) return b; // gh raw 是实时源，不需要也不能 pin
+  if (/@[^/]+$/.test(b)) return b.replace(/@[^/]+$/, '@' + c);
+  return b;
+}
+
+/** gh raw 有 CDN 缓存（max-age 约 5 分钟），实时必须打时间戳；CDN 源不打，保住缓存。 */
+export function freshUrl(url, base) {
+  if (!isRaw(base)) return url;
+  return url + (url.indexOf('?') < 0 ? '?' : '&') + 't=' + Date.now();
 }
 
 /* ───────────────────────── 同步 ───────────────────────── */
@@ -152,7 +193,7 @@ async function fetchMetaOnce(base, timeout, bust) {
   const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
   const timer = setTimeout(() => { if (ctrl) ctrl.abort(); }, timeout);
   try {
-    const url = base + '/meta.json' + (bust ? '?t=' + Date.now() : '');
+    const url = freshUrl(base + '/meta.json', base) + (bust ? '&r=' + Date.now() : '');
     const res = await fetch(url, {
       cache: 'no-cache',
       credentials: 'omit',
@@ -203,6 +244,7 @@ export async function sync({ doc = document, meta = null, timeout = 2000, base =
   const local = meta && Array.isArray(meta.articles) ? meta.articles : [];
   if (payload) {
     const cmp = compareMeta(sortByDate(local), payload.articles);
+    const commit = commitOf(payload.remote);
     state = {
       status: cmp.status,
       localCount: local.length,
@@ -210,10 +252,13 @@ export async function sync({ doc = document, meta = null, timeout = 2000, base =
       articles: payload.articles,
       fetchedAt: Date.now(),
       base: used,
+      assetBase: pinned(used, commit),
+      commit,
       tried,
       error: null,
       ms: now() - t0,
       added: cmp.added,
+      changed: cmp.changed,
       meta: payload.remote,
     };
     offlineLogged = false;
@@ -257,7 +302,14 @@ export function mount({ doc = document, store = null, platform = null, meta = nu
     const slug = pendingSlug(doc, meta);
     if (slug) {
       views += 1;
-      renderArticle({ doc, meta, slug, base: st.base || contentBase(doc), store });
+      renderArticle({ doc, meta, slug, base: assetBase(st, doc), store });
+    } else {
+      const post = postSlug(doc);
+      if (post) {
+        views += 1;
+        // boot 完成后异步拉取，不占任何启动检查点
+        setTimeout(() => refreshPost({ doc, meta, st, slug: post, store }), 0);
+      }
     }
   } catch (err) { if (typeof console !== 'undefined') console.error('[remote] article', err); }
 
@@ -277,8 +329,178 @@ export function pendingSlug(doc = document, meta = null) {
   } catch { return null; }
 }
 
+/** 内容基址：优先 commit 锁定地址（jsDelivr @main 有缓存，不可信）。 */
+function assetBase(st, doc) {
+  return (st && (st.assetBase || st.base)) || contentBase(doc);
+}
+
+/** 文章页 slug：data-page="post" 且 /posts/<slug>/。 */
+export function postSlug(doc = document) {
+  try {
+    if (doc.documentElement.getAttribute('data-page') !== 'post') return null;
+    const loc = (doc.defaultView || {}).location;
+    const m = /^\/posts\/([^/]+)\/$/.exec(loc ? loc.pathname : '');
+    return m ? decodeURIComponent(m[1]) : null;
+  } catch { return null; }
+}
+
+async function fetchText(url, timeout, base) {
+  const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+  const timer = setTimeout(() => { if (ctrl) ctrl.abort(); }, timeout || 8000);
+  try {
+    const res = await fetch(freshUrl(url, base), { cache: 'no-cache', credentials: 'omit', mode: 'cors', signal: ctrl ? ctrl.signal : undefined });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    return await res.text();
+  } finally { clearTimeout(timer); }
+}
+
+/** 用户正在输入 / 选中文本时不做就地替换。 */
+function canReplace(doc, win) {
+  const ae = doc.activeElement;
+  if (ae && (/^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName) || ae.isContentEditable)) return false;
+  try {
+    const sel = win && win.getSelection ? win.getSelection() : null;
+    if (sel && !sel.isCollapsed && String(sel).length > 2) return false;
+  } catch { /* 忽略 */ }
+  return true;
+}
+
+const slugify = (s) => String(s).trim().toLowerCase()
+  .replace(/[^\w\u4e00-\u9fa5 -]/g, '')
+  .replace(/\s+/g, '-')
+  .replace(/^-+|-+$/g, '');
+
+/** 锚点 id 规则：标题文本 slug 化，重复加 -1/-2。 */
+function decorateHeadings(root) {
+  const seen = {};
+  const hs = Array.from(root.querySelectorAll('h1,h2,h3,h4,h5,h6'));
+  for (const h of hs) {
+    if (h.id) continue;
+    const base = slugify(h.textContent) || 'section';
+    seen[base] = (seen[base] || 0) + 1;
+    h.id = seen[base] > 1 ? base + '-' + (seen[base] - 1) : base;
+  }
+  return hs.length;
+}
+
+/** 文章候选基址：gh raw（实时）→ @commit（不可变，必然新鲜）→ @main → 兜底。 */
+export function articleBases(doc, st) {
+  const { primary, fallback } = contentBases(doc);
+  const all = [primary, fallback];
+  const raw = all.filter(isRaw)[0] || '';
+  const cdn = all.filter((u) => /jsdelivr/i.test(u))[0] || '';
+  const list = [];
+  const push = (u) => { const v = trimBase(u); if (v && list.indexOf(v) < 0) list.push(v); };
+  push(raw);
+  if (cdn) { if (st && st.commit) push(pinned(cdn, st.commit)); push(cdn); }
+  push(primary);
+  push(fallback);
+  return list;
+}
+
+/** 拉一篇文章的 md：按候选基址逐个试，返回 { data, node, base }。 */
+async function buildArticle(doc, bases, slug) {
+  let lastErr = null;
+  for (let i = 0; i < bases.length; i++) {
+    const base = bases[i];
+    try {
+      const md = await fetchText(base + '/posts/' + encodeURIComponent(slug) + '/index.md', i === 0 ? 4000 : 2500, base);
+      const { data, body } = parseFrontMatter(md);
+      const { marked } = await import('marked');
+      const node = doc.createElement('div');
+      node.className = 'post-content remote-article';
+      node.innerHTML = marked.parse(body, { gfm: true });
+      decorateHeadings(node);
+      rewriteAssets(node, base, slug);
+      await highlight(node);
+      return { data, node, base };
+    } catch (err) { lastErr = err; }
+  }
+  throw lastErr || new Error('md 拉取失败');
+}
+
+/**
+ * 文章页：无条件实时拉正文（不拿 hash 拦渲染），离屏渲染完成后整体替换，恢复 scrollY。
+ * hash 只用来决定是否显示「内容已更新」。
+ */
+async function refreshPost({ doc, meta, st, slug, store, tries = 0 }) {
+  const art = doc.querySelector('.post-content');
+  if (!art) return false;
+  const win = doc.defaultView;
+  if (!canReplace(doc, win)) {
+    if (tries < 4) setTimeout(() => refreshPost({ doc, meta, st, slug, store, tries: tries + 1 }), 1500);
+    return false;
+  }
+  const y = win && typeof win.scrollY === 'number' ? win.scrollY : 0;
+  const bases = articleBases(doc, st);
+  try {
+    const { data, node, base } = await buildArticle(doc, bases, slug);
+    // 离屏节点已就绪，这里才动 DOM（静态 HTML 在此之前一直可见）
+    while (art.firstChild) art.removeChild(art.firstChild);
+    while (node.firstChild) art.appendChild(node.firstChild);
+    updatePostHeader(doc, data);
+    updateHead(doc, data, slug, meta);
+    const local = ((meta && meta.articles) || []).find((a) => a && a.slug === slug);
+    const remote = ((st && st.articles) || []).find((a) => a && a.slug === slug);
+    const changed = !!(remote && remote.hash && local && local.hash && remote.hash !== local.hash);
+    if (changed || !local || !local.hash) insertArticleNote(doc, slug, meta);
+    if (win && typeof win.scrollTo === 'function') win.scrollTo(0, y);
+    if (store) store.setData({ remoteArticle: { slug, title: data.title || slug, base, at: Date.now() } });
+    return true;
+  } catch (err) {
+    // 失败保留静态 HTML，静默
+    return false;
+  }
+}
+
+function updatePostHeader(doc, data) {
+  const head = doc.querySelector('.post-header');
+  if (!head) return;
+  const h1 = head.querySelector('h1');
+  if (h1 && data.title) h1.textContent = data.title;
+  const date = head.querySelector('.news-date');
+  if (date && data.date) date.textContent = dayPath(data.date);
+  if (Array.isArray(data.tags)) {
+    const box = Array.from(head.querySelectorAll('div')).find((d) => d.querySelector('span.tag'));
+    if (box) {
+      box.textContent = '';
+      data.tags.forEach((t) => {
+        const s = doc.createElement('span');
+        s.className = 'tag';
+        s.textContent = t;
+        box.appendChild(s);
+      });
+    }
+  }
+}
+
+function insertArticleNote(doc, slug, meta) {
+  const art = doc.querySelector('.post-content');
+  if (!art || !art.parentNode) return;
+  const host = art.parentNode;
+  const old = host.querySelector('.remote-note');
+  if (old && old.parentNode) old.parentNode.removeChild(old);
+  const note = makeNote(doc, '内容已更新 · 来自内容仓库', () => refreshArticle(doc, meta, slug));
+  const head = host.querySelector('.post-header');
+  if (head) host.insertBefore(note, head);
+  else host.insertBefore(note, art);
+}
+
+async function refreshArticle(doc, meta, slug) {
+  if (refreshing) return;
+  refreshing = true;
+  try {
+    const st = await sync({ doc, meta, bust: true, timeout: 4000 });
+    await refreshPost({ doc, meta, st, slug, store: null });
+  } finally { refreshing = false; }
+}
+
 function applyLists(doc, st, meta, store) {
-  if (!st || st.status !== 'stale') return 0;
+  // stale（新增）和 updated（正文/标题/摘要变了）都要重渲染列表
+  if (!st || (st.status !== 'stale' && st.status !== 'updated')) return 0;
+  if (st.remoteCount < st.localCount) return 0; // 只增不减：构建比内容新时不动
+
+
   const tpl = doc.getElementById('postItemTpl');
   if (!tpl) return 0;
   const boxes = Array.from(doc.querySelectorAll('[data-remote-list]'));
@@ -354,21 +576,31 @@ function buildItem(doc, tpl, a, kind) {
   return node;
 }
 
-function insertNote(doc, box, st) {
-  const old = box.querySelector ? box.querySelector('.remote-note') : null;
-  if (old && old.parentNode) old.parentNode.removeChild(old);
+function makeNote(doc, text, onClick) {
   const note = doc.createElement('p');
   note.className = 'remote-note';
   const label = doc.createElement('span');
-  const added = Math.max(0, (st.remoteCount || 0) - (st.localCount || 0));
-  label.textContent = added > 0 ? '已同步 ' + added + ' 篇更新 · 来自内容仓库' : '远端清单有更新 · 来自内容仓库';
+  label.textContent = text;
   const btn = doc.createElement('button');
   btn.type = 'button';
   btn.className = 'cut';
   btn.textContent = '刷新';
-  btn.addEventListener('click', () => refresh(doc, null, btn));
+  btn.addEventListener('click', onClick);
   note.appendChild(label);
   note.appendChild(btn);
+  return note;
+}
+
+function insertNote(doc, box, st) {
+  const old = box.querySelector ? box.querySelector('.remote-note') : null;
+  if (old && old.parentNode) old.parentNode.removeChild(old);
+  const added = Math.max(0, (st.remoteCount || 0) - (st.localCount || 0));
+  const changed = st.changed || 0;
+  const parts = [];
+  if (added > 0) parts.push(added + ' 篇新增');
+  if (changed > 0) parts.push(changed + ' 篇更新');
+  const text = (parts.length ? parts.join(' · ') : '远端清单有更新') + ' · 来自内容仓库';
+  const note = makeNote(doc, text, () => refresh(doc, null, null));
   if (box.insertBefore) box.insertBefore(note, box.firstChild); else box.appendChild(note);
 }
 
@@ -403,30 +635,14 @@ async function renderArticle({ doc, meta, slug, base, store }) {
   box.appendChild(loading);
 
   try {
-    const url = base.replace(/\/+$/, '') + '/posts/' + encodeURIComponent(slug) + '/index.md';
-    const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
-    const timer = setTimeout(() => { if (ctrl) ctrl.abort(); }, 8000);
-    let res;
-    try {
-      res = await fetch(url, { cache: 'no-cache', credentials: 'omit', mode: 'cors', signal: ctrl ? ctrl.signal : undefined });
-    } finally { clearTimeout(timer); }
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const text = await res.text();
-    const { data, body } = parseFrontMatter(text);
+    const built = await buildArticle(doc, articleBases(doc, state), slug);
+    const { data, node } = built;
     if (data.draft === true) throw new Error('草稿未发布');
-
-    const { marked } = await import('marked');
-    const html = marked.parse(body, { gfm: true });
-    const art = doc.createElement('article');
-    art.className = 'post-content remote-article';
-    art.innerHTML = html;
-    rewriteAssets(art, base, slug);
 
     box.textContent = '';
     box.appendChild(heading(doc, data, slug));
-    box.appendChild(art);
-
-    const hl = await highlight(art);
+    box.appendChild(node);
+    const hl = node.querySelectorAll('pre.chroma').length;
     updateHead(doc, data, slug, meta);
     await ensureMainCss(doc);
     if (store) store.setData({ remoteArticle: { slug, title: data.title || slug, highlighted: hl, at: Date.now() } });
@@ -608,8 +824,8 @@ async function ensureMainCss(doc) {
 }
 
 const api = {
-  sync, mount, getRemoteState, contentBase, contentBases, compareMeta, parseFrontMatter,
-  parseYamlLite, pendingSlug, toChroma, monthPath, dayPath,
+  sync, mount, getRemoteState, contentBase, contentBases, compareMeta, commitOf, pinned, freshUrl,
+  parseFrontMatter, parseYamlLite, pendingSlug, postSlug, articleBases, toChroma, monthPath, dayPath,
 };
 
 // 调试出口：window.__kb.remote（main.js 先建好 window.__kb）

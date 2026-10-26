@@ -1,6 +1,16 @@
 /** 移植自 layouts/partials/head/js.html：运行时计时 + 入口模块 */
 import { esc } from '../../../build/html.mjs';
 
+/**
+ * 慢网优化：解析阶段就发起下载（modulepreload 语义，不是 preload as=script）。
+ * 只预载入口与 overlay；remote 由 boot 的 manifest 阶段 import，marked/hljs 严禁预载。
+ */
+export function modulePreloads({ assets }) {
+  const lines = [`<link rel="modulepreload" href="${esc(assets.js)}">`];
+  if (assets.overlay) lines.push(`<link rel="modulepreload" href="${esc(assets.overlay)}">`);
+  return lines.join('\n');
+}
+
 /** 仅入口模块 + onerror 回退（404 / tag 页用，不带运行时计时） */
 export function entryScript({ assets }) {
   return `<script type="module" src="${esc(assets.js)}" onerror="document.documentElement.classList.replace('js','no-js')"></script>`;

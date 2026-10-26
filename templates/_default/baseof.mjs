@@ -11,7 +11,7 @@ import { esc } from '../../build/html.mjs';
 import { CONTENT_BASE, CONTENT_FALLBACK } from '../../build/config.mjs';
 import { headMeta } from '../partials/head/meta.mjs';
 import { cssLink } from '../partials/head/css.mjs';
-import { jsScripts } from '../partials/head/js.mjs';
+import { jsScripts, modulePreloads } from '../partials/head/js.mjs';
 import { loaderCooldown } from '../partials/head/loader.mjs';
 import { svgDefs } from '../partials/svg-defs.mjs';
 import { loaderPartial } from '../partials/loader.mjs';
@@ -46,6 +46,7 @@ export function documentShell({ site, page, assets, year, main, metaCount }) {
 ${headMeta({ site, page })}
 ${ICONS}
 <link rel="preload" as="fetch" href="/meta.json" crossorigin>
+${modulePreloads({ assets })}
 ${cssLink({ assets })}
 ${SKIP_STYLE}
 ${loaderCooldown()}

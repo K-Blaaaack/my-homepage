@@ -2,7 +2,7 @@
 import { esc } from '../../build/html.mjs';
 import { CONTENT_BASE, CONTENT_FALLBACK } from '../../build/config.mjs';
 import { cssLink } from './head/css.mjs';
-import { entryScript } from './head/js.mjs';
+import { entryScript, modulePreloads } from './head/js.mjs';
 
 const arrow =
   '<svg viewBox="0 0 7 15"><polyline points="1,1 6,7.5 1,14" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>';
@@ -40,7 +40,8 @@ ${text ? `  <p>${esc(text)}</p>\n` : ''}${content || ''}  <a href="/" class="btn
 </div>`;
 
   const inner = `${box}
-${remoteArticle ? '<div id="remoteArticle" hidden></div>\n' : ''}${extra || ''}`;
+<div class="remote-note-slot"></div>
+${remoteArticle ? '<div id="remoteArticle" hidden data-slug=""></div>\n' : ''}${extra || ''}`;
 
   const body = mainWrap
     ? `<div class="main-wrap" style="opacity:1">
@@ -59,7 +60,7 @@ ${inner}</main>
 <meta name="color-scheme" content="dark">
 <title>${esc(title)}</title>
 <link rel="preload" as="fetch" href="/meta.json" crossorigin>
-${withMainCss && assets ? cssLink({ assets }) + '\n' : ''}<link rel="stylesheet" href="/css/error.css">
+${assets ? modulePreloads({ assets }) + '\n' : ''}${withMainCss && assets ? cssLink({ assets }) + '\n' : ''}<link rel="stylesheet" href="/css/error.css">
 <script>document.documentElement.classList.remove("no-js");document.documentElement.classList.add("js");</script>
 <noscript><style>.main-wrap{opacity:1!important}</style></noscript>
 </head>

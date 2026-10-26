@@ -13,7 +13,7 @@ export function postMain({ post, html }) {
 ${tags}
     </div>
   </div>
-  <article class="post-content">
+  <article class="post-content" data-slug="${esc(post.slug)}">
 ${html}
   </article>
 </div>`;

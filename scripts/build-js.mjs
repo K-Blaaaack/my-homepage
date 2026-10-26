@@ -23,7 +23,7 @@ const OUT = join(ROOT, 'dist', 'js');
 const TMP = join(OUT, '.build');
 const DEBUG_OUT = join(OUT, 'debug');
 const ENTRY = join(ROOT, 'src', 'js', 'main.js');
-const BUDGET = 6350; // 入口 gzip 上限（lead 2026-10-27 调整：≤ 6.2 KB）
+const BUDGET = 6656; // 入口 gzip 上限（lead 2026-10-27 二次调整：≤ 6.5 KB）
 
 const kb = (n) => (n / 1024).toFixed(2) + ' KB';
 const gz = (buf) => gzipSync(buf, { level: 9 }).length;

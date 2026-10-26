@@ -11,9 +11,10 @@
 const OK = '> [  OK  ] ';
 const FAIL = '> [ FAIL ] ';
 const WARN = '> [ WARN ] ';
-const DBG = '> [ DBG  ] ';
 export const GLOBAL_DEADLINE = 2500;
 const FLAVOR_BUDGET = 400;
+/** core 阶段「软等待」：超过这个时间只是行文案降级，import 继续跑，到了照常挂载。 */
+export const SOFT_KERNEL_WAIT = 3000;
 
 const now = () => (typeof performance !== 'undefined' && performance.now ? performance.now() : Date.now());
 
@@ -38,6 +39,17 @@ function raceTimeout(promise, ms) {
       (e) => { clearTimeout(t); reject(e); },
     );
   });
+}
+
+/** 内核加载：只发一次，失败重试 1 次；promise 缓存在 ctx 上，绝不重复下载。 */
+function loadKernelOnce(ctx) {
+  if (ctx.kernelPromise) return ctx.kernelPromise;
+  const load = ctx.loadKernel || (() => import('./overlay.js'));
+  ctx.kernelPromise = load().catch((err) => {
+    ctx.kernelError = err;
+    return load();
+  });
+  return ctx.kernelPromise;
 }
 
 /** 已加载脚本的真实字节（PerformanceResourceTiming）；不可得时返回 0。 */
@@ -79,20 +91,27 @@ export const STAGES = [
     },
   },
   {
-    id: 'core', weight: 20, timeout: 3000, label: '运行时内核', kind: 'ok',
+    id: 'core', weight: 20, timeout: 10000, label: '运行时内核', kind: 'ok',
     applies: (ctx) => ctx.kernelEnabled !== false,
     run: async (ctx) => {
       const t0 = now();
-      // 真实网络分包：overlay 是独立 chunk，这里才发出请求
-      const mod = await (ctx.loadKernel ? ctx.loadKernel() : import('./overlay.js'));
-      const ms = now() - t0;
-      ctx.kernel = mod;
+      // 真实网络分包：overlay 是独立 chunk，这里才发出请求。
+      // 关键：promise 一旦发出就不再 race 丢弃 —— 慢网络只影响行文案，到了照常挂载。
+      const p = loadKernelOnce(ctx);
+      p.then((mod) => ctx.onKernelReady && ctx.onKernelReady(mod, t0),
+             (err) => ctx.onKernelFail && ctx.onKernelFail(err));
+      const settled = await Promise.race([
+        p.then(() => 'ok', () => 'fail'),
+        sleep(SOFT_KERNEL_WAIT).then(() => 'slow'),
+      ]);
+      if (settled === 'fail') throw ctx.kernelError || new Error('内核加载失败');
+      if (settled === 'slow') return { warn: true, detail: '加载中（慢网络），继续后台加载' };
       const kb = ctx.kernelKb();
-      return { detail: (kb > 0 ? kb + ' KB · ' : '') + ms.toFixed(0) + ' ms' };
+      return { detail: (kb > 0 ? kb + ' KB · ' : '') + (now() - t0).toFixed(0) + ' ms' };
     },
   },
   {
-    id: 'manifest', weight: 25, timeout: 3000, label: '文章清单', kind: 'ok',
+    id: 'manifest', weight: 25, timeout: 6000, label: '文章清单', kind: 'ok',
     run: async (ctx) => {
       const t0 = now();
       const res = await fetch(ctx.metaUrl, { cache: 'no-store', credentials: 'same-origin' });
@@ -113,7 +132,8 @@ export const STAGES = [
           ctx.remoteState = st;
           ctx.store.setData({ remote: st });
           if (st && st.status !== 'offline') {
-            return { detail: n + ' 篇 · 远端 ' + st.remoteCount + ' 篇 · ' + (now() - t0).toFixed(0) + ' ms' };
+            const upd = st.changed ? ' · 更新 ' + st.changed + ' 篇' : '';
+            return { detail: n + ' 篇 · 远端 ' + st.remoteCount + ' 篇' + upd + ' · ' + (now() - t0).toFixed(0) + ' ms' };
           }
         } catch (err) { /* 静默降级 */ }
         return { warn: true, detail: '离线缓存 · ' + n + ' 篇' };
@@ -151,13 +171,9 @@ export const STAGES = [
     applies: (ctx) => ctx.kernelEnabled !== false,
     run: async (ctx) => {
       const t0 = now();
-      let views = 0;
-      if (ctx.kernel && typeof ctx.kernel.init === 'function') {
-        views = ctx.kernel.init({
-          store: ctx.store, platform: ctx.platform, meta: ctx.meta, index: ctx.index,
-          remote: ctx.remote, remoteState: ctx.remoteState,
-        }) || 0;
-      }
+      const views = ctx.mountViews();
+      ctx.viewsStageDone = true;
+      if (views < 0) return { warn: true, detail: '内核加载中，到达后自动挂载' };
       await frame(ctx.win);
       return { detail: '搜索 / 目录 / 标签 · ' + (now() - t0).toFixed(0) + ' ms', views };
     },
@@ -369,6 +385,24 @@ export async function boot(opts = {}) {
     loadKernel: opts.loadKernel,
     heroImages: () => heroImages(doc),
     kernelKb: opts.kernelKb || scriptKb,
+    viewsMounted: -1,
+    viewsStageDone: false,
+  };
+
+  /** 幂等挂载：views 阶段与「迟到的内核」谁先到谁挂，只挂一次。未就绪返回 -1。 */
+  ctx.mountViews = () => {
+    if (!ctx.kernel || typeof ctx.kernel.init !== 'function') return -1;
+    if (ctx.viewsMounted >= 0) return ctx.viewsMounted;
+    try {
+      ctx.viewsMounted = ctx.kernel.init({
+        store, platform, meta: ctx.meta, index: ctx.index,
+        remote: ctx.remote, remoteState: ctx.remoteState,
+      }) || 0;
+    } catch (err) {
+      ctx.viewsMounted = 0;
+      console.error('[boot] kernel.init', err);
+    }
+    return ctx.viewsMounted;
   };
 
   store.setBoot({ debug, replay, phase: 'boot', progress: 0, timings: {}, errors: {} });
@@ -409,7 +443,8 @@ export async function boot(opts = {}) {
       writeSession(ss, 'boot:failures', '0');
       store.setBoot({ phase: result.degraded ? 'degraded' : 'ready', totalMs: result.totalMs });
       mark('boot:ready');
-      if (debug) await debugPanel(term, store, result, win);
+      // 调试面板在独立 chunk：只有 ?boot=debug 才多一次请求
+      if (debug) await (await import('./debug.js')).debugPanel(term, store, result, STAGES, win);
       // 彩蛋：只在 ready 之后，且总时长 > 300ms 时才播，绝不阻塞遮罩
       if (!result.degraded) await flavor(term, result.totalMs);
       ctl.release();
@@ -436,6 +471,11 @@ export async function boot(opts = {}) {
 
 /** 静默序列：回访/降级时后台加载数据与覆盖层，不渲染终端。 */
 async function silent(ctx, store, { setProgress, record }) {
+  ctx.onKernelReady = (mod) => {
+    ctx.kernel = mod;
+    if (ctx.viewsStageDone && ctx.viewsMounted < 0) ctx.mountViews();
+  };
+  ctx.onKernelFail = () => {};
   const hooks = {
     onLine: (stage, result, ms, progress) => { setProgress(progress); record(stage.id, ms); },
     onFail: (stage, reason) => {
@@ -506,6 +546,41 @@ async function play(ctx, store, term, ctl, { debug, setProgress, record, ss }) {
     },
   };
 
+  /* 慢网络兜底：core 只做了「软等待」，chunk 真正到达时在这里补挂载，不刷新也能用 */
+  ctx.onKernelReady = (mod, t0) => {
+    ctx.kernel = mod;
+    if (!ctx.viewsStageDone || ctx.viewsMounted >= 0) return; // 正常路径由 views 阶段挂
+    const v = ctx.mountViews();
+    if (v < 0) return;
+    const kb = ctx.kernelKb();
+    const el = term.lineFor('core');
+    if (el) {
+      el.className = 'loader-line show';
+      el.textContent = OK + '运行时内核 ' + (kb > 0 ? kb + ' KB · ' : '') + (now() - t0).toFixed(0) + ' ms';
+    }
+    term.write(OK + '视图挂载 搜索 / 目录 / 标签 · 后台完成', '', 'views');
+    store.setBoot({ kernel: 'late', views: v });
+  };
+
+  /* 迟到的失败（软等待已过才 reject）：补红行 + 重试；早失败由 onFail 统一处理 */
+  ctx.onKernelFail = (err) => {
+    ctx.kernelError = err;
+    if (!ctx.viewsStageDone) return;
+    const reason = (err && err.message) || String(err);
+    store.setBoot((b) => ({ errors: { ...b.errors, core: reason } }));
+    const el = term.lineFor('core');
+    if (el) { el.className = 'loader-line err show'; el.textContent = FAIL + '运行时内核 · ' + reason; }
+    ctl.unblock();
+    term.retryButton('点击重试', async () => {
+      ctx.kernelPromise = null;
+      try {
+        ctx.kernel = await loadKernelOnce(ctx);
+        ctx.viewsStageDone = true;
+        if (ctx.mountViews() >= 0) { ctl.release(); store.setBoot({ phase: 'ready' }); }
+      } catch { /* 仍失败：保持红行 */ }
+    });
+  };
+
   const onKey = (e) => {
     if (e.key === 'Escape' && !ctl.released) {
       e.preventDefault();
@@ -523,39 +598,6 @@ async function play(ctx, store, term, ctl, { debug, setProgress, record, ss }) {
     doc.removeEventListener('keydown', onKey, true);
     if (term.body) term.body.removeAttribute('aria-live');
   }
-}
-
-/** ?boot=debug：终端内追加计时面板（只复用已有 .loader-line 类，不新增样式）。 */
-async function debugPanel(term, store, result, win) {
-  const conn = (store.state.prefs && store.state.prefs.connection) || null;
-  const rows = Object.keys(result.timings).map((id) => {
-    const stage = STAGES.find((s) => s.id === id);
-    return DBG + id + ' ' + result.timings[id].toFixed(0) + ' ms · w' + (stage ? stage.weight : '?');
-  });
-  rows.push(DBG + 'total ' + result.totalMs.toFixed(0) + ' ms · ' + (conn ? 'conn ' + (conn.type || 'n/a') : 'conn n/a'));
-  rows.forEach((r) => term.write(r, 'dim'));
-  store.setBoot({ timings: result.timings });
-
-  // 末行是完整 JSON（无前缀，选中即可复制），CI 也可以直接读 console 的 BOOT_METRICS 行
-  const payload = {
-    total_ms: Number(result.totalMs.toFixed(1)),
-    degraded: !!result.degraded,
-    stages: Object.keys(result.timings).reduce((acc, id) => {
-      const stage = STAGES.find((s) => s.id === id);
-      acc[id] = { ms: Number(result.timings[id].toFixed(1)), weight: stage ? stage.weight : null };
-      return acc;
-    }, {}),
-    errors: result.errors,
-    connection: conn ? conn.type || null : null,
-  };
-  const json = JSON.stringify(payload);
-  term.write(json, 'dim');
-  try {
-    if (win) win.__bootMetrics = payload;
-    console.log('BOOT_METRICS ' + json);
-    console.table(payload.stages);
-  } catch { /* 忽略 */ }
-  await sleep(2000); // 留出观察时间；finally 仍会移除遮罩
 }
 
 /** ready 之后的氛围文案：不阻塞遮罩，>300ms 才播，预算 400ms。 */

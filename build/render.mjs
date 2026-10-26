@@ -153,6 +153,7 @@ export function createRenderer(ctx) {
             description: post.summaryText,
             ogType: 'article',
             themeColor: '#080a0b',
+            postHash: post.hash,
           }, main);
         }
 

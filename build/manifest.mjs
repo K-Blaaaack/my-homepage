@@ -20,6 +20,7 @@ export function buildManifest({ site, posts, pages, tags }) {
       reading_minutes: post.readingMinutes,
       words: post.words,
       cover: post.coverUrl || null,
+      hash: post.hash,
     })),
     pages: pages.map((page) => ({ slug: page.slug, title: page.title, url: page.url })),
     tags: tags.map((tag) => ({ name: tag.name, slug: tag.slug, count: tag.count, url: tag.url })),
