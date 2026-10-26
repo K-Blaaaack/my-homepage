@@ -42,6 +42,13 @@ else {
   if (!/setTimeout|timeout|AbortController/.test(src)) problems.push('remote.js 缺超时控制');
 }
 
+const overlaySrc = read('src/js/overlay.js');
+if (!overlaySrc) problems.push('缺少 src/js/overlay.js');
+else {
+  if (!/dataset\.page[^\n]{0,40}post/.test(overlaySrc)) problems.push('overlay.js 的目录未限定在 data-page="post"（会出现在首页/独立页）');
+  if (!/\.post-content/.test(overlaySrc)) problems.push('overlay.js 的目录未限定在 .post-content 内');
+}
+
 const chunks = fg.sync('dist/js/chunk-*.js', { absolute: false });
 if (!chunks.length) problems.push('dist/js 没有分包（运行时同步必须是按需 chunk）');
 

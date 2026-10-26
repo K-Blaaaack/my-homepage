@@ -281,8 +281,10 @@ function createSearch({ store, platform, docs, meta, doc, win }) {
 
 /* ── 文章目录（滚动高亮） ── */
 function createToc({ platform, doc, win }) {
-  const main = doc.getElementById('main') || doc.body;
-  const headings = Array.from(main.querySelectorAll('h2, h3')).filter((h) => (h.textContent || '').trim().length > 0);
+  // 目录只属于文章页：首页的区块标题、/stack/ 的卡片标题都不是章节
+  if ((doc.documentElement.dataset.page || '') !== 'post') return null;
+  const scope = doc.querySelector('.post-content') || doc.getElementById('main') || doc.body;
+  const headings = Array.from(scope.querySelectorAll('h2, h3')).filter((h) => (h.textContent || '').trim().length > 0);
   if (headings.length < 2) return null;
 
   const slug = (text) => 'h-' + text.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^\w\u4e00-\u9fa5-]/g, '').slice(0, 40);
