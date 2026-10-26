@@ -23,7 +23,7 @@ CONTENT_DIR=/home/kb/github/articles npm run build
 - 托管：Cloudflare Pages，Git 集成，**push 到 main 自动构建**。
 - 构建命令（面板）：`npm ci && node scripts/fetch-content.mjs && npm run build`
 - 输出目录（面板）：`dist`
-- 环境变量（面板）：`NODE_VERSION=20`、`CONTENT_REPO=K-Blaaaack/articles`
+- 环境变量（面板）：`NODE_VERSION=24`、`CONTENT_REPO=K-Blaaaack/articles`
 
 > 迁移窗口期：面板参数切换前，main 仍按旧 Hugo 配置构建。切换时先发一版 preview 验证。
 

@@ -19,6 +19,9 @@ docs/         架构文档与 runbook
 
 ## 命令
 
+> 需要 Node ≥ 22.22（html-validate 11 的硬要求；CI 与 Cloudflare Pages 均用 24）。
+
+
 ```bash
 npm ci
 node scripts/fetch-content.mjs      # 克隆内容仓库到 .cache/content（已有 ../articles 时自动用同级目录）

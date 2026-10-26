@@ -5,7 +5,7 @@
   "type": "module",
   "description": "K-BLACK 个人站 V3：自有 Node 构建内核 + 运行时内核 + 真实启动序列",
   "engines": {
-    "node": ">=20"
+    "node": ">=22.22.0"
   },
   "scripts": {
     "build": "node scripts/build-all.mjs",
