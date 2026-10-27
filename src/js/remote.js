@@ -7,9 +7,11 @@
  *  3. markdown / hljs 只在「404 页命中未构建的新文章」时才 import，不进入口包。
  */
 
-// 文章必须实时：gh raw 是实时源（branch head），排第一；jsDelivr 只做兜底。
-const DEFAULT_PRIMARY = 'https://raw.githubusercontent.com/K-Blaaaack/articles/main';
-const DEFAULT_FALLBACK = 'https://cdn.jsdelivr.net/gh/K-Blaaaack/articles@main';
+// 优先级：jsDelivr（内容仓库 push 后由 Action 调 purge 清缓存）→ gh raw 兜底。
+// 实测 raw 的 CDN 不认 ?t= 与 Cache-Control（同一文件用唯一时间戳仍返回旧内容），
+// 所以 raw 只当兜底；真正保证新鲜的是 jsDelivr 的 purge + @<commit> 不可变地址。
+const DEFAULT_PRIMARY = 'https://cdn.jsdelivr.net/gh/K-Blaaaack/articles@main';
+const DEFAULT_FALLBACK = 'https://raw.githubusercontent.com/K-Blaaaack/articles/main';
 const isRaw = (u) => /raw\.githubusercontent\.com|\/raw\//i.test(String(u || ''));
 const SHIFT = 8 * 3600 * 1000;
 const trimBase = (v) => String(v || '').trim().replace(/\/+$/, '');
@@ -65,12 +67,9 @@ export function contentBases(doc = document) {
     }
   } catch { /* 忽略 */ }
   const list = [a, b].filter(Boolean);
-  const raw = list.filter(isRaw)[0] || '';
-  const rest = list.filter((u) => u !== raw);
-  const primary = raw || rest[0] || DEFAULT_PRIMARY;
-  const others = list.filter((u) => u !== primary);
-  let fallback = others[0] || (primary === DEFAULT_PRIMARY ? DEFAULT_FALLBACK : DEFAULT_PRIMARY);
-  if (fallback === primary) fallback = '';
+  // 顺序以 data-content-base → data-content-fallback 为准：builder 已经把 jsDelivr 放在前面
+  const primary = list[0] || DEFAULT_PRIMARY;
+  const fallback = list.filter((u) => u !== primary)[0] || '';
   return { primary, fallback };
 }
 
@@ -175,8 +174,16 @@ export function commitOf(meta) {
 export function pinned(base, commit) {
   const b = String(base || '').replace(/\/+$/, '');
   const c = String(commit || '');
-  if (!c || !/jsdelivr/i.test(b)) return b; // gh raw 是实时源，不需要也不能 pin
-  if (/@[^/]+$/.test(b)) return b.replace(/@[^/]+$/, '@' + c);
+  if (!c) return b;
+  if (/jsdelivr/i.test(b)) {
+    if (/@[^/]+$/.test(b)) return b.replace(/@[^/]+$/, '@' + c);
+    return b;
+  }
+  if (isRaw(b)) {
+    // raw.githubusercontent.com/<user>/<repo>/<ref> → 把末段 ref 换成 commit，得到不可变地址
+    const parts = b.split('/');
+    if (parts.length >= 5) { parts[parts.length - 1] = c; return parts.join('/'); }
+  }
   return b;
 }
 
@@ -381,8 +388,11 @@ export function articleBases(doc, st) {
   const cdn = all.filter((u) => /jsdelivr/i.test(u))[0] || '';
   const list = [];
   const push = (u) => { const v = trimBase(u); if (v && list.indexOf(v) < 0) list.push(v); };
-  push(raw);
-  if (cdn) { if (st && st.commit) push(pinned(cdn, st.commit)); push(cdn); }
+  const commit = st && st.commit ? st.commit : '';
+  if (cdn && commit) push(pinned(cdn, commit)); // 不可变，必然新鲜
+  if (cdn) push(cdn);                          // purge 过的 @main
+  if (raw && commit) push(pinned(raw, commit));
+  push(raw);                                   // 约 5 分钟缓存，仅兜底
   push(primary);
   push(fallback);
   return list;
