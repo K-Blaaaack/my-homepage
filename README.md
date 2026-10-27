@@ -38,14 +38,15 @@ CONTENT_DIR=/path/to/articles npm run build
 
 ## 实时更新（不需要重新构建）
 
-文章仓库 push 之后，站点**下次访问**就能看到，不用等站点重建：
+HTML 里只有骨架，内容全部运行时拉取：
 
-1. 运行时拉远端清单（jsDelivr 优先，raw 兜底，各 2s 超时），与构建期 `/meta.json` 比对；
-2. 比基线新 → 只替换 `[data-remote-list]` 子容器，并在顶部显示「已同步 N 篇更新」；
-3. 访问尚未构建的新文章 `/posts/<slug>/` → 404 页客户端渲染（marked + 按需 hljs），标题/描述/canonical 一并更新；
-4. 远端不可达 → 一行 `[ WARN ] 文章清单 离线缓存`，静态内容照常。
+1. 文章页的正文容器初始只有一个加载态，静态正文在 `<noscript>` 里，JS 开着时不参与渲染；
+2. 打开文章页 → 拉 `posts/<slug>/index.md`（raw → jsDelivr `@<commit>` → `@main`），渲染完整体替换，不闪旧内容；
+3. 列表容器初始为空 → 拉 `meta.json`（`no-cache`）后渲染条目；刷新只在列表提供，且仅当已渲染过、后来又拉到新增时才提示；
+4. 内容源不可达 → 把 `<noscript>` 的静态版解析回可见 DOM，加一行「内容仓库暂时不可达 · 显示构建版本」+ 重试；
+5. 未构建的新 slug → `functions/posts/[[slug]].js` 把 404 外壳以 **200** 返回（`x-kb-shell: runtime`），不需要为了状态码重建站点。
 
-代价：运行时能力全部在按需 chunk 里，入口 gzip 5.97 KB；首屏不加载 marked/hljs。
+代价：每次访问多一次网络往返；入口 gzip 6.2 KB，marked 与 hljs 都按需加载。
 
 ## 设计要点
 
