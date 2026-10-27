@@ -10,7 +10,7 @@
 // 文章必须实时：gh raw 是实时源（branch head），排第一；jsDelivr 只做兜底。
 const DEFAULT_PRIMARY = 'https://raw.githubusercontent.com/K-Blaaaack/articles/main';
 const DEFAULT_FALLBACK = 'https://cdn.jsdelivr.net/gh/K-Blaaaack/articles@main';
-const isRaw = (u) => /raw\.githubusercontent\.com/i.test(String(u || ''));
+const isRaw = (u) => /raw\.githubusercontent\.com|\/raw\//i.test(String(u || ''));
 const SHIFT = 8 * 3600 * 1000;
 const trimBase = (v) => String(v || '').trim().replace(/\/+$/, '');
 
@@ -193,7 +193,9 @@ async function fetchMetaOnce(base, timeout, bust) {
   const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
   const timer = setTimeout(() => { if (ctrl) ctrl.abort(); }, timeout);
   try {
-    const url = freshUrl(base + '/meta.json', base) + (bust ? '&r=' + Date.now() : '');
+    // 查询串自己拼：bust 时绝不能拼成 /meta.json&r=…（会变成 404）
+    let url = freshUrl(base + '/meta.json', base);
+    if (bust) url += (url.indexOf('?') < 0 ? '?' : '&') + 'r=' + Date.now();
     const res = await fetch(url, {
       cache: 'no-cache',
       credentials: 'omit',
@@ -446,9 +448,21 @@ export function preparePost(doc = document) {
     art.__kbPrepared = true;
     // 构建版正文在 <noscript> 里（JS 开启时不可见但 DOM 里在），失败时用它兜底
     art.__kbFallback = noscriptHtml(art) || '';
+    const ns = art.querySelector('noscript');
+    if (ns && ns.parentNode) ns.parentNode.removeChild(ns);
     // builder 模板已内置 .post-loading；缺失时补一行，文案统一
     if (!art.querySelector('.post-loading')) {
       art.insertBefore(loadingLine(doc, POST_LOADING), art.firstChild);
+    }
+    // 看门狗：6s 后仍是加载态（拉取卡住/模块没跑）→ 强制兜底，绝不无限「正在拉取…」
+    const win = doc.defaultView;
+    if (win && win.setTimeout) {
+      win.setTimeout(() => {
+        try {
+          const el = doc.querySelector('.post-content');
+          if (el && el.querySelector('.post-loading')) postFailed(doc, el, null, null);
+        } catch { /* 忽略 */ }
+      }, 6000);
     }
     return true;
   } catch { return false; }
@@ -459,6 +473,33 @@ function noscriptHtml(scope) {
     const ns = scope && scope.querySelector ? scope.querySelector('noscript') : null;
     return ns ? String(ns.textContent || '') : '';
   } catch { return ''; }
+}
+
+/** noscript 里的原始 HTML 字符串 → DocumentFragment（template 解析，不执行脚本）。 */
+function parseHtml(doc, raw) {
+  const frag = doc.createDocumentFragment();
+  if (!raw) return frag;
+  try {
+    const t = doc.createElement('template');
+    t.innerHTML = raw;
+    while (t.content && t.content.firstChild) frag.appendChild(t.content.firstChild);
+  } catch { /* 解析失败就返回空片段 */ }
+  return frag;
+}
+
+/** 文章页失败态：一行 .remote-error（+重试）+ 构建版正文。 */
+function postFailed(doc, art, meta, slug) {
+  const raw = art.__kbFallback || noscriptHtml(art);
+  art.textContent = '';
+  const box = errorLine(doc, '内容仓库暂时不可达 · 显示构建版本');
+  box.appendChild(cutButton(doc, '重试', () => {
+    art.textContent = '';
+    art.appendChild(loadingLine(doc, POST_LOADING));
+    if (slug) mountPost({ doc, meta, st: getRemoteState(), slug, store: null });
+  }));
+  art.appendChild(box);
+  art.appendChild(parseHtml(doc, raw));
+  return raw.length;
 }
 
 /** 文章页：拉 md → 渲染 → 替换加载态；失败给错误态 + 重试 + 构建版兜底。无刷新、无 note。 */
@@ -477,20 +518,8 @@ async function mountPost({ doc, meta, st, slug, store }) {
     return true;
   } catch (err) {
     // 断网/404/双源全挂：错误行 + noscript 里的构建版正文（不是无限「正在拉取…」）
-    art.textContent = '';
-    const box = errorLine(doc, '内容仓库暂时不可达 · 显示构建版本');
-    box.appendChild(cutButton(doc, '重试', () => {
-      art.textContent = '';
-      art.appendChild(loadingLine(doc, POST_LOADING));
-      mountPost({ doc, meta, st: getRemoteState(), slug, store });
-    }));
-    art.appendChild(box);
-    const raw = fallback || noscriptHtml(art);
-    if (raw) {
-      const wrap = doc.createElement('div');
-      wrap.innerHTML = raw;
-      while (wrap.firstChild) art.appendChild(wrap.firstChild);
-    }
+    if (!art.__kbFallback) art.__kbFallback = fallback;
+    postFailed(doc, art, meta, slug);
     return false;
   }
 }
@@ -528,6 +557,15 @@ function captureFallback(box) {
 function skeleton(doc, box) {
   box.textContent = '';
   box.appendChild(loadingLine(doc, POST_LOADING));
+  // 看门狗：10s 还是骨架（boot 卡住/模块没跑）→ 兜底
+  const win = doc.defaultView;
+  if (win && win.setTimeout) {
+    win.setTimeout(() => {
+      try {
+        if (box.querySelector('.remote-loading')) showFallback(doc, box, null);
+      } catch { /* 忽略 */ }
+    }, 10000);
+  }
 }
 
 /** 拉不到 → noscript 里的静态列表 + 一行「离线 · 显示构建版本」；连兜底都没有才报错。 */
@@ -539,9 +577,7 @@ function showFallback(doc, box, meta) {
     const old = host.querySelector ? host.querySelector('.remote-note') : null;
     if (old && old.parentNode) old.parentNode.removeChild(old);
     host.insertBefore(makeNote(doc, '离线 · 显示构建版本', () => refresh(doc, meta, null)), host.firstChild);
-    const wrap = doc.createElement('div');
-    wrap.innerHTML = raw;
-    while (wrap.firstChild) box.appendChild(wrap.firstChild);
+    box.appendChild(parseHtml(doc, raw));
     return;
   }
   const err = errorLine(doc, '加载失败');
@@ -578,6 +614,18 @@ function renderList(doc, box, tpl, st) {
   items.forEach((a) => frag.appendChild(buildItem(doc, tpl, a, kind)));
   box.appendChild(frag);
   return items.length;
+}
+
+/** 模块求值时立刻给每个列表容器上骨架，等数据到了再换。 */
+export function prepareLists(doc = document) {
+  try {
+    const boxes = Array.from(doc.querySelectorAll('[data-remote-list]'));
+    for (const box of boxes) {
+      if (!box.__kbFallback) captureFallback(box);
+      if (!box.children.length) skeleton(doc, box);
+    }
+    return boxes.length;
+  } catch { return 0; }
 }
 
 /** 列表挂载：先骨架，再数据；数据失败走静态兜底。 */
@@ -908,7 +956,7 @@ async function ensureMainCss(doc) {
 
 const api = {
   sync, mount, getRemoteState, contentBase, contentBases, compareMeta, commitOf, pinned, freshUrl,
-  parseFrontMatter, parseYamlLite, pendingSlug, postSlug, articleBases, preparePost, toChroma, monthPath, dayPath,
+  parseFrontMatter, parseYamlLite, pendingSlug, postSlug, articleBases, preparePost, prepareLists, toChroma, monthPath, dayPath,
   refreshList: () => refresh(document, null, null),
 };
 
@@ -920,7 +968,8 @@ try {
   }
 } catch { /* 忽略 */ }
 
-// 文章页：模块一求值就把静态正文换成加载态（打开即加载，不闪旧正文）
+// 模块一求值：文章页进加载态（不闪旧正文），列表容器上骨架
 try { preparePost(); } catch { /* 忽略 */ }
+try { prepareLists(); } catch { /* 忽略 */ }
 
 export default api;

@@ -38,4 +38,4 @@ boot({ store, platform, params, kernel: params.get('kernel') !== '0' })
   .catch(emergency);
 
 // 调试出口（?boot=debug 时配合 performance.getEntriesByName('boot:*') 使用）
-window.__kb = { store, platform, boot };
+window.__kb = Object.assign(window.__kb || {}, { store, platform, boot });
