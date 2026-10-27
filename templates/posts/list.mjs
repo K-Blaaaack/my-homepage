@@ -18,9 +18,12 @@ export function postsListMain({ posts }) {
     .join('\n');
   return `<div class="sec" style="min-height:calc(100vh - 56px);padding-top:80px">
   <div class="sec-hd"><div class="sec-tag">POSTS 文章</div><div class="sec-line"></div></div>
-  <div class="posts-list" data-remote-list="posts">
+  <div class="posts-list" data-remote-list="posts"></div>
+  <noscript>
+  <div class="posts-list">
 ${items}
   </div>
+  </noscript>
 ${postItemTemplate()}
 </div>`;
 }

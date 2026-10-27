@@ -168,13 +168,13 @@ body{counter-reset:sec}
   border-left:2px solid var(--signal);font-size:12px;line-height:1.6;color:var(--signal);cursor:pointer}
 .remote-note:hover{color:var(--paper)}
 /* .cut 只给几何，按钮配方在这里补；position:relative 让 .cut::before 的 1px 斜线留在按钮内 */
-.remote-note .cut,.remote-error + .cut{position:relative;flex-shrink:0;margin-left:auto;--cut:var(--cut-xs);
+.remote-note .cut,.remote-error ~ .cut{position:relative;flex-shrink:0;margin-left:auto;--cut:var(--cut-xs);
   min-height:26px;padding:3px 10px;cursor:pointer;font-family:var(--mono);font-size:10px;
   letter-spacing:.08em;color:var(--signal);text-transform:uppercase;background:var(--ink-2);
   border:1px solid var(--line);
   transition:color var(--t-fast) var(--ease-out),border-color var(--t-fast) var(--ease-out)}
-.remote-note .cut:hover,.remote-error + .cut:hover{color:var(--paper);border-color:var(--line-h)}
-.remote-note .cut:disabled,.remote-error + .cut:disabled{color:var(--disabled);cursor:default}
+.remote-note .cut:hover,.remote-error ~ .cut:hover{color:var(--paper);border-color:var(--line-h)}
+.remote-note .cut:disabled,.remote-error ~ .cut:disabled{color:var(--disabled);cursor:default}
 
 /* ── 运行时远程文章（404 外壳运行时会补挂 main.css，故放本层） ────────────────
    remote.js 注入链：.remote-loading → .remote-head(.remote-title + .remote-meta)
@@ -182,7 +182,8 @@ body{counter-reset:sec}
    .remote-error + button.cut（紧邻兄弟，配方与 .remote-note .cut 共用一条规则）。
    .remote-title 沿用文章页标题的字号/字重（28px/400，见 templates/posts/single.mjs
    的 <h1>），字距沿用外壳的 -.03em，不另造一套。 */
-.remote-loading{margin:0;padding:24px 0 24px 12px;border-left:1px solid var(--signal);
+/* 占位行：404 远程文章用 .remote-loading，文章页模板用 .post-loading，同一份配方 */
+.remote-loading,.post-loading{margin:0;padding:24px 0 24px 12px;border-left:1px solid var(--signal);
   font-family:var(--mono);font-size:12px;line-height:1.7;color:var(--muted)}
 .remote-head{margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid var(--line)}
 .remote-title{margin:0 0 12px;font-family:var(--display);font-size:28px;font-weight:400;

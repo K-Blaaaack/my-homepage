@@ -294,8 +294,7 @@ export function mount({ doc = document, store = null, platform = null, meta = nu
   let views = 0;
 
   try {
-    const n = applyLists(doc, st, meta, store);
-    if (n) views += n;
+    views += mountLists({ doc, st, meta, store });
   } catch (err) { if (typeof console !== 'undefined') console.error('[remote] list', err); }
 
   try {
@@ -307,8 +306,8 @@ export function mount({ doc = document, store = null, platform = null, meta = nu
       const post = postSlug(doc);
       if (post) {
         views += 1;
-        // boot 完成后异步拉取，不占任何启动检查点
-        setTimeout(() => refreshPost({ doc, meta, st, slug: post, store }), 0);
+        // 不 await：md 拉取不占任何启动检查点
+        mountPost({ doc, meta, st, slug: post, store });
       }
     }
   } catch (err) { if (typeof console !== 'undefined') console.error('[remote] article', err); }
@@ -352,17 +351,6 @@ async function fetchText(url, timeout, base) {
     if (!res.ok) throw new Error('HTTP ' + res.status);
     return await res.text();
   } finally { clearTimeout(timer); }
-}
-
-/** 用户正在输入 / 选中文本时不做就地替换。 */
-function canReplace(doc, win) {
-  const ae = doc.activeElement;
-  if (ae && (/^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName) || ae.isContentEditable)) return false;
-  try {
-    const sel = win && win.getSelection ? win.getSelection() : null;
-    if (sel && !sel.isCollapsed && String(sel).length > 2) return false;
-  } catch { /* 忽略 */ }
-  return true;
 }
 
 const slugify = (s) => String(s).trim().toLowerCase()
@@ -419,36 +407,90 @@ async function buildArticle(doc, bases, slug) {
   throw lastErr || new Error('md 拉取失败');
 }
 
+const POST_LOADING = '正在从内容仓库拉取…';
+
+function loadingLine(doc, text) {
+  const el = doc.createElement('div');
+  el.className = 'remote-loading post-loading';
+  el.setAttribute('aria-busy', 'true');
+  el.textContent = text;
+  return el;
+}
+
+function errorLine(doc, text) {
+  const el = doc.createElement('div');
+  el.className = 'remote-error';
+  const s = doc.createElement('span');
+  s.textContent = text;
+  el.appendChild(s);
+  return el;
+}
+
+function cutButton(doc, label, onClick) {
+  const b = doc.createElement('button');
+  b.type = 'button';
+  b.className = 'cut';
+  b.textContent = label;
+  b.addEventListener('click', onClick);
+  return b;
+}
+
 /**
- * 文章页：无条件实时拉正文（不拿 hash 拦渲染），离屏渲染完成后整体替换，恢复 scrollY。
- * hash 只用来决定是否显示「内容已更新」。
+ * 文章页一加载就把静态正文换成加载态：打开即加载，绝不先闪旧正文。
+ * 由模块求值末尾自动调用（manifest 阶段之前就生效）。
  */
-async function refreshPost({ doc, meta, st, slug, store, tries = 0 }) {
+export function preparePost(doc = document) {
+  try {
+    const art = doc.querySelector('.post-content');
+    if (!art || art.__kbPrepared) return false;
+    art.__kbPrepared = true;
+    // 构建版正文在 <noscript> 里（JS 开启时不可见但 DOM 里在），失败时用它兜底
+    art.__kbFallback = noscriptHtml(art) || '';
+    // builder 模板已内置 .post-loading；缺失时补一行，文案统一
+    if (!art.querySelector('.post-loading')) {
+      art.insertBefore(loadingLine(doc, POST_LOADING), art.firstChild);
+    }
+    return true;
+  } catch { return false; }
+}
+
+function noscriptHtml(scope) {
+  try {
+    const ns = scope && scope.querySelector ? scope.querySelector('noscript') : null;
+    return ns ? String(ns.textContent || '') : '';
+  } catch { return ''; }
+}
+
+/** 文章页：拉 md → 渲染 → 替换加载态；失败给错误态 + 重试 + 构建版兜底。无刷新、无 note。 */
+async function mountPost({ doc, meta, st, slug, store }) {
   const art = doc.querySelector('.post-content');
   if (!art) return false;
-  const win = doc.defaultView;
-  if (!canReplace(doc, win)) {
-    if (tries < 4) setTimeout(() => refreshPost({ doc, meta, st, slug, store, tries: tries + 1 }), 1500);
-    return false;
-  }
-  const y = win && typeof win.scrollY === 'number' ? win.scrollY : 0;
-  const bases = articleBases(doc, st);
+  if (!art.__kbPrepared) preparePost(doc);
+  const fallback = art.__kbFallback || '';
   try {
-    const { data, node, base } = await buildArticle(doc, bases, slug);
-    // 离屏节点已就绪，这里才动 DOM（静态 HTML 在此之前一直可见）
+    const { data, node, base } = await buildArticle(doc, articleBases(doc, st), slug);
     while (art.firstChild) art.removeChild(art.firstChild);
     while (node.firstChild) art.appendChild(node.firstChild);
     updatePostHeader(doc, data);
     updateHead(doc, data, slug, meta);
-    const local = ((meta && meta.articles) || []).find((a) => a && a.slug === slug);
-    const remote = ((st && st.articles) || []).find((a) => a && a.slug === slug);
-    const changed = !!(remote && remote.hash && local && local.hash && remote.hash !== local.hash);
-    if (changed || !local || !local.hash) insertArticleNote(doc, slug, meta);
-    if (win && typeof win.scrollTo === 'function') win.scrollTo(0, y);
     if (store) store.setData({ remoteArticle: { slug, title: data.title || slug, base, at: Date.now() } });
     return true;
   } catch (err) {
-    // 失败保留静态 HTML，静默
+    // 断网/404/双源全挂：错误行 + noscript 里的构建版正文（不是无限「正在拉取…」）
+    art.textContent = '';
+    const box = errorLine(doc, '内容仓库暂时不可达 · 显示构建版本');
+    box.appendChild(cutButton(doc, '重试', () => {
+      art.textContent = '';
+      art.appendChild(loadingLine(doc, POST_LOADING));
+      mountPost({ doc, meta, st: getRemoteState(), slug, store });
+    }));
+    art.appendChild(box);
+    const raw = fallback || noscriptHtml(art);
+    if (raw) {
+      const wrap = doc.createElement('div');
+      wrap.innerHTML = raw;
+      while (wrap.firstChild) art.appendChild(wrap.firstChild);
+    }
     return false;
   }
 }
@@ -474,73 +516,106 @@ function updatePostHeader(doc, data) {
   }
 }
 
-function insertArticleNote(doc, slug, meta) {
-  const art = doc.querySelector('.post-content');
-  if (!art || !art.parentNode) return;
-  const host = art.parentNode;
-  const old = host.querySelector('.remote-note');
-  if (old && old.parentNode) old.parentNode.removeChild(old);
-  const note = makeNote(doc, '内容已更新 · 来自内容仓库', () => refreshArticle(doc, meta, slug));
-  const head = host.querySelector('.post-header');
-  if (head) host.insertBefore(note, head);
-  else host.insertBefore(note, art);
+/* 本次会话已渲染过的列表状态：用来判断「新增」和是否需要提示 */
+const session = { rendered: false, slugs: [], lastSync: 0, watched: false };
+
+function captureFallback(box) {
+  if (!box.__kbFallback) box.__kbFallback = box.innerHTML;
+  return box.__kbFallback;
 }
 
-async function refreshArticle(doc, meta, slug) {
-  if (refreshing) return;
-  refreshing = true;
-  try {
-    const st = await sync({ doc, meta, bust: true, timeout: 4000 });
-    await refreshPost({ doc, meta, st, slug, store: null });
-  } finally { refreshing = false; }
+/** 骨架：一行加载态（不依赖任何 CSS 也能读）。 */
+function skeleton(doc, box) {
+  box.textContent = '';
+  box.appendChild(loadingLine(doc, POST_LOADING));
 }
 
-function applyLists(doc, st, meta, store) {
-  // stale（新增）和 updated（正文/标题/摘要变了）都要重渲染列表
-  if (!st || (st.status !== 'stale' && st.status !== 'updated')) return 0;
-  if (st.remoteCount < st.localCount) return 0; // 只增不减：构建比内容新时不动
-
-
-  const tpl = doc.getElementById('postItemTpl');
-  if (!tpl) return 0;
-  const boxes = Array.from(doc.querySelectorAll('[data-remote-list]'));
-  let n = 0;
-  for (const box of boxes) {
-    const kind = box.getAttribute('data-remote-list') || 'posts';
-    const tag = box.getAttribute('data-tag');
-    let items = st.articles;
-    if (kind === 'tag') {
-      if (!tag) continue;
-      items = items.filter((a) => (a.tags || []).some((t) => String(t).toLowerCase() === String(tag).toLowerCase()));
-      if (!items.length) continue; // 远端没有这个标签 → 不动静态页
-    } else if (kind === 'home') {
-      // 条数由 builder 的 data-limit 决定（对应 latest_count），缺省 5
-      const limit = Number(box.getAttribute('data-limit')) || 5;
-      items = items.slice(0, limit);
-    }
-    if (!items.length) continue;
-    renderBox(doc, box, tpl, items, kind, st);
-    n += 1;
+/** 拉不到 → noscript 里的静态列表 + 一行「离线 · 显示构建版本」；连兜底都没有才报错。 */
+function showFallback(doc, box, meta) {
+  const raw = noscriptHtml(box.parentNode) || noscriptHtml(doc) || captureFallback(box);
+  box.textContent = '';
+  if (raw && /news-item/.test(raw)) {
+    const host = box.parentNode || box;
+    const old = host.querySelector ? host.querySelector('.remote-note') : null;
+    if (old && old.parentNode) old.parentNode.removeChild(old);
+    host.insertBefore(makeNote(doc, '离线 · 显示构建版本', () => refresh(doc, meta, null)), host.firstChild);
+    const wrap = doc.createElement('div');
+    wrap.innerHTML = raw;
+    while (wrap.firstChild) box.appendChild(wrap.firstChild);
+    return;
   }
-  if (n && store) store.setData({ remote: st, remoteList: { updated: n, at: Date.now() } });
-  return n;
+  const err = errorLine(doc, '加载失败');
+  err.appendChild(cutButton(doc, '重试', () => {
+    skeleton(doc, box);
+    sync({ doc, meta, bust: true, timeout: 4000 }).then((st) => {
+      if (st && st.status !== 'offline' && st.articles && st.articles.length) mountLists({ doc, st, meta, store: null, force: true });
+      else showFallback(doc, box, meta);
+    });
+  }));
+  box.appendChild(err);
 }
 
-function isPostItem(el) {
-  if (!el || el.tagName !== 'A') return false;
-  if (el.getAttribute('data-c') === 'post') return true;
-  return /^\/posts\//.test(el.getAttribute('href') || '');
+function listItems(box, st) {
+  const kind = box.getAttribute('data-remote-list') || 'posts';
+  const tag = box.getAttribute('data-tag');
+  let items = st.articles || [];
+  if (kind === 'tag') {
+    if (!tag) return [];
+    items = items.filter((a) => (a.tags || []).some((t) => String(t).toLowerCase() === String(tag).toLowerCase()));
+  } else if (kind === 'home') {
+    // 条数由 builder 的 data-limit 决定（对应 latest_count），缺省 5
+    items = items.slice(0, Number(box.getAttribute('data-limit')) || 5);
+  }
+  return items;
 }
-function renderBox(doc, box, tpl, items, kind, st) {
-  const kids = Array.from(box.children);
-  const keep = kids.filter((el) => !isPostItem(el));
-  const anchor = keep[0] || null;
-  kids.filter(isPostItem).forEach((el) => box.removeChild(el));
 
+function renderList(doc, box, tpl, st) {
+  const items = listItems(box, st);
+  box.textContent = '';
+  if (!items.length) { box.appendChild(loadingLine(doc, '暂无文章')); return 0; }
+  const kind = box.getAttribute('data-remote-list') || 'posts';
   const frag = doc.createDocumentFragment();
   items.forEach((a) => frag.appendChild(buildItem(doc, tpl, a, kind)));
-  if (anchor) box.insertBefore(frag, anchor); else box.appendChild(frag);
-  insertNote(doc, box, st);
+  box.appendChild(frag);
+  return items.length;
+}
+
+/** 列表挂载：先骨架，再数据；数据失败走静态兜底。 */
+function mountLists({ doc, st, meta, store, force = false }) {
+  const boxes = Array.from(doc.querySelectorAll('[data-remote-list]'));
+  if (!boxes.length) return 0;
+  const tpl = doc.getElementById('postItemTpl');
+  const has = !!(st && st.articles && st.articles.length);
+  const offline = !st || st.status === 'offline';
+
+  for (const box of boxes) {
+    if (!box.__kbFallback) captureFallback(box);
+    if (has && tpl) renderList(doc, box, tpl, st);
+    else if (offline) showFallback(doc, box, meta);
+    else skeleton(doc, box);
+  }
+
+  if (has && tpl) {
+    session.rendered = true;
+    session.slugs = (st.articles || []).map((a) => a.slug);
+    session.lastSync = Date.now();
+    watch(doc, meta);
+    if (store && !force) store.setData({ remote: st, remoteList: { count: session.slugs.length, at: Date.now() } });
+  }
+  return boxes.length;
+}
+
+/** 页面重新可见时（≥60s）复查一次：有新增才提示。 */
+function watch(doc, meta) {
+  if (session.watched) return;
+  session.watched = true;
+  doc.addEventListener('visibilitychange', () => {
+    try {
+      if (doc.visibilityState !== 'visible' || !session.rendered) return;
+      if (Date.now() - session.lastSync < 60000) return;
+      refresh(doc, meta, null);
+    } catch { /* 忽略 */ }
+  });
 }
 
 /** 按 builder 的 #postItemTpl 结构填充；模板缺字段时跳过，不抛异常。 */
@@ -591,32 +666,40 @@ function makeNote(doc, text, onClick) {
   return note;
 }
 
-function insertNote(doc, box, st) {
-  const old = box.querySelector ? box.querySelector('.remote-note') : null;
+/** 只有「已渲染过 + 又拉到更多」才提示，首次加载不提示。 */
+function insertNote(doc, box, n, meta) {
+  const host = box.parentNode || box;
+  const old = host.querySelector('.remote-note');
   if (old && old.parentNode) old.parentNode.removeChild(old);
-  const added = Math.max(0, (st.remoteCount || 0) - (st.localCount || 0));
-  const changed = st.changed || 0;
-  const parts = [];
-  if (added > 0) parts.push(added + ' 篇新增');
-  if (changed > 0) parts.push(changed + ' 篇更新');
-  const text = (parts.length ? parts.join(' · ') : '远端清单有更新') + ' · 来自内容仓库';
-  const note = makeNote(doc, text, () => refresh(doc, null, null));
-  if (box.insertBefore) box.insertBefore(note, box.firstChild); else box.appendChild(note);
+  const note = makeNote(doc, n + ' 篇新增 · 来自内容仓库', () => refresh(doc, meta, null));
+  if (host.insertBefore) host.insertBefore(note, host.firstChild);
+  else host.appendChild(note);
 }
 
+/** 刷新 = 重拉 meta → 与已渲染列表 diff → 新的插到顶部并高亮。 */
 async function refresh(doc, meta, btn) {
   if (refreshing) return;
   refreshing = true;
   if (btn) { btn.disabled = true; btn.textContent = '同步中…'; }
   try {
     const st = await sync({ doc, meta, bust: true, timeout: 4000 });
-    if (st.status === 'stale') {
-      applyLists(doc, st, meta, null);
-    } else {
-      const notes = doc.querySelectorAll('.remote-note');
-      Array.from(notes).forEach((n) => n.parentNode && n.parentNode.removeChild(n));
+    session.lastSync = Date.now();
+    const tpl = doc.getElementById('postItemTpl');
+    if (!tpl || !st || st.status === 'offline' || !st.articles || !st.articles.length) return;
+    const known = session.slugs || [];
+    const fresh = st.articles.filter((a) => known.indexOf(a.slug) < 0);
+    const boxes = Array.from(doc.querySelectorAll('[data-remote-list]'));
+    for (const box of boxes) renderList(doc, box, tpl, st);
+    if (fresh.length) {
+      for (const box of boxes) {
+        Array.from(box.querySelectorAll('a.news-item')).slice(0, fresh.length).forEach((el) => {
+          if (el.classList) el.classList.add('fresh');
+        });
+        insertNote(doc, box, fresh.length, meta);
+      }
+      session.slugs = st.articles.map((a) => a.slug);
     }
-    if (btn) { btn.disabled = false; btn.textContent = '刷新'; }
+    if (btn) { btn.disabled = false; btn.textContent = fresh.length ? '刷新' : '已是最新'; }
   } finally {
     refreshing = false;
   }
@@ -825,7 +908,8 @@ async function ensureMainCss(doc) {
 
 const api = {
   sync, mount, getRemoteState, contentBase, contentBases, compareMeta, commitOf, pinned, freshUrl,
-  parseFrontMatter, parseYamlLite, pendingSlug, postSlug, articleBases, toChroma, monthPath, dayPath,
+  parseFrontMatter, parseYamlLite, pendingSlug, postSlug, articleBases, preparePost, toChroma, monthPath, dayPath,
+  refreshList: () => refresh(document, null, null),
 };
 
 // 调试出口：window.__kb.remote（main.js 先建好 window.__kb）
@@ -835,5 +919,8 @@ try {
     window.__kb.remote = api;
   }
 } catch { /* 忽略 */ }
+
+// 文章页：模块一求值就把静态正文换成加载态（打开即加载，不闪旧正文）
+try { preparePost(); } catch { /* 忽略 */ }
 
 export default api;

@@ -99,8 +99,12 @@
 /* ═══ 11 Content ════════════════════════════════════════════════════════ */
 /* 文章页头部：模板原来用内联 style="font-size:28px;font-weight:400;margin-bottom:12px"，
    V3 把内联搬到这里（逐字等价，桌面像素不变）；移动端在 platform-mobile.css 降为 24px。 */
+/* 文章页列宽：头部与正文同为 780px 并水平居中。
+   1024 下原来是正文贴左、右侧留 208px 空档（.sec 内容盒 964 − 780 = 184 全压在右边）；
+   .remote-head 是 404 远程渲染时 .post-content 的兄弟块，一并限宽保持对齐。 */
+.post-header,.remote-head{max-width:780px;margin-left:auto;margin-right:auto}
 .post-header h1{font-size:28px;font-weight:400;margin-bottom:12px}
-.post-content{max-width:780px;font-size:16px;line-height:1.8;color:var(--paper-2)}
+.post-content{max-width:780px;margin-left:auto;margin-right:auto;font-size:16px;line-height:1.8;color:var(--paper-2)}
 .post-content h1{font-family:var(--display);font-size:38px;font-weight:700;letter-spacing:-.04em;line-height:1.05;
   color:var(--paper);margin:40px 0 16px;text-transform:uppercase}
 /* H2 带信号色短标尺 */

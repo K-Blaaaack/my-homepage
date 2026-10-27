@@ -14,7 +14,10 @@ ${tags}
     </div>
   </div>
   <article class="post-content" data-slug="${esc(post.slug)}">
+    <div class="post-loading">正在从内容仓库拉取…</div>
+    <noscript>
 ${html}
+    </noscript>
   </article>
 </div>`;
 }

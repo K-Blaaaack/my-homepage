@@ -31,6 +31,8 @@ html.prts-skip .main-wrap{opacity:1;transition:none}
    JS 在 head 内联脚本里把 no-js 换成 js；禁用 JS 时这两条就是唯一防线。 */
 .no-js .loader{display:none}
 .no-js .main-wrap{opacity:1}
+/* 文章页占位行：禁 JS 时正文在 <noscript> 里已可见，占位行不能留在页面顶部 */
+.no-js .post-loading{display:none}
 
 
 /* ── @keyframes：全站动效曲线集中于此（按名解析，顺序无关） ── */

@@ -34,6 +34,8 @@ const BUDGET = 9.9 * 1024;
 const NEW_SELECTOR_ALLOW = [
   '.no-js .loader',          // 无 JS：隐藏启动遮罩（契约 §3.5）
   '.no-js .main-wrap',       // 无 JS：正文立即可见（契约 §3.5）
+  '.no-js .post-loading',    // 无 JS：隐藏文章页「正在拉取…」占位行
+  '.post-loading',           // 文章页占位行（与 .remote-loading 共用一条规则）
   '.loader-line.warn',       // 启动超时降级行（31 号文档 §7）
   '.loader-retry',           // 启动失败重试（含 :hover/:active/:focus-visible）
   '.news-summary',           // 运行时注入的摘要行（两行截断）
@@ -48,7 +50,9 @@ const NEW_SELECTOR_ALLOW = [
   '.nav',                    // 移动端实底顶栏（去玻璃）
   '.post-content',           // overflow-wrap:anywhere
   '.post-content h1',        // 移动端标题降级 24px
-  '.post-header h1',         // 文章页标题（模板内联 28px，移动端 !important 降级）
+  '.post-header',            // 文章页头部容器（限宽 780 + 居中，与正文列对齐）
+  '.remote-head',            // 404 远程文章头部（同样限宽 780 + 居中）
+  '.post-header h1',         // 文章页标题（桌面 28px/400，移动端 24px）
   '.post-content h2',        // 20px
   '.post-content h3',        // 17px
   '.post-content h4',        // 15px

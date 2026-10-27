@@ -70,9 +70,10 @@ ${tabs}
   </div>
 
   <div class="news-list" id="newsList">
-    <div data-remote-list="home" data-limit="${limit}">
+    <div data-remote-list="home" data-limit="${limit}"></div>
+    <noscript>
 ${postItems}
-    </div>
+    </noscript>
 ${dataItems}
   </div>
 ${postItemTemplate()}
