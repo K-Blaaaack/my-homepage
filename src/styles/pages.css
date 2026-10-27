@@ -97,6 +97,9 @@
 
 
 /* ═══ 11 Content ════════════════════════════════════════════════════════ */
+/* 文章页头部：模板原来用内联 style="font-size:28px;font-weight:400;margin-bottom:12px"，
+   V3 把内联搬到这里（逐字等价，桌面像素不变）；移动端在 platform-mobile.css 降为 24px。 */
+.post-header h1{font-size:28px;font-weight:400;margin-bottom:12px}
 .post-content{max-width:780px;font-size:16px;line-height:1.8;color:var(--paper-2)}
 .post-content h1{font-family:var(--display);font-size:38px;font-weight:700;letter-spacing:-.04em;line-height:1.05;
   color:var(--paper);margin:40px 0 16px;text-transform:uppercase}
@@ -106,11 +109,14 @@
 .post-content h2::after{content:"";position:absolute;left:0;bottom:-1px;width:52px;height:2px;background:var(--signal)}
 .post-content h3{font-size:19px;font-weight:700;color:var(--paper);margin:28px 0 12px}
 .post-content h4{font-size:16px;font-weight:700;color:var(--paper);margin:20px 0 8px}
+/* 锚点落位留出固定顶栏高度（56px + 16px 呼吸），否则 h2/h3 会被顶栏盖住 */
+.post-content h2,.post-content h3,.post-content h4{scroll-margin-top:72px}
 .post-content p{margin-bottom:20px}
 .post-content ul,.post-content ol{margin:14px 0;padding-left:28px}
 .post-content li{margin-bottom:8px;line-height:1.8}
 .post-content code{font-family:var(--mono);font-size:13px;padding:2px 6px;
-  background:var(--ink-3);border:1px solid var(--rule);color:var(--signal)}
+  background:var(--ink-3);border:1px solid var(--rule);color:var(--signal);
+  line-height:inherit;word-break:break-word}
 .post-content pre{position:relative;padding:20px;margin:20px 0;overflow-x:auto;
   background:var(--ink);border:1px solid var(--line)}
 .post-content pre code{padding:0;background:none;border:none;font-size:13px;line-height:1.7;color:var(--paper-2)}

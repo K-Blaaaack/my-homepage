@@ -43,6 +43,22 @@ const NEW_SELECTOR_ALLOW = [
   '.remote-title',           // 404 远程文章：标题
   '.remote-meta',            // 404 远程文章：日期/标签行
   '.remote-error',           // 404 远程文章：失败态（含紧邻的 button.cut）
+  // V3 移动端阅读修正（390/360 实机）：全部是「既有选择器 + 新增媒体上下文」，
+  // 桌面声明值一个没动；.post-content 前缀同时覆盖下列 .post-content * 选择器。
+  '.nav',                    // 移动端实底顶栏（去玻璃）
+  '.post-content',           // overflow-wrap:anywhere
+  '.post-content h1',        // 移动端标题降级 24px
+  '.post-header h1',         // 文章页标题（模板内联 28px，移动端 !important 降级）
+  '.post-content h2',        // 20px
+  '.post-content h3',        // 17px
+  '.post-content h4',        // 15px
+  '.post-content p',         // 移动端正文节奏
+  '.post-content ul',        // 列表缩进 22px
+  '.post-content ol',
+  '.post-content code',      // 行内代码 .86em / 1px 5px（移动端）
+  '.post-content pre',       // 14px + 惯性滚动
+  '.post-content pre code',  // 12.5px
+  '.post-content table',     // 窄屏横滚
   '.ovl',                    // 覆盖层全部：.ovl / .ovl-search / .ovl-toc / .ovl-*
                              //   选中态用 .ovl-item[aria-selected="true"]、.ovl-toc-link[aria-current]，
                              //   不用 .on（.on 只归导航/tab，未改原规则）

@@ -18,3 +18,26 @@
   .foot-links{grid-area:2/1}
   .foot-logo{grid-area:3/1;justify-self:start}
 }
+
+/* ═══ V3 移动端阅读修正（390×844 / 360×640 实机截图，8 条） ═══════════════════
+   全部落在 max-width:768px —— 桌面 1440×1000 的计算值零变化（parity 逐声明校验）。
+   ① 顶栏透字：移动端放弃玻璃（rgba + blur），改实底 --ink，滚动时正文不再从 logo 后透出；
+   ④ pre 收紧 + 横向惯性滚动；⑤ 标题降级；⑥ 正文节奏；⑦ 表格横滚；⑧ 长串断行。
+   #3 行内代码的字号/内边距也放这里（桌面保持 13px / 2px 6px 不变）；
+   line-height:inherit 与 word-break:break-word 是纯新增，在 pages.css 里全局生效。 */
+@media(max-width:768px){
+  .nav{background:var(--ink);-webkit-backdrop-filter:none;backdrop-filter:none}
+  .post-content{overflow-wrap:anywhere}
+  /* 模板内联样式已搬进 pages.css 的 .post-header h1，这里只是普通覆盖（无需 !important） */
+  .post-header h1{font-size:24px}
+  .post-content h1{font-size:24px}
+  .post-content h2{font-size:20px}
+  .post-content h3{font-size:17px}
+  .post-content h4{font-size:15px}
+  .post-content p{margin-bottom:16px;line-height:1.75}
+  .post-content ul,.post-content ol{padding-left:22px}
+  .post-content code{font-size:.86em;padding:1px 5px}
+  .post-content pre{padding:14px;font-size:12.5px;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
+  .post-content pre code{font-size:12.5px}
+  .post-content table{display:block;overflow-x:auto;white-space:nowrap}
+}
