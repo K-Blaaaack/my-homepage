@@ -389,10 +389,12 @@ export function articleBases(doc, st) {
   const list = [];
   const push = (u) => { const v = trimBase(u); if (v && list.indexOf(v) < 0) list.push(v); };
   const commit = st && st.commit ? st.commit : '';
-  if (cdn && commit) push(pinned(cdn, commit)); // 不可变，必然新鲜
-  if (cdn) push(cdn);                          // purge 过的 @main
+  // @main 排前面：内容仓库 push 后会按文件 purge，秒级新鲜；
+  // @commit 只在最后兜底——meta 若来自缓存，commit 可能比 HEAD 旧，反而不该优先。
+  if (cdn) push(cdn);
+  if (raw) push(raw);
+  if (cdn && commit) push(pinned(cdn, commit));
   if (raw && commit) push(pinned(raw, commit));
-  push(raw);                                   // 约 5 分钟缓存，仅兜底
   push(primary);
   push(fallback);
   return list;
