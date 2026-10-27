@@ -391,10 +391,12 @@ export function articleBases(doc, st) {
   const commit = st && st.commit ? st.commit : '';
   // @main 排前面：内容仓库 push 后会按文件 purge，秒级新鲜；
   // @commit 只在最后兜底——meta 若来自缓存，commit 可能比 HEAD 旧，反而不该优先。
-  if (cdn) push(cdn);
+  // 实测：raw 在 push 后约 3 秒就新鲜；jsDelivr 依赖 Action 按文件 purge（约 1 分钟）。
+  // 所以 raw 先试，jsDelivr 紧跟，@commit 兜底（meta 若来自缓存，commit 可能落后于 HEAD）。
   if (raw) push(raw);
-  if (cdn && commit) push(pinned(cdn, commit));
+  if (cdn) push(cdn);
   if (raw && commit) push(pinned(raw, commit));
+  if (cdn && commit) push(pinned(cdn, commit));
   push(primary);
   push(fallback);
   return list;
