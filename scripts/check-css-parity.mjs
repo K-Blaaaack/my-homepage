@@ -66,6 +66,10 @@ const NEW_SELECTOR_ALLOW = [
   '.ovl',                    // 覆盖层全部：.ovl / .ovl-search / .ovl-toc / .ovl-*
                              //   选中态用 .ovl-item[aria-selected="true"]、.ovl-toc-link[aria-current]，
                              //   不用 .on（.on 只归导航/tab，未改原规则）
+  // 2026-11-06 首页主视觉：正四面体 canvas（tetra.js 运行时插入，含 .on 淡入态）
+  '.hero-tetra',
+  '.hero-bg',               // 让 canvas 接收指针（拖拽）；遮罩层不再拦截事件
+
   // 2026-11-06 swarm：导航栏里的光标群重建开关（桌面一个、移动菜单一个，共用同一套样式）
   '.nav-right',              // 导航右侧容器（Swarm 控制器 + 汉堡）
   '.swarm-ctl',              // 导航栏里的 Swarm 控制器（含 [data-on="true"] 展开态）

@@ -9,7 +9,7 @@
 build/        构建内核（12 模块）：content / markdown / media / routes / render / feeds / manifest / search
 templates/    模板（22 文件）：_default / posts / stack / 404 / partials
 src/styles/   样式 7 层（tokens → base → components → pages → motion → platform-*）
-src/js/       运行时（store / boot / overlay / platform / main）
+src/js/       运行时（store / boot / overlay / platform / main / tetra）
 scripts/      编排与门禁：build-all / build-css / build-js / fetch-content / serve / check-*
 data/         站点文案（site.toml / home.toml）
 static/       直通资源（_headers 等）

@@ -30,6 +30,13 @@ function emergency(err) {
 window.addEventListener('error', (e) => emergency(e.error || e.message));
 window.addEventListener('unhandledrejection', (e) => emergency(e.reason));
 
+// 首页主视觉：正四面体（独立分包）。不等 boot —— 它是首屏的一部分，越早下载越好。
+if (document.documentElement.dataset.page === 'home') {
+  import('./tetra.js')
+    .then((m) => m.init({ doc: document, win: window, platform, store }))
+    .catch(() => {});
+}
+
 boot({ store, platform, params, kernel: params.get('kernel') !== '0' })
   .then((r) => {
     if (r && r.ok) store.setBoot({ phase: r.degraded ? 'degraded' : 'ready' });
