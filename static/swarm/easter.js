@@ -2,13 +2,19 @@
  * Swarm Cursors — 导航栏控制器 + 加载后自动播放一次
  *
  *  · 引擎 /swarm/swarm-cursors.js 只在需要时下载（~150KB，不进首屏）
- *  · 页面加载完、启动序列 ready 之后自动播一遍（静音、2×、9 秒后自己退场）
+ *  · SWARM_ENABLED 是总开关；关掉后这套东西完全不出现（?swarm=1 可临时打开）
  *  · 导航栏右侧的小组件负责全部控制：播放/停止、进度、层数、速度、声音、退出
  *  · 引擎自带的那条底部控制栏已经删掉，控制权只在这里
  *  · Alt+Shift+S 同效；?swarm=0 关掉自动播放；系统开了"减少动态效果"也不自动播
  */
 (() => {
   "use strict";
+
+  /* ───────────────────────────── 总开关 ─────────────────────────────
+   * false = 整套效果下线：不下载引擎、不自动播放、导航栏/折叠菜单里也不建控件。
+   * 想临时看一眼：地址后加 ?swarm=1（只对这次访问生效）。
+   * ──────────────────────────────────────────────────────────────── */
+  const SWARM_ENABLED = false;
 
   // 引擎带版本号：配合 /swarm/* 的 immutable 缓存，首次拉一次，之后走本地缓存。
   // 改了引擎就把 VER 往后挪一位（浏览器会重新拉新文件）。
@@ -25,6 +31,15 @@
   const autoOff = params.get("swarm") === "0" || location.hash === "#swarm0";
   const reduce = !!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
   const wide = !window.matchMedia || matchMedia("(min-width: 768px)").matches; // 手机不自动播，按钮仍可用
+
+  const forced = params.get("swarm") === "1";
+  if (!SWARM_ENABLED && !forced) {
+    // 关掉时连挂载点一起摘掉，导航栏布局和原来一模一样
+    for (const m of document.querySelectorAll("[data-swarm-ctl]")) m.remove();
+    window.SwarmCursorsEnabled = false;
+    return;
+  }
+  window.SwarmCursorsEnabled = true;
 
   window.SwarmCursorsConfig = Object.assign({ zIndex: Z_INDEX }, window.SwarmCursorsConfig || {});
 

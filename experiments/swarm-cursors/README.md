@@ -22,6 +22,18 @@
 | `templates/_default/baseof.mjs` | 全站 `</body>` 前加 `<script defer src="/swarm/easter.js">` |
 | [`demo.html`](demo.html) | 独立演示页，`file://` 直接打开就能跑 |
 
+## 总开关（当前：关）
+
+`static/swarm/easter.js` 顶部一行：
+
+```js
+const SWARM_ENABLED = false; // true = 开；false = 整套下线
+```
+
+关掉之后：**不下载引擎**（0 请求）、不自动播放、顶栏和折叠菜单里也不建控件（挂载点一起摘掉），页面和没这批代码时一模一样。
+
+临时看效果：地址后加 `?swarm=1`，只对这一次访问生效，不用改代码。
+
 ## 控制方式
 
 **桌面**：导航栏右侧的 `▷ SWARM`。空闲只占一个描边小按钮；播放时原地展开 `进度条 · 层数/总层数 · 速度 · 声音 · ✕`。
