@@ -64,6 +64,7 @@ ${main}
 ${footerPartial({ site, year })}
 </div>
 ${jsScripts({ site, assets })}
+<script defer src="/swarm/easter.js"></script>
 </body>
 </html>
 `;

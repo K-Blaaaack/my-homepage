@@ -10,6 +10,10 @@ function links(site, activeKey) {
     .join('\n');
 }
 
+/** 光标群重建的控制器挂载点：结构由 /swarm/easter.js 在客户端建（省 HTML 字节，纯增强）
+ *  桌面在顶栏右侧，移动端在折叠菜单里 —— 两处同一套状态。 */
+const SWARM_MOUNT = '<div class="swarm-ctl" data-swarm-ctl data-on="false"></div>';
+
 export function navPartial({ site, activeKey = '' }) {
   return `<header class="nav">
   <div class="nav-in">
@@ -21,7 +25,10 @@ export function navPartial({ site, activeKey = '' }) {
     <nav class="nav-links">
 ${links(site, activeKey)}
     </nav>
-    <button class="burger" id="burger" type="button" aria-label="打开导航菜单" aria-expanded="false" aria-controls="mob"><i></i><i></i><i></i></button>
+    <div class="nav-right">
+      ${SWARM_MOUNT}
+      <button class="burger" id="burger" type="button" aria-label="打开导航菜单" aria-expanded="false" aria-controls="mob"><i></i><i></i><i></i></button>
+    </div>
   </div>
 </header>`;
 }
@@ -29,5 +36,6 @@ ${links(site, activeKey)}
 export function mobPartial({ site, activeKey = '' }) {
   return `<div class="mob" id="mob">
 ${links(site, activeKey)}
+${SWARM_MOUNT}
 </div>`;
 }

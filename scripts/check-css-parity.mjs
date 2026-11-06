@@ -66,6 +66,21 @@ const NEW_SELECTOR_ALLOW = [
   '.ovl',                    // 覆盖层全部：.ovl / .ovl-search / .ovl-toc / .ovl-*
                              //   选中态用 .ovl-item[aria-selected="true"]、.ovl-toc-link[aria-current]，
                              //   不用 .on（.on 只归导航/tab，未改原规则）
+  // 2026-11-06 swarm：导航栏里的光标群重建开关（桌面一个、移动菜单一个，共用同一套样式）
+  '.nav-right',              // 导航右侧容器（Swarm 控制器 + 汉堡）
+  '.swarm-ctl',              // 导航栏里的 Swarm 控制器（含 [data-on="true"] 展开态）
+  '.swarm-btn',              // 控制器主按钮（含 :hover / :focus-visible）
+  '.swarm-ic',               // 主按钮里的光标三角
+  '.swarm-label',            // 主按钮文字（窄屏隐藏）
+  '.swarm-live',             // 展开的实时区（进度、速度、声音、退出）
+  '.swarm-meter',            // 进度条（含内部 i）
+  '.swarm-num',              // 层数计数
+  '.swarm-mini',             // 小按钮（含 :hover / :focus-visible / [aria-pressed="true"]）
+  '.swarm-x',                // 退出按钮
+  'html.swarm-on .nav',      // 播放中把顶栏抬到覆盖层之上
+  'html.swarm-on .mob',      // 播放中菜单要压在覆盖层之上，才点得到控制器
+  '.nav-right .swarm-ctl',   // 移动端隐藏顶栏里的那份控制器
+  '.mob .swarm-',            // 折叠菜单里的控制器：挂载点、按钮、展开区
 ];
 
 const fail = [];

@@ -16,3 +16,8 @@ Thumbs.db
 
 # 依赖
 node_modules/
+
+# Swarm 演示录屏（体积大，不入库）
+experiments/swarm-cursors/*.mp4
+experiments/swarm-cursors/*.gif
+experiments/swarm-cursors/*.png
